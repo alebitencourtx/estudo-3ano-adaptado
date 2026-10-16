@@ -115,6 +115,7 @@ input:focus{border-color:var(--acc,var(--ma))}
 .qrow{display:flex;gap:12px;align-items:flex-start}
 .qimg{width:84px;height:84px;object-fit:cover;border-radius:14px;border:2px solid var(--line);flex:none;background:var(--acc-soft)}
 .qrow .qtext{flex:1;min-width:0}
+.fita{width:26px;height:26px;object-fit:contain;vertical-align:middle;border-radius:50%;background:#fff;border:1px solid var(--line)}
 .qtext{font-size:1.25rem;font-weight:700;line-height:1.35}
 .passage{margin:0;background:var(--acc-soft);border-radius:12px;padding:12px 14px;font-style:italic}
 .opts{display:flex;flex-direction:column;gap:10px}
@@ -651,6 +652,28 @@ const HG_TOPICS=[
 
 /* =============== HISTÓRIA E GEOGRAFIA ADAPTADA (p. 86-87) =============== */
 const HG_ADAPTADA_TOPICS=[
+ {id:'agr-base',name:'Agricultura',pages:'p. 84, 85, 92, 95',pool:()=>[
+   C('Na subsistência, quem come os alimentos?', ['As pessoas que cuidam das plantações','Só outros países','Só as máquinas'],'As pessoas que cuidam das plantações','Quem planta come; a sobra vende perto.'),
+   TF('Na agricultura comercial, os produtos são destinados à venda.',true),
+   P('Toque nos 2 da subsistência.',['propriedades pequenas','mão de obra familiar','máquinas grandes','venda para outros países'],['propriedades pequenas','mão de obra familiar']),
+   S('Subsistência ou comercial?',['Subsistência','Comercial'],[['instrumentos simples como enxada',0],['máquinas como tratores',1],['vende em mercados próximos',0],['vende no país e outros países',1]]),
+   O('A manhã do Sr. Alfredo. Coloque em ordem.',['Acordava cedo e juntava o gado.','Ordenhava as vacas.','Fazia o queijo.']),
+   W('A máquina colhe a cana.'),
+   M('Ligue cada um ao seu par.',[['Subsistência','propriedades pequenas'],['Comercial','máquinas'],['Meeiro','reparte a produção']]),
+   Z('Complete.','Na cana, antes a colheita era {}. Hoje é com {}.',['manual','máquinas'],['manual','máquinas']),
+   C('O que atrai a vaca na ordenha com robôs?',['A ração no cocho','O facão','A enxada'],'A ração no cocho','A vaca vai sozinha comer no cocho.'),
+   F('Qual instrumento corta a cana na foto de 1996? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.')]},
+ {id:'agr-autismo',name:'Agricultura adaptado',pages:'p. 84, 85, 92, 95',pool:()=>[
+   C('Quem come na subsistência?',['Quem planta','Outros países'],'Quem planta','Quem planta come.'),
+   TF('A máquina ajuda na colheita.',true),
+   P('Toque nos 2 instrumentos simples.',['enxada','arado','trator','colheitadeira'],['enxada','arado']),
+   S('Subsistência ou comercial?',['Subsistência','Comercial'],[['propriedade pequena',0],['propriedade grande',1],['mão de obra da família',0],['máquinas',1]]),
+   O('O leite do Sr. Alfredo.',['Junta o gado.','Tira o leite.','Faz o queijo.']),
+   W('O robô tira o leite.'),
+   M('Ligue.',[['Subsistência','enxada'],['Comercial','máquina'],['Cana','facão']]),
+   Z('Complete.','Cana de 1996: {}. Cana de 2020: {}.',['facão','máquina'],['facão','máquina']),
+   C('O que a vaca usa no pescoço?',['chip','enxada'],'chip','O chip informa cada animal.'),
+   F('O que corta a cana? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.')]},
  {id:'pec-adapt',name:'Pecuária',pages:'p. 86, 87',pool:()=>[
    C('Quem organiza as atividades dos outros trabalhadores?',['Administrador da propriedade','Trabalhador fixo','Arrendatário'],'Administrador da propriedade','O administrador organiza as atividades.'),
    C('Em qual criação é necessário um número maior de trabalhadores?',['Pecuária intensiva','Pecuária extensiva','Nenhuma'],'Pecuária intensiva','Na intensiva precisa de mais trabalhadores.'),
@@ -672,7 +695,7 @@ const HG_ADAPTADA_TOPICS=[
    TF('Ovos e leite podem vir da pecuária.',true),
    F('Como também é chamado o trabalhador volante?',[{label:'Resposta',ans:['boia-fria','boia fria']}],'Também chamado boia-fria.'),
    F('Onde o gado da pecuária intensiva fica abrigado?',[{label:'Resposta',ans:['estábulo']}],'No estábulo.')]},
- {id:'pec-autismo',name:'Pecuária adaptada autismo',pages:'p. 86, 87',pool:()=>[
+ {id:'pec-autismo',name:'Pecuária adaptado',pages:'p. 86, 87',pool:()=>[
    C('Onde mora o boi da pecuária intensiva?',['No estábulo','Na pastagem'],'No estábulo','Boi intensivo mora no estábulo.'),
    TF('Na pecuária extensiva, o boi vive solto.',true),
    P('Toque nos 2 que a pecuária nos dá.',['leite','carne','estábulo','pastagem'],['leite','carne']),
@@ -694,7 +717,7 @@ const HG_ADAPTADA_TOPICS=[
    Z('Complete.','O {} faz fios. O {} faz portão. O {} faz cimento.',['cobre','ferro','calcário'],['cobre','ferro','calcário']),
    C('Qual objeto é feito de alumínio?',['utensílio de cozinha','fios de cobre','portão de ferro'],'utensílio de cozinha','Ralador e panelas são de alumínio.'),
    F('O cimento é feito a partir de qual recurso?',[{label:'Resposta',ans:['calcário','calcario']}],'Do calcário.',{img:'img/hga/min/cimento.jpg'})]},
- {id:'min-autismo',name:'Extrativismo mineral autismo',pages:'p. 90, 91',pool:()=>[
+ {id:'min-autismo',name:'Extrativismo mineral adaptado',pages:'p. 90, 91',pool:()=>[
    C('O fio elétrico é feito de quê?',['cobre','areia'],'cobre','Fio é de cobre.',{img:'img/hga/min/cobre.jpg'}),
    Object.assign(TF('O portão é de ferro.',true),{img:'img/hga/min/ferro.jpg'}),
    Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílio de cobre','portão de ferro','cimento'],['fios de cobre','utensílio de cobre']),{img:'img/hga/min/cobre.jpg'}),
@@ -705,6 +728,51 @@ const HG_ADAPTADA_TOPICS=[
    Z('Complete com 2 palavras.','Fio é de {}. Portão é de {}.',['cobre','ferro'],['cobre','ferro']),
    Object.assign(TF('Areia é um recurso mineral.',true),{img:'img/hga/min/areia.jpg'}),
    F('Fio é de quê? Escreva 1 palavra.',[{label:'Palavra',ans:['cobre']}],'De cobre.',{img:'img/hga/min/cobre.jpg'})]}
+,
+ {id:'cc-base',name:'Campo e cidade',pages:'p. 102, 104, 105',pool:()=>[
+   C('Onde Alice passeava aos domingos?',['Jardim da Luz','Cinema','Fábrica'],'Jardim da Luz','Aos domingos ia ao Jardim da Luz.'),
+   TF('O primeiro cinema foi mudo e em preto e branco.',true),
+   P('Toque nos 2 lazeres de Alice.',['piqueniques na Cantareira','passeio no Jardim da Luz','cinema 3-D','robôs'],['piqueniques na Cantareira','passeio no Jardim da Luz']),
+   S('Em 1895 ou atualmente?',['Em 1895','Atualmente'],[['filme mudo',0],['filme sonoro',1],['preto e branco',0],['colorido',1]]),
+   O('O cinema no tempo.',['1895: primeiro cinema mudo.','1927: primeiro com falas.','1937: cor nos desenhos.','1953: cinema 3-D.']),
+   W('Alice passeava no jardim.'),
+   M('Ligue o ano ao fato.',[['1895','primeiro cinema'],['1927','primeiro com falas'],['1937','desenho colorido']]),
+   Z('Complete.','O filme de 1895 era {} e {}.',['mudo','preto e branco'],['mudo','preto e branco']),
+   C('Quem ia com Alice nos passeios?',['As famílias amigas','Os robôs','As máquinas'],'As famílias amigas','Ia com as famílias amigas.'),
+   F('Em que cidade fica o Jardim da Luz?',[{label:'Resposta',ans:['São Paulo','Sao Paulo']}],'Em São Paulo.')]},
+ {id:'cc-autismo',name:'Campo e cidade adaptado',pages:'p. 102, 104, 105',pool:()=>[
+   C('Alice ia a piquenique onde?',['Na Cantareira','Na fábrica'],'Na Cantareira','Piquenique na Cantareira.'),
+   TF('Alice passeava no Jardim da Luz.',true),
+   P('Toque nos 2 de lazer.',['piquenique','passeio no jardim','trator','facão'],['piquenique','passeio no jardim']),
+   S('1895 ou hoje?',['1895','Hoje'],[['mudo',0],['com falas',1],['preto e branco',0],['colorido',1]]),
+   O('O cinema muda.',['Cinema mudo.','Cinema com falas.','Cinema colorido.']),
+   W('O cinema era mudo.'),
+   M('Ligue.',[['1895','mudo'],['1927','falas'],['1937','cor']]),
+   Z('Complete.','Filme antigo: {}. Filme hoje: {}.',['mudo','colorido'],['mudo','colorido']),
+   C('Quem passeava com Alice?',['A família','O robô'],'A família','Com a família.'),
+   F('Jardim da ___? Escreva 1 palavra.',[{label:'Palavra',ans:['Luz','luz']}],'Jardim da Luz.')]},
+ {id:'imp-base',name:'Impactos ambientais',pages:'p. 108 a 113',pool:()=>[
+   C('O que o campo manda para a cidade?',['alimentos do campo','carros','remédios'],'alimentos do campo','O campo manda comida.'),
+   TF('Desmatamento é tirar a vegetação natural.',true),
+   P('Toque nos 2 problemas do campo.',['desmatamento','uso de agrotóxicos','passeio no jardim','filme colorido'],['desmatamento','uso de agrotóxicos']),
+   S('Campo ou cidade?',['Campo','Cidade'],[['carne e leite',0],['roupas e remédios',1],['plantação de soja',0],['engarrafamento',1]]),
+   O('O desmatamento faz mal.',['Tiram a vegetação.','Os animais perdem a casa.','O solo fica pobre.']),
+   W('O campo manda comida.'),
+   M('Ligue o problema à causa.',[['Desmatamento','tira a vegetação'],['Agrotóxico','contamina o solo'],['Irrigação','usa muita água']]),
+   Z('Complete.','Máquinas aumentam a {} e aumentam o {}.',['produção','desemprego'],['produção','desemprego']),
+   C('Onde morar é perigoso?',['Encosta do morro','Jardim da Luz','Cinema'],'Encosta do morro','Morro e beira de rio são área de risco.'),
+   F('O que contamina o solo e a água? Escreva 1 palavra.',[{label:'Palavra',ans:['agrotóxicos','agrotoxicos','agrotóxico','agrotoxico']}],'Agrotóxicos.')]} ,
+ {id:'imp-autismo',name:'Impactos ambientais adaptado',pages:'p. 108 a 113',pool:()=>[
+   C('O campo manda o quê?',['comida','carros'],'comida','O campo manda comida.'),
+   TF('Tirar as árvores faz mal.',true),
+   P('Toque nos 2 que fazem mal.',['desmatamento','agrotóxicos','piquenique','cinema'],['desmatamento','agrotóxicos']),
+   S('Campo ou cidade?',['Campo','Cidade'],[['vaca',0],['carro',1],['plantação',0],['prédio',1]]),
+   O('Da terra à cidade.',['Planta a semente.','Colhe a comida.','Manda para a cidade.']),
+   W('Cuide da água.'),
+   M('Ligue.',[['campo','comida'],['cidade','roupa'],['rio','água']]),
+   Z('Complete.','Campo dá {}. Cidade dá {}.',['comida','roupa'],['comida','roupa']),
+   C('Onde é perigoso morar?',['No morro','No jardim'],'No morro','Morro é área de risco.'),
+   F('O que suja a água? Escreva 1 palavra.',[{label:'Palavra',ans:['esgoto']}],'O esgoto.')]}
 ];
 
 /* =============== INGLÊS (Poptropica English 3 — Unidades 5 e 6) =============== */
@@ -971,7 +1039,7 @@ const top=()=>window.scrollTo(0,0);
 const isAut=t=>/autismo/.test(t.id);
 function visibleTopics(sub){if(store.mode==='autismo')return sub.topics.filter(isAut);if(store.mode==='regular')return sub.topics.filter(t=>!isAut(t));return sub.topics.slice()}
 function visibleSubjects(){if(store.mode==='autismo')return SUBJECTS.filter(s=>s.topics.some(isAut));return SUBJECTS.slice()}
-function modeTabs(){return `<div class="tabs" role="group" aria-label="Modo de questões"><button type="button" class="mini" data-mode="regular" aria-pressed="${store.mode==='regular'}">Regular</button><button type="button" class="mini" data-mode="autismo" aria-pressed="${store.mode==='autismo'}">Adaptado autismo</button><button type="button" class="mini" data-mode="tudo" aria-pressed="${store.mode==='tudo'}">Tudo</button></div>`}
+function modeTabs(){return `<div class="tabs" role="group" aria-label="Modo de questões"><button type="button" class="mini" data-mode="regular" aria-pressed="${store.mode==='regular'}">Regular</button><button type="button" class="mini" data-mode="autismo" aria-pressed="${store.mode==='autismo'}">Adaptado autismo <img class="fita" src="img/fita-autismo.avif" alt="Símbolo do autismo"></button><button type="button" class="mini" data-mode="tudo" aria-pressed="${store.mode==='tudo'}">Tudo</button></div>`}
 function wireMode(rerender){app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{store.mode=b.dataset.mode;save();rerender()})};
 
 /* =============== TELAS =============== */
@@ -984,7 +1052,7 @@ function renderHome(){
 <div class="skins"><span>Tema:</span><button type="button" class="mini" data-skin="azul" aria-pressed="${store.skin!=='rosa'}">💙 Azul</button><button type="button" class="mini" data-skin="rosa" aria-pressed="${store.skin==='rosa'}">🌸 Rosa</button></div>
 <div><span class="hint">Modo:</span>${modeTabs()}</div>
     ${store.name?'':`<form id="nameForm" class="nameform"><label for="nameIn">Seu primeiro nome ou apelido (fica só neste aparelho)</label><div class="row"><input id="nameIn" maxlength="16" autocomplete="off"><button class="btn" type="submit">Salvar</button></div></form>`}</header>
-    <div class="subjects">${visibleSubjects().map(s=>`<button class="sub" data-subject="${s.id}" data-go="${s.id}"><span class="tile">${IC[s.id].startsWith('<')?IC[s.id]:esc(IC[s.id])}</span><span><h3>${s.name}</h3><small>${examInfo(s.exam)}</small></span></button>`).join('')}</div>
+    <div class="subjects">${visibleSubjects().map(s=>`<button class="sub" data-subject="${s.id}" data-go="${s.id}"><span class="tile">${IC[s.id].startsWith('<')?IC[s.id]:esc(IC[s.id])}</span><span><h3>${s.name}${s.topics.some(isAut)?' <img class="fita" src="img/fita-autismo.avif" alt="Temas adaptados">':''}</h3><small>${examInfo(s.exam)}</small></span></button>`).join('')}</div>
     <div class="foot"><span>Cada vez que você treina, as questões mudam. Seu progresso fica salvo só neste aparelho.</span><button class="link" id="reset">Apagar meu progresso</button></div></div>`;
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{renderSubject(b.dataset.go);top()});
   app.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{renderRanking();top()});
@@ -1004,7 +1072,7 @@ function renderSubject(id){
     <div class="stack">
       ${id==='en'?`<div class="topic"><div class="tx"><h3>Sound Lab</h3><div class="chips"><span class="pg">ouvir, repetir e falar</span></div><p class="best">Escute cada palavra e frase, repita e treine a pronúncia.</p></div><button class="btn" id="bLab">Abrir</button></div>`:''}
       <div class="topic full"><div class="tx"><h3>Simulado completo</h3><div class="chips"><span class="pg">todos os assuntos misturados</span></div><p class="best">${sc('simulado')?'Melhor: '+sc('simulado').best+'%':'O resultado e as respostas aparecem só no final.'}</p></div>${starHtml(starsOf(sc('simulado')?sc('simulado').best:0))}<button class="btn" data-sim="1">Fazer</button></div>
-      ${vts.map(t=>`<div class="topic"><div class="tx"><h3>${t.name}</h3><div class="chips"><span class="pg">${t.pages}</span></div>${sc(t.id)?`<p class="best">Melhor: ${sc(t.id).best}% · ${sc(t.id).tries} treino${sc(t.id).tries>1?'s':''}</p>`:''}</div>${starHtml(starsOf(sc(t.id)?sc(t.id).best:0))}<button class="btn" data-t="${t.id}">Treinar</button></div>`).join('')}
+      ${vts.map(t=>`<div class="topic"><div class="tx"><h3>${t.name}${isAut(t)?' <img class="fita" src="img/fita-autismo.avif" alt="Adaptado">':''}</h3><div class="chips"><span class="pg">${t.pages}</span></div>${sc(t.id)?`<p class="best">Melhor: ${sc(t.id).best}% · ${sc(t.id).tries} treino${sc(t.id).tries>1?'s':''}</p>`:''}</div>${starHtml(starsOf(sc(t.id)?sc(t.id).best:0))}<button class="btn" data-t="${t.id}">Treinar</button></div>`).join('')}
     </div></div>`;
   $('#home').onclick=()=>{renderHome();top()};
   wireMode(()=>{renderSubject(id);top()});
