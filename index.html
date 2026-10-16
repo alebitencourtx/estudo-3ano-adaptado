@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Treino do 3º Ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Caderno quadriculado: coluna única, cartões brancos, uma cor de destaque por matéria */
+:root{
+  --font-display:'Baloo 2','Nunito',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --paper:#EEF3FB; --grid:#DCE5F4; --card:#FFFFFF; --ink:#18264A; --muted:#55628A; --line:#CBD6EC;
+  --ok:#16794F; --ok-soft:#DDF4E8; --bad:#B63030; --bad-soft:#FBE4E4; --focus:#2A55C4; --star:#E09A00;
+  --on-acc:#FFFFFF; --on-star:#18264A;
+  --pt:#C73A30; --pt-soft:#FCE6E3; --ci:#17774F; --ci-soft:#DAF2E6; --ma:#2A55C4; --ma-soft:#E2EAFC; --hg:#965F10; --hg-soft:#FBEED2; --en:#7A3FB8; --en-soft:#EFE3FA;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1730; --grid:#17213F; --card:#18223F; --ink:#E9EEFB; --muted:#A5B1D2; --line:#2B3963;
+  --ok:#58D39B; --ok-soft:#153A2B; --bad:#FF8F8F; --bad-soft:#44202A; --focus:#8FB0FF; --star:#FFC83D; --on-acc:#0E1530;
+  --pt:#FF8479; --pt-soft:#432327; --ci:#55D69A; --ci-soft:#153828; --ma:#8CAAFF; --ma-soft:#1D2A57; --hg:#F2B650; --hg-soft:#3B2F14; --en:#C9A0FF; --en-soft:#33224A;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1730; --grid:#17213F; --card:#18223F; --ink:#E9EEFB; --muted:#A5B1D2; --line:#2B3963;
+  --ok:#58D39B; --ok-soft:#153A2B; --bad:#FF8F8F; --bad-soft:#44202A; --focus:#8FB0FF; --star:#FFC83D; --on-acc:#0E1530;
+  --pt:#FF8479; --pt-soft:#432327; --ci:#55D69A; --ci-soft:#153828; --ma:#8CAAFF; --ma-soft:#1D2A57; --hg:#F2B650; --hg-soft:#3B2F14; --en:#C9A0FF; --en-soft:#33224A;
+  color-scheme:dark}
+
+/* Tema rosa: rosa clarinho + amarelo */
+:root[data-skin="rosa"]{
+  --paper:#FFF4F8; --grid:#FBE1EB; --card:#FFFFFF; --ink:#4A1D3A; --muted:#85556F; --line:#F2C9DA;
+  --focus:#C2255C; --star:#F7BC1D; --on-star:#4A1D3A; --on-acc:#FFFFFF;
+  --pt:#C2255C; --pt-soft:#FDE3EC; --ci:#23805F; --ci-soft:#DDF5EA; --ma:#7A4FD0; --ma-soft:#EEE6FB; --hg:#A56A00; --hg-soft:#FFF0C2; --en:#C2410C; --en-soft:#FFE7D8}
+@media (prefers-color-scheme:dark){:root[data-skin="rosa"]:not([data-theme="light"]){
+  --paper:#261424; --grid:#331B30; --card:#36202F; --ink:#FFEAF2; --muted:#D9B0C7; --line:#5C3553;
+  --focus:#FF9CC4; --star:#FFD43B; --on-star:#3A1A2D; --on-acc:#2A1224;
+  --pt:#FF8FB3; --pt-soft:#4A2336; --ci:#6FE0B0; --ci-soft:#183C30; --ma:#C5A8FF; --ma-soft:#35275A; --hg:#FFD95A; --hg-soft:#4A3A14; --en:#FFA97A; --en-soft:#4D2B1B}}
+:root[data-skin="rosa"][data-theme="dark"]{
+  --paper:#261424; --grid:#331B30; --card:#36202F; --ink:#FFEAF2; --muted:#D9B0C7; --line:#5C3553;
+  --focus:#FF9CC4; --star:#FFD43B; --on-star:#3A1A2D; --on-acc:#2A1224;
+  --pt:#FF8FB3; --pt-soft:#4A2336; --ci:#6FE0B0; --ci-soft:#183C30; --ma:#C5A8FF; --ma-soft:#35275A; --hg:#FFD95A; --hg-soft:#4A3A14; --en:#FFA97A; --en-soft:#4D2B1B}
+.skins{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.skins span{font-weight:800;font-size:.85rem;color:var(--muted)}
+.skins .mini[aria-pressed="true"]{background:var(--focus);color:var(--on-acc);border-color:var(--focus)}
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
+[data-subject="pt"]{--acc:var(--pt);--acc-soft:var(--pt-soft)}
+[data-subject="ci"]{--acc:var(--ci);--acc-soft:var(--ci-soft)}
+[data-subject="ma"]{--acc:var(--ma);--acc-soft:var(--ma-soft)}
+[data-subject="hg"]{--acc:var(--hg);--acc-soft:var(--hg-soft)}
+[data-subject="hga"]{--acc:var(--hg);--acc-soft:var(--hg-soft)}
+[data-subject="en"]{--acc:var(--en);--acc-soft:var(--en-soft)}
+button,input,select{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:760px;margin-inline:auto;padding-inline:16px;padding-block:12px 56px}
+h1,h2,h3{font-family:var(--font-display);line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.1rem,7vw,3rem);font-weight:800}
+h2{font-size:1.7rem;font-weight:800}
+p{margin:0}
+.kicker{font-weight:800;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:52ch}
+.hero{display:flex;flex-direction:column;gap:10px;padding-block:20px 22px}
+.nameform label{font-weight:700;font-size:.9rem;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.row input{flex:1 1 180px;min-width:0}
+
+/* botões */
+.btn{appearance:none;border:0;font:800 1.05rem var(--font-body);color:var(--on-acc);background:var(--acc,var(--ma));border-radius:14px;padding:.75rem 1.3rem;min-height:50px;cursor:pointer;box-shadow:0 4px 0 color-mix(in srgb,var(--acc,var(--ma)) 60%,#000);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb,var(--acc,var(--ma)) 60%,#000)}
+.btn[disabled]{background:var(--line);color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.mini{appearance:none;border:2px solid var(--line);background:var(--card);border-radius:10px;padding:.35rem .8rem;font-weight:800;font-size:.9rem;cursor:pointer;min-height:40px}
+input[type=text],input[type=number],input:not([type]){background:var(--card);border:2px solid var(--line);border-radius:12px;padding:.6rem .8rem;font-size:1.15rem;font-weight:700;min-height:50px;width:100%}
+input:focus{border-color:var(--acc,var(--ma))}
+
+/* home */
+.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.sub{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px;cursor:pointer;width:100%;font:inherit;box-shadow:0 4px 0 var(--line)}
+.sub:active{transform:translateY(2px);box-shadow:0 2px 0 var(--line)}
+.tile{width:62px;height:62px;border-radius:16px;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;font:800 1.55rem var(--font-display)}
+.tile svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sub h3{font-size:1.4rem;font-weight:800}
+.sub small{display:block;color:var(--muted);font-weight:700;font-size:.85rem}
+.foot{margin-top:28px;display:flex;flex-direction:column;gap:8px;color:var(--muted);font-size:.9rem}
+.link{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:.85rem;text-align:left;width:fit-content}
+
+/* barra superior */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:10px;background:var(--paper);margin-inline:-16px;padding:10px 16px;border-bottom:2px solid var(--line)}
+.bar-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.bar-t b{font-family:var(--font-display);font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-t span{font-size:.78rem;color:var(--muted);font-weight:700}
+.count{font-weight:800;font-variant-numeric:tabular-nums;color:var(--acc)}
+.prog{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-block:12px}
+.prog i{display:block;height:100%;width:var(--p);background:var(--acc);border-radius:99px;transition:width .3s}
+
+/* matéria */
+.shead{display:flex;align-items:center;gap:14px;padding-block:18px 14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.topic{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px}
+.topic .tx{flex:1 1 200px;min-width:0}
+.topic h3{font-size:1.2rem;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.pg{font-size:.78rem;font-weight:700;background:var(--acc-soft);color:var(--ink);border-radius:8px;padding:2px 8px}
+.stars{letter-spacing:.1em;color:var(--star);font-size:1.1rem;white-space:nowrap}
+.stars .e{color:var(--line)}
+.best{font-size:.78rem;color:var(--muted);font-weight:700}
+.full{background:var(--acc-soft);border-color:var(--acc)}
+
+/* questão */
+.qcard{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.qrow{display:flex;gap:12px;align-items:flex-start}
+.qimg{width:84px;height:84px;object-fit:cover;border-radius:14px;border:2px solid var(--line);flex:none;background:var(--acc-soft)}
+.qrow .qtext{flex:1;min-width:0}
+.qtext{font-size:1.25rem;font-weight:700;line-height:1.35}
+.passage{margin:0;background:var(--acc-soft);border-radius:12px;padding:12px 14px;font-style:italic}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt,.chip,.segb{appearance:none;background:var(--card);border:2px solid var(--line);border-radius:14px;font:700 1.05rem var(--font-body);cursor:pointer;text-align:left;padding:.7rem 1rem;min-height:50px;box-shadow:0 3px 0 var(--line);color:var(--ink)}
+.opt.sel,.chip.sel,.segb.sel{border-color:var(--acc);background:var(--acc-soft)}
+.ok{border-color:var(--ok)!important;background:var(--ok-soft)!important}
+.bad{border-color:var(--bad)!important;background:var(--bad-soft)!important}
+.miss{border-style:dashed!important;border-color:var(--ok)!important}
+.opt.ok::after,.chip.ok::after{content:" ✓";color:var(--ok);font-weight:800}
+.opt.bad::after,.chip.bad::after{content:" ✗";color:var(--bad);font-weight:800}
+.chipbox{display:flex;flex-wrap:wrap;gap:10px}
+.chip{text-align:center}
+.srow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-block:6px;border-bottom:1px dashed var(--line)}
+.stxt{flex:1 1 220px;min-width:0;font-weight:700}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.segb{min-height:44px;padding:.4rem .9rem;text-align:center}
+.fix{display:block;width:100%;font-size:.9rem;color:var(--muted);font-weight:700}
+.oline{min-height:58px;display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:2px dashed var(--line);border-radius:14px;align-items:center}
+.oline.steps,.obank.steps{flex-direction:column;align-items:stretch}
+.obank{display:flex;flex-wrap:wrap;gap:8px}
+.obank .chip,.oline .chip{text-align:left}
+.oline .chip b{color:var(--acc);margin-right:.4em}
+.hint{color:var(--muted);font-size:.9rem;font-weight:700}
+select{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:.45rem .6rem;font-size:1.02rem;font-weight:700;min-height:46px;max-width:100%}
+.clz{line-height:2.6;font-size:1.12rem;font-weight:600}
+.clz select{margin-inline:4px}
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.flab{font-weight:800;min-width:0}
+.frow input{width:11rem;max-width:100%;text-align:center}
+.frow.wide input{width:min(100%,18rem)}
+.word{font:800 2.4rem var(--font-display);letter-spacing:.05em;text-align:center}
+.blank{display:inline-block;min-width:1.6em;border-bottom:5px solid var(--acc);margin-inline:2px}
+.armada{font:700 1.8rem/1.25 var(--font-mono);background:var(--acc-soft);border-radius:12px;padding:12px 20px;margin:0;width:fit-content}
+.cap{font-weight:800;text-align:center;color:var(--muted)}
+.vis{display:block;width:100%;max-width:640px;height:auto;margin-inline:auto;color:var(--ink)}
+.vis text{fill:currentColor;font:700 18px var(--font-body)}
+.vis .tk{fill:var(--muted);font-size:16px}
+.vis .hl{fill:var(--acc);font:800 26px var(--font-display)}
+.vis .bar-r{fill:var(--acc)}
+.vis .gl{stroke:var(--line);stroke-width:1.5}
+.vis .cf{fill:var(--card);stroke:var(--ink);stroke-width:3;stroke-linejoin:round}
+.vis .cr{fill:var(--acc-soft);stroke:var(--ink);stroke-width:3;stroke-linejoin:round}
+.vis .st{fill:var(--star);stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.vis .tr{fill:var(--acc);stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.vis .ci{fill:var(--card);stroke:var(--ink);stroke-width:3}
+.vis.nl text{font-size:27px}
+.vis.nl .hl{font-size:36px}
+.tile.gold{background:var(--star);color:var(--on-star)}
+.ptsup{font:800 1.4rem var(--font-display);color:var(--ok)}
+textarea{width:100%;min-height:7rem;resize:vertical;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:.6rem .8rem;font:700 1.05rem var(--font-body);color:inherit}
+textarea:focus{border-color:var(--acc)}
+.cardtxt{font:800 1.8rem var(--font-display);overflow-wrap:anywhere}
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rank li{display:grid;grid-template-columns:3rem minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:800}
+.rank li.empty{display:block;color:var(--muted)}
+.rank .pos{font:800 1.3rem var(--font-display);color:var(--muted)}
+.rank li:nth-child(-n+3) .pos{color:var(--star)}
+.rank .nm{overflow-wrap:anywhere}
+.rank .pt{font-variant-numeric:tabular-nums}
+.rank li.me{border-color:var(--acc);background:var(--acc-soft)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-block:14px}
+.tabs .mini[aria-pressed="true"]{background:var(--acc,var(--focus));color:var(--on-acc,#fff);border-color:var(--acc,var(--focus))}
+.wcard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px 14px}
+.we{font-size:2rem;line-height:1;width:44px;text-align:center}
+.wt{flex:1 1 170px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.wt b{font:700 1.15rem var(--font-display);overflow-wrap:anywhere}
+.wt small{color:var(--muted);font-weight:700}
+.wt em{font-style:normal;font-weight:800;color:var(--acc);letter-spacing:.01em}
+.wt p{margin:2px 0}
+.wb{display:flex;gap:8px;flex-wrap:wrap}
+.wb .mini{min-width:48px;min-height:48px;font-size:1.05rem}
+.wres{font-weight:700;font-size:.9rem;min-height:0}
+.wres[data-ok="1"]{color:var(--ok)}.wres[data-ok="0"]{color:var(--bad)}
+.audio{margin-top:-2px}
+.audio .mini{min-height:46px;font-size:1rem}
+.say{display:inline-flex;gap:8px}
+.fb{padding:14px 16px;border-radius:14px;border:2px solid;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--ok-soft);border-color:var(--ok)}
+.fb.bad{background:var(--bad-soft);border-color:var(--bad)}
+.fb b{font-size:1.1rem}
+.fb.ok b{color:var(--ok)} .fb.bad b{color:var(--bad)}
+.fb .exp{color:var(--muted);font-weight:600}
+.actions{display:flex;justify-content:flex-end;margin-top:16px}
+.actions .btn{min-width:11rem}
+
+/* resultado */
+.res{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding-block:24px 8px}
+.big{font:800 4rem/1 var(--font-display);color:var(--acc);font-variant-numeric:tabular-nums}
+.res .stars{font-size:2.2rem}
+.rev{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.rev li{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rev .rq{font-weight:700}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-block:18px}
+
+/* tabuada */
+#ov{position:fixed;inset:0;z-index:20;background:rgba(10,16,38,.6);display:flex;align-items:flex-start;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 12px 16px;overflow:auto}
+.sheet{background:var(--card);border-radius:20px;border:2px solid var(--line);max-width:760px;width:100%;padding:16px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-family:var(--font-display);font-size:1.4rem}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tb{border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-variant-numeric:tabular-nums;font-size:.95rem;line-height:1.55}
+.tb b{display:block;color:var(--acc);font-family:var(--font-display);font-size:1.05rem}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script>window.addEventListener("error",function(e){var a=document.getElementById("app");if(a&&!a.innerHTML.trim())a.innerHTML="<pre style=\"white-space:pre-wrap;padding:16px;color:#f88\">Erro: "+(e.message||"")+" ("+(e.filename||"").split("/").pop()+":"+(e.lineno||"")+")</pre>"});</script>
+</head>
+<body style="margin:0">
+
+<div id="app" data-subject="ma"></div>
+<div id="ov" hidden></div>
+<script>
+(function(){
+'use strict';
+/* ---------- utilitários ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick1=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const strip=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'');
+const cleanName=s=>String(s).replace(/[—–|·:]/g,' ').replace(/\s+/g,' ').trim().slice(0,16);
+const norm=s=>strip(s).toLowerCase().replace(/\s+/g,' ').trim();
+let UID=0;
+
+/* ---------- progresso (só neste aparelho) ---------- */
+const KEY='treino3ano.v1';
+let store={name:'',points:0,board:'',scores:{},dev:'',skin:'azul',mode:'tudo'};
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);store.name=o.name||'';store.points=+o.points||0;store.board=o.board||'';store.scores=o.scores||{};store.dev=o.dev||'';store.skin=o.skin==='rosa'?'rosa':'azul';store.mode=['regular','autismo','tudo'].includes(o.mode)?o.mode:'tudo'}}catch(e){}}
+function applySkin(){try{document.documentElement.dataset.skin=store.skin==='rosa'?'rosa':'azul'}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+
+/* ---------- construtores de questões ---------- */
+const C=(q,opts,ans,exp,x)=>Object.assign({t:'choice',q,opts,ans,exp},x||{});
+const TF=(s,v,exp)=>({t:'choice',q:'Verdadeiro ou falso? <b>'+s+'</b>',opts:['Verdadeiro','Falso'],ans:v?'Verdadeiro':'Falso',exp,fixed:true});
+const P=(q,opts,ans,exp)=>({t:'pick',q,opts,ans,exp});
+const S=(q,cats,items,exp)=>({t:'sort',q,cats,items,exp});
+const O=(q,steps,exp)=>({t:'order',q,steps,layout:'steps',exp});
+const W=s=>({t:'order',q:'Coloque as palavras em ordem para formar uma frase.',steps:s.split(' '),layout:'words',exp:s});
+const M=(q,pairs,exp)=>({t:'match',q,pairs,exp});
+const Z=(q,text,bank,ans,exp)=>({t:'cloze',q,text,bank,ans,exp});
+const N=(q,fields,exp,x)=>Object.assign({t:'inputs',kind:'num',q,fields,exp},x||{});
+const F=(q,fields,exp,x)=>Object.assign({t:'inputs',kind:'text',q,fields,exp},x||{});
+
+/* ---------- figuras (SVG) ---------- */
+function numberLineSVG(start,end,step,hidden){
+  const Wd=700,x0=40,x1=660,sx=v=>x0+(v-start)/(end-start)*(x1-x0);
+  const hs=hidden.slice().sort((a,b)=>a-b);let L=65;
+  let s=`<svg class="vis nl" viewBox="0 0 ${Wd} 126" role="img" aria-label="Reta numerada">`;
+  s+=`<line x1="12" y1="68" x2="688" y2="68" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M8 68l12-7v14zM692 68l-12-7v14z" fill="currentColor"/>`;
+  for(let v=start;v<=end;v+=step){const x=sx(v);
+    s+=`<line x1="${x}" y1="58" x2="${x}" y2="78" stroke="currentColor" stroke-width="3"/>`;
+    if(hs.includes(v)){s+=`<text class="hl" x="${x}" y="32" text-anchor="middle">${String.fromCharCode(L++)}</text><path d="M${x} 36v14m-6-6l6 8 6-8" stroke="var(--acc)" stroke-width="3" fill="none" stroke-linecap="round"/>`}
+    else s+=`<text x="${x}" y="114" text-anchor="middle">${v}</text>`;
+  }
+  return s+'</svg>';
+}
+function barChartSVG(labels,values,ymax,step){
+  const Wd=520,H=290,l=46,r=12,t=14,b=46,pw=Wd-l-r,ph=H-t-b,y=v=>t+ph-(v/ymax)*ph;
+  let s=`<svg class="vis" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Gráfico de barras">`;
+  for(let v=0;v<=ymax;v+=step){s+=`<line class="gl" x1="${l}" x2="${Wd-r}" y1="${y(v)}" y2="${y(v)}"/><text class="tk" x="${l-8}" y="${y(v)+5}" text-anchor="end">${v}</text>`}
+  const bw=pw/labels.length;
+  labels.forEach((lb,i)=>{const cx=l+bw*i+bw/2,h=ph*values[i]/ymax;
+    s+=`<rect class="bar-r" x="${cx-bw*.3}" y="${y(values[i])}" width="${bw*.6}" height="${h}" rx="4"/><text x="${cx}" y="${H-18}" text-anchor="middle">${esc(lb)}</text>`});
+  return s+'</svg>';
+}
+function cubeSVG(){
+  const star=(cx,cy,R,r)=>{let p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rad=i%2?r:R;p.push((cx+rad*Math.cos(a)).toFixed(1)+','+(cy+rad*Math.sin(a)).toFixed(1))}return p.join(' ')};
+  return `<svg class="vis" viewBox="0 0 220 200" style="max-width:300px" role="img" aria-label="Cubo com uma figura em cada face visível">
+  <polygon class="cf" points="30,70 130,70 130,170 30,170"/><polygon class="cf" points="30,70 130,70 180,25 80,25"/><polygon class="cr" points="130,70 180,25 180,125 130,170"/>
+  <circle class="ci" cx="80" cy="120" r="24"/><polygon class="st" points="${star(105,47,19,8)}"/><polygon class="tr" points="155,78 140,114 170,114"/></svg>`;
+}
+function armada(a,op,b){const w=Math.max(String(a).length,String(b).length)+2;
+  return `<pre class="armada">${String(a).padStart(w)}\n${op+String(b).padStart(w-1)}\n${'─'.repeat(w)}</pre>`}
+
+/* ---------- voz (ditado) ---------- */
+function canSpeak(){return 'speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined'}
+function speak(text,rate,lang){try{if(!canSpeak())return;lang=lang||'pt-BR';const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;
+  const vs=speechSynthesis.getVoices(),w=lang.toLowerCase(),nl=x=>x.lang.replace('_','-').toLowerCase();const v=vs.find(v=>nl(v)===w&&/samantha|google|aria|jenny|enhanced|premium/i.test(v.name))||vs.find(v=>nl(v)===w)||vs.find(v=>nl(v).startsWith(w.slice(0,2)));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+
+/* ---------- renderizadores: cada um devolve {ready,grade,mark,note?} ---------- */
+const R={};
+R.choice=(q,host,ch)=>{
+  const opts=q.fixed?q.opts.slice():shuffle(q.opts);let sel=-1,locked=false;
+  host.innerHTML=`<div class="opts" role="radiogroup">${opts.map(o=>`<button type="button" class="opt" role="radio" aria-checked="false">${esc(o)}</button>`).join('')}</div>`;
+  const b=[...host.querySelectorAll('.opt')];
+  b.forEach((x,i)=>x.onclick=()=>{if(locked)return;sel=i;b.forEach((y,j)=>{y.classList.toggle('sel',j===i);y.setAttribute('aria-checked',j===i)});ch()});
+  return{ready:()=>sel>=0,grade:()=>opts[sel]===q.ans,
+    mark:()=>{locked=true;b.forEach((x,i)=>{x.classList.remove('sel');if(opts[i]===q.ans)x.classList.add('ok');else if(i===sel)x.classList.add('bad')})}};
+};
+R.pick=(q,host,ch)=>{
+  const opts=shuffle(q.opts),sel=new Set();let locked=false;
+  host.innerHTML=`<p class="hint">Toque em todas as respostas certas.</p><div class="chipbox">${opts.map(o=>`<button type="button" class="chip" aria-pressed="false">${esc(o)}</button>`).join('')}</div>`;
+  const b=[...host.querySelectorAll('.chip')];
+  b.forEach((x,i)=>x.onclick=()=>{if(locked)return;sel.has(i)?sel.delete(i):sel.add(i);x.classList.toggle('sel',sel.has(i));x.setAttribute('aria-pressed',sel.has(i));ch()});
+  const good=i=>q.ans.includes(opts[i]);
+  return{ready:()=>sel.size>0,grade:()=>b.every((x,i)=>good(i)===sel.has(i)),
+    mark:()=>{locked=true;b.forEach((x,i)=>{x.classList.remove('sel');if(good(i)&&sel.has(i))x.classList.add('ok');else if(sel.has(i))x.classList.add('bad');else if(good(i))x.classList.add('miss')})}};
+};
+R.sort=(q,host,ch)=>{
+  const items=shuffle(q.items),val=items.map(()=>-1);let locked=false;
+  host.innerHTML=items.map(it=>`<div class="srow"><span class="stxt">${esc(it[0])}</span><div class="seg" role="radiogroup">${q.cats.map(c=>`<button type="button" class="segb" role="radio" aria-checked="false">${esc(c)}</button>`).join('')}</div></div>`).join('');
+  const rows=[...host.querySelectorAll('.srow')];
+  rows.forEach((r,i)=>[...r.querySelectorAll('.segb')].forEach((bt,k)=>bt.onclick=()=>{if(locked)return;val[i]=k;
+    r.querySelectorAll('.segb').forEach((y,j)=>{y.classList.toggle('sel',j===k);y.setAttribute('aria-checked',j===k)});ch()}));
+  return{ready:()=>val.every(v=>v>=0),grade:()=>items.every((it,i)=>val[i]===it[1]),
+    mark:()=>{locked=true;rows.forEach((r,i)=>{const bs=r.querySelectorAll('.segb');bs.forEach(y=>y.classList.remove('sel'));
+      const good=val[i]===items[i][1];bs[items[i][1]].classList.add('ok');if(!good){if(val[i]>=0)bs[val[i]].classList.add('bad')}})}};
+};
+R.order=(q,host,ch)=>{
+  const all=shuffle(q.steps.map((t,i)=>({t,i}))),line=[];let locked=false;
+  host.innerHTML=`<p class="hint">Toque nos itens na ordem certa. Toque de novo para devolver.</p><div class="oline ${q.layout}" aria-label="Sua resposta"></div><div class="obank ${q.layout}"></div><div class="fix" id="ofix${++UID}"></div>`;
+  const ol=host.querySelector('.oline'),ob=host.querySelector('.obank'),fx=host.querySelector('.fix');
+  function draw(){ol.innerHTML='';ob.innerHTML='';
+    line.forEach((w,n)=>{const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML=(q.layout==='steps'?`<b>${n+1}</b>`:'')+esc(w.t);b.onclick=()=>{if(locked)return;line.splice(n,1);draw();ch()};ol.appendChild(b)});
+    if(!line.length)ol.innerHTML='<span class="hint">Sua resposta aparece aqui</span>';
+    all.filter(w=>!line.includes(w)).forEach(w=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=w.t;b.onclick=()=>{if(locked)return;line.push(w);draw();ch()};ob.appendChild(b)});}
+  draw();
+  const sep=q.layout==='words'?' ':'|';
+  return{ready:()=>line.length===all.length,grade:()=>line.map(w=>w.t).join(sep)===q.steps.join(sep),
+    mark:ok=>{locked=true;ol.classList.add(ok?'ok':'bad');if(!ok)fx.textContent='Ordem certa: '+q.steps.join(q.layout==='words'?' ':'  →  ')}};
+};
+R.match=(q,host,ch)=>{
+  const rights=shuffle([...new Set(q.pairs.map(p=>p[1]))]),id=++UID;
+  host.innerHTML=q.pairs.map((p,i)=>`<div class="srow"><label class="stxt" for="m${id}-${i}">${esc(p[0])}</label><select id="m${id}-${i}"><option value="">Escolha…</option>${rights.map(r=>`<option>${esc(r)}</option>`).join('')}</select></div>`).join('');
+  const sl=[...host.querySelectorAll('select')];sl.forEach(s=>s.onchange=ch);
+  return{ready:()=>sl.every(s=>s.value),grade:()=>sl.every((s,i)=>s.value===q.pairs[i][1]),
+    mark:()=>sl.forEach((s,i)=>{const g=s.value===q.pairs[i][1];s.classList.add(g?'ok':'bad');s.disabled=true;
+      if(!g){const f=document.createElement('span');f.className='fix';f.textContent='Certo: '+q.pairs[i][1];s.closest('.srow').appendChild(f)}})};
+};
+R.cloze=(q,host,ch)=>{
+  const parts=q.text.split('{}'),bank=shuffle(q.bank),id=++UID;
+  host.innerHTML='<p class="clz">'+parts.map((p,i)=>esc(p)+(i<parts.length-1?`<select id="z${id}-${i}" aria-label="Lacuna ${i+1}"><option value="">…</option>${bank.map(b=>`<option>${esc(b)}</option>`).join('')}</select>`:'')).join('')+'</p><div class="fix"></div>';
+  const sl=[...host.querySelectorAll('select')];sl.forEach(s=>s.onchange=ch);
+  return{ready:()=>sl.every(s=>s.value),grade:()=>sl.every((s,i)=>s.value===q.ans[i]),
+    mark:()=>{let bad=[];sl.forEach((s,i)=>{const g=s.value===q.ans[i];s.classList.add(g?'ok':'bad');s.disabled=true;if(!g)bad.push(q.ans[i])});
+      if(bad.length)host.querySelector('.fix').textContent='Certo: '+bad.join(', ')}};
+};
+R.inputs=(q,host,ch)=>{
+  const id=++UID,num=q.kind==='num';let note='';
+  host.innerHTML=q.fields.map((f,i)=>`<div class="frow${f.label&&f.label.length>10?' wide':''}">${f.say?`<span class="say"><button type="button" class="mini" data-r="0.85">🔊 Ouvir</button><button type="button" class="mini" data-r="0.55">Devagar</button></span>`:''}${f.label?`<label class="flab" for="f${id}-${i}">${esc(f.label)}</label>`:''}<input id="f${id}-${i}" ${num?'inputmode="numeric" pattern="[0-9]*"':'autocapitalize="none" autocorrect="off" spellcheck="false"'} autocomplete="off"></div>`).join('')+'<div class="fix"></div>';
+  const ins=[...host.querySelectorAll('input')];ins.forEach(x=>x.oninput=ch);
+  q.fields.forEach((f,i)=>{if(f.say){const row=ins[i].closest('.frow');row.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>speak(f.say,+b.dataset.r,f.lang));
+    if(!canSpeak()){row.insertAdjacentHTML('afterbegin','<span class="hint">Este aparelho não fala. Peça a um adulto para ditar.</span>')}}});
+  const good=(f,v)=>{v=v.trim();if(!v)return false;
+    if(num)return Number(v.replace(',','.'))===Number(f.ans);
+    return [].concat(f.ans).some(a=>norm(a)===norm(v))};
+  return{ready:()=>ins.every(x=>x.value.trim()),grade:()=>q.fields.every((f,i)=>good(f,ins[i].value)),
+    note:()=>note,
+    mark:()=>{let fix=[];q.fields.forEach((f,i)=>{const g=good(f,ins[i].value);ins[i].classList.add(g?'ok':'bad');ins[i].disabled=true;
+      if(g&&!num){const a=[].concat(f.ans);if(!a.some(x=>x.toLowerCase()===ins[i].value.trim().toLowerCase()))note='Atenção ao acento: escreve-se "'+a[0]+'".'}
+      if(!g)fix.push((f.label?f.label+': ':'')+[].concat(f.ans)[0])});
+      if(fix.length)host.querySelector('.fix').textContent='Certo: '+fix.join(' · ')}};
+};
+function answerText(q){
+  switch(q.t){
+    case 'choice':return q.ans;
+    case 'pick':return q.ans.join(', ');
+    case 'sort':return q.cats.map((c,k)=>c+': '+q.items.filter(i=>i[1]===k).map(i=>i[0]).join(', ')).join('  |  ');
+    case 'order':return q.steps.join(q.layout==='words'?' ':'  →  ');
+    case 'match':return q.pairs.map(p=>p[0]+' → '+p[1]).join('; ');
+    case 'cloze':{let i=0;return q.text.replace(/\{\}/g,()=>q.ans[i++])}
+    case 'inputs':return q.fields.map(f=>(f.label?f.label+': ':'')+[].concat(f.ans)[0]).join(' · ');
+  }return '';
+}
+
+/* =============== PORTUGUÊS =============== */
+const sp=(s,opts)=>{const [pre,a,post]=s.split('|');
+  return {t:'choice',q:'Complete a palavra:',vis:`<p class="word">${esc(pre)}<span class="blank">&nbsp;&nbsp;</span>${esc(post)}</p>`,
+    opts:opts.map(o=>o.toUpperCase()),ans:a.toUpperCase(),fixed:true,exp:`Escreve-se <b>${esc(pre+a+post)}</b>.`}};
+const GGU=['|gu|erra','|gu|itarra','|g|irafa','|g|ente','fo|gu|eira','ami|g|o','|gu|ia','|gu|erreiro','|g|elo','man|gu|eira','ce|g|onha','|g|aiola','san|gu|e','fi|g|ura','|g|inástica','fo|gu|ete','re|g|ime','á|gu|ia'];
+const CQU=['|qu|eijo','|qu|ilômetro','|qu|intal','pe|qu|eno','es|qu|ilo','má|qu|ina','|qu|adro','|c|adeira','|c|oelho','|qu|ente','|qu|ase','a|qu|ário','pa|c|ote','ca|qu|i','|c|obra','|c|uidado','|qu|eda'];
+const RRR=['ca|rr|oça','pa|r|ede','ba|rr|iga','fa|r|inha','a|rr|oz','to|rr|e','ca|r|eta','ho|rr|ível','te|rr|a','mo|r|eno','ca|rr|inho','a|r|ara','fe|rr|eiro','ma|r|ido','ba|r|ulho','ja|rr|a','cacho|rr|o'];
+const MNN=['ca|m|po','ba|n|co','ta|m|bém','co|n|tente','i|m|portante','ca|n|ta','le|m|brar','a|n|tigo','li|m|po','ma|n|to','po|m|bo','ma|n|ga','co|m|prar','se|m|pre','te|n|da','pla|n|ta'];
+const SSS=['pá|ss|aro','ro|s|a','mi|ss|ão','me|s|a','va|ss|oura','ca|s|aco','pe|ss|oa','a|ss|ado','pê|ss|ego','mú|s|ica','vi|s|ita','a|ss|unto','profe|ss|ora','pre|s|ente','de|s|ejo','o|ss|o'];
+const spellPool=(list,opts,n)=>shuffle(list).slice(0,n).map(x=>sp(x,opts));
+const DITADO=['guerra','queijo','girafa','esquilo','carroça','barriga','campo','também','pássaro','vassoura','foguete','mangueira','quadrado','esquerda','terra','carrinho','sempre','planta','pêssego','professora','guitarra','fogueira','quilômetro','aquário','pequeno','desejo','presente','música','tenda','cachorro','gente','amigo','missão','pessoa','importante','arroz','torre','lembrar'];
+const CORRETA=[
+  ['Ontem eu e o Lucas fomos ao mercado.','ontem eu e o lucas fomos ao mercado','Ontem eu e o lucas fomos ao mercado.'],
+  ['A professora Ana mora em Curitiba.','a professora ana mora em curitiba.','A professora ana mora em Curitiba.'],
+  ['Meu amigo Pedro nasceu em Minas Gerais.','meu amigo pedro nasceu em minas gerais.','Meu amigo pedro nasceu em Minas Gerais.'],
+  ['O rio Tietê passa por São Paulo.','o rio tietê passa por são paulo.','O rio tietê passa por São Paulo.'],
+  ['Na sexta-feira, Ana e Lucas visitaram o museu em Salvador.','na sexta-feira, ana e lucas visitaram o museu em salvador.','Na sexta-feira, ana e Lucas visitaram o museu em Salvador.']];
+const FINAL=[['Onde você guardou meu caderno','?'],['Que lindo dia de sol','!'],['Hoje é segunda-feira','.'],['Socorro, está pegando fogo','!'],['Você gosta de pizza','?'],['Eu moro perto da escola','.'],['Quantos anos você tem','?'],['Cuidado com o degrau','!'],['A aula começa às sete horas','.']];
+const PT_TOPICS=[
+ {id:'gqu',name:'G, GU e QU',pages:'p. 178, 179, 191, 192, 218',pool:()=>[
+   ...spellPool(GGU,['g','gu'],5),...spellPool(CQU,['c','qu'],4),
+   C('Qual palavra está escrita certo?',['guerra','gerra','guera'],'guerra','Em GUE e GUI o U mantém o som forte do G.'),
+   C('Qual palavra está escrita certo?',['guitarra','gitarra','guitara'],'guitarra'),
+   C('Qual palavra está escrita certo?',['mangueira','mangeira','manqueira'],'mangueira'),
+   C('Qual palavra está escrita certo?',['esquilo','esqilo','escilo'],'esquilo'),
+   C('Qual palavra está escrita certo?',['quadrado','cuadrado','quadrato'],'quadrado'),
+   TF('Em GUE e GUI, o U ajuda a manter o som forte do G, como em guerra.',true),
+   TF('Em GE e GI, o som da letra G é de J, como em girafa.',true),
+   TF('Escrevemos "gerra" para a palavra guerra.',false,'O certo é <b>guerra</b>.')]},
+ {id:'ort',name:'Ortografia: R/RR, M/N e S/SS',pages:'p. 90, 91, 119, 120, 152, 160, 161, 210',pool:()=>[
+   ...spellPool(RRR,['r','rr'],4),...spellPool(MNN,['m','n'],3),...spellPool(SSS,['s','ss'],4),
+   TF('Usamos M antes das letras P e B, como em campo e bombom.',true),
+   TF('O RR se escreve no começo das palavras, como em "rrato".',false,'No começo da palavra usamos um R só: <b>rato</b>.'),
+   TF('Entre duas vogais, SS tem som de S, como em pássaro.',true),
+   TF('Entre duas vogais, um S só tem som de Z, como em rosa.',true)]},
+ {id:'mai',name:'Letra maiúscula e pontuação',pages:'p. 66, 67, 123, 127, 154, 246',pool:()=>[
+   ...CORRETA.map(c=>C('Qual frase está escrita corretamente?',c,c[0],'Nomes de pessoas, cidades e rios começam com letra maiúscula, e a frase termina com ponto.')),
+   ...FINAL.map(f=>C('Qual sinal fecha esta frase?<br><b>'+esc(f[0])+' ___</b>',['.','?','!'],f[1],f[1]==='?'?'Pergunta termina com ponto de interrogação.':f[1]==='!'?'Surpresa, susto ou alegria pedem ponto de exclamação.':'Frase que conta algo termina com ponto final.',{fixed:true})),
+   P('Toque nas palavras que precisam de letra maiúscula: <b>no sábado, joão e maria viajaram para o rio de janeiro.</b>',['no','sábado','joão','e','maria','viajaram','para','o','rio','de','janeiro'],['no','joão','maria','rio','janeiro'],'A primeira palavra da frase e os nomes próprios começam com maiúscula.'),
+   C('Qual frase tem as vírgulas certas?',['Na feira vendem alface, tomate, cenoura e batata.','Na feira vendem, alface tomate cenoura e batata.','Na feira, vendem alface tomate, cenoura e batata.'],'Na feira vendem alface, tomate, cenoura e batata.','Separamos os itens de uma lista com vírgula, e o último vem com "e".'),
+   C('Qual frase tem as vírgulas certas?',['Comprei bolas, bonecas, carrinhos e jogos.','Comprei, bolas bonecas carrinhos e jogos.','Comprei bolas bonecas, carrinhos, e jogos.'],'Comprei bolas, bonecas, carrinhos e jogos.'),
+   TF('O nome de uma cidade começa com letra maiúscula.',true),
+   TF('Depois de um ponto final, a frase seguinte começa com letra minúscula.',false,'Depois do ponto final, a frase seguinte começa com <b>maiúscula</b>.'),
+   TF('Uma pergunta termina com ponto de exclamação.',false,'Pergunta termina com <b>ponto de interrogação</b>.'),
+   TF('O nome de uma pessoa começa com letra maiúscula.',true)]},
+ {id:'pad',name:'Padrões de escrita',pages:'p. 144, 226, 227, 228',pool:()=>[
+   W('Lucas chutou a bola.'),W('O gatinho brincava com o novelo.'),W('Os pássaros cantam na manhã.'),W('Maria vai à escola a pé.'),W('O foguete subiu ao céu.'),W('Pedro comeu o sorvete de chocolate.'),
+   O('Coloque a história na ordem certa.',['Pedro acordou cedo para ir à escola.','Depois, tomou café e escovou os dentes.','Em seguida, pegou a mochila e saiu de casa.','Na escola, encontrou seus amigos.']),
+   O('Coloque a história na ordem certa.',['Ana ganhou um convite para a festa da amiga.','No sábado, ela colocou um vestido bonito e foi para a festa.','Lá, brincou muito com os amigos.','No fim, todos cantaram parabéns e comeram bolo.']),
+   Z('Complete com a palavra certa.','Eu queria brincar, {} estava chovendo.',['mas','porque','depois','então'],['mas']),
+   Z('Complete com a palavra certa.','Fiquei feliz {} ganhei um presente.',['mas','porque','depois','então'],['porque']),
+   Z('Complete com a palavra certa.','Primeiro lavei as mãos e {} almocei.',['mas','porque','depois','então'],['depois']),
+   Z('Complete com a palavra certa.','Estava com fome, {} comi um sanduíche.',['mas','porque','depois','então'],['então']),
+   C('Qual é o texto escrito corretamente?',['No domingo, meu pai levou a família ao parque. Eu andei na roda-gigante. Que passeio legal!','no domingo meu pai levou a família ao parque eu andei na roda-gigante que passeio legal','No domingo meu pai levou a família ao parque eu andei na roda-gigante. que passeio legal'],'No domingo, meu pai levou a família ao parque. Eu andei na roda-gigante. Que passeio legal!')]},
+ {id:'dit',name:'Ditado',pages:'palavras dos estudos de ortografia',pool:()=>shuffle(DITADO).slice(0,10).map(w=>F('Ouça a palavra e escreva do jeito certo.',[{ans:w,say:w}],'A palavra é <b>'+w+'</b>.'))}
+];
+
+/* =============== CIÊNCIAS =============== */
+const CI_TOPICS=[
+ {id:'vert',name:'Vertebrados e invertebrados',pages:'p. 76 a 81',pool:()=>[
+   S('Separe os animais em vertebrados e invertebrados.',['Vertebrado','Invertebrado'],[['leão',0],['joaninha',1],['tartaruga',0],['polvo',1],['galinha',0],['lesma',1],['golfinho',0],['abelha',1]],'Vertebrados têm coluna vertebral e esqueleto de ossos.'),
+   S('Separe os animais em vertebrados e invertebrados.',['Vertebrado','Invertebrado'],[['elefante',0],['centopeia',1],['pombo',0],['camarão',1],['baleia',0],['mosca',1],['crocodilo',0],['polvo',1]]),
+   S('Separe os animais em vertebrados e invertebrados.',['Vertebrado','Invertebrado'],[['caranguejo',1],['coelho',0],['formiga',1],['pato',0],['estrela-do-mar',1],['lagartixa',0],['lula',1],['rã',0]]),
+   P('Toque nos animais <b>invertebrados</b>.',['cavalo','aranha','borboleta','galinha','caracol','tartaruga'],['aranha','borboleta','caracol']),
+   P('Toque nos animais <b>vertebrados</b>.',['minhoca','sapo','peixe','caramujo','cobra','água-viva'],['sapo','peixe','cobra']),
+   C('O que todos os vertebrados têm em comum?',['coluna vertebral','asas','casca','antenas'],'coluna vertebral'),
+   C('Qual destes animais é invertebrado?',['cavalo','lagarta','tubarão','sapo'],'lagarta'),
+   Z('Complete.','Os animais que têm esqueleto interno com ossos são os {}. A água-viva e a minhoca são {} porque não têm {}.',['vertebrados','invertebrados','coluna vertebral','casca'],['vertebrados','invertebrados','coluna vertebral']),
+   TF('A estrela-do-mar tem coluna vertebral.',false),
+   TF('Os peixes são animais vertebrados.',true),
+   TF('Toda minhoca tem ossos.',false),
+   TF('Existem mais animais invertebrados do que vertebrados no mundo.',true)]},
+ {id:'nasc',name:'Nascimento dos animais',pages:'p. 82 a 85',pool:()=>[
+   S('Separe os animais: nascem de ovos (ovíparos) ou da barriga da mãe (vivíparos)?',['Ovíparo','Vivíparo'],[['galinha',0],['cachorro',1],['tartaruga',0],['vaca',1],['jacaré',0],['golfinho',1],['sapo',0],['baleia',1]]),
+   S('Separe os animais: ovíparos ou vivíparos?',['Ovíparo','Vivíparo'],[['pato',0],['gato',1],['avestruz',0],['cavalo',1],['crocodilo',0],['macaco',1],['borboleta',0],['golfinho',1]]),
+   M('Relacione o animal ao filhote.',[['galinha','pintinho'],['vaca','bezerro'],['sapo','girino'],['ovelha','cordeiro']]),
+   M('Relacione a mãe ao filhote.',[['cavalo','potro'],['porca','leitão'],['cabra','cabrito'],['pata','patinho']]),
+   O('Coloque as etapas da vida do sapo em ordem.',['A rã põe ovos na água.','Dos ovos nascem os girinos, que vivem na água.','O girino cresce e nascem as patas.','O girino se transforma em sapo adulto.']),
+   O('Coloque as etapas do nascimento do pintinho em ordem.',['A galinha põe os ovos.','A galinha choca os ovos para mantê-los aquecidos.','O pintinho quebra a casca e nasce.','O filhote cresce e vira uma galinha adulta.']),
+   Z('Complete.','Os animais que nascem de ovos são {}. Os que se desenvolvem na barriga da mãe são {}.',['ovíparos','vivíparos','vertebrados','invertebrados'],['ovíparos','vivíparos']),
+   Z('Complete.','A galinha {} os ovos para mantê-los aquecidos. O filhote de mamífero mama o {} da mãe.',['choca','leite','ovo','pasto'],['choca','leite']),
+   C('Como se chama o filhote do sapo, que vive na água?',['girino','pintinho','potro','bezerro'],'girino'),
+   TF('O cachorro nasce de um ovo.',false,'O cachorro é vivíparo: nasce da barriga da mãe.'),
+   TF('A tartaruga é um animal ovíparo.',true),
+   TF('A baleia nasce da barriga da mãe.',true)]},
+ {id:'clas',name:'Classificação dos animais',pages:'p. 86 a 89, 94 a 97, 99 a 102',pool:()=>[
+   M('Relacione cada grupo à cobertura do corpo.',[['Mamíferos','pelos'],['Aves','penas'],['Répteis','escamas'],['Peixes','escamas'],['Anfíbios','pele lisa e úmida']]),
+   M('Relacione cada grupo à sua característica.',[['Mamíferos','corpo com pelos; o filhote mama leite'],['Aves','corpo com penas e bico'],['Répteis','pele coberta de escamas secas'],['Peixes','respiram por brânquias e têm nadadeiras'],['Anfíbios','pele lisa e úmida; o filhote vive na água']]),
+   M('Em que grupo está cada animal?',[['rã','anfíbio'],['lagartixa','réptil'],['coruja','ave'],['golfinho','mamífero'],['sardinha','peixe'],['cavalo','mamífero']]),
+   M('Em que grupo está cada animal?',[['sapo','anfíbio'],['jacaré','réptil'],['pinguim','ave'],['baleia','mamífero'],['tubarão','peixe'],['morcego','mamífero'],['tartaruga','réptil'],['avestruz','ave']]),
+   C('Qual animal <b>não</b> pertence ao grupo dos outros?',['pato','coruja','morcego','pombo'],'morcego','O morcego é mamífero. Os outros são aves.'),
+   C('Qual animal <b>não</b> pertence ao grupo dos outros?',['sapo','rã','perereca','jacaré'],'jacaré','O jacaré é réptil. Os outros são anfíbios.'),
+   C('Qual animal <b>não</b> pertence ao grupo dos outros?',['baleia','golfinho','tubarão','foca'],'tubarão','O tubarão é peixe. Os outros são mamíferos.'),
+   C('Quem sou eu? Sou uma ave de pescoço e pernas longos, não voo e corro muito rápido.',['avestruz','pinguim','coruja','pato'],'avestruz'),
+   C('Quem sou eu? Sou um réptil, não tenho patas e rastejo.',['cobra','sapo','lagartixa','tartaruga'],'cobra'),
+   C('Quem sou eu? Sou um mamífero que vive no mar e respiro o ar pelo alto da cabeça.',['baleia','tubarão','sardinha','jacaré'],'baleia','Também vale golfinho: os dois são mamíferos do mar.'),
+   Z('Complete.','Os mamíferos mamam {} quando são filhotes. Os peixes respiram por meio de {}.',['leite','brânquias','penas','escamas'],['leite','brânquias']),
+   Z('Complete.','As aves têm o corpo coberto de {} e os répteis têm a pele com {}.',['leite','brânquias','penas','escamas'],['penas','escamas']),
+   TF('A baleia é um peixe.',false,'A baleia é mamífero: respira ar e amamenta o filhote.'),
+   TF('Quando filhotes, os anfíbios vivem na água.',true),
+   TF('O pinguim é uma ave que não voa.',true),
+   TF('Os répteis têm penas.',false),
+   TF('A cobra é um mamífero.',false)]},
+ {id:'ven',name:'Animais venenosos e peçonhentos',pages:'p. 91',pool:()=>[
+   S('Venenoso ou peçonhento?',['Venenoso','Peçonhento'],[['baiacu',0],['escorpião',1],['cobra-coral',1],['sapo-cururu',0],['marimbondo',1],['sapo-de-flecha',0]],'Peçonhento injeta o veneno (ferrão ou presas). Venenoso faz mal se for tocado ou comido.'),
+   S('Venenoso ou peçonhento?',['Venenoso','Peçonhento'],[['jararaca',1],['sapo-cururu',0],['aranha-armadeira',1],['abelha',1]]),
+   Z('Complete.','Os animais {} produzem veneno e têm ferrão ou presas para injetá-lo. Os animais {} fazem mal se forem tocados ou comidos.',['peçonhentos','venenosos'],['peçonhentos','venenosos']),
+   P('Toque nas atitudes <b>corretas</b> para evitar acidentes com animais.',['Olhar dentro dos sapatos antes de calçar','Mexer em teias de aranha com as mãos','Avisar um adulto se encontrar uma cobra','Tentar pegar animais desconhecidos','Manter o quintal limpo, sem entulho','Colocar a mão em buracos'],['Olhar dentro dos sapatos antes de calçar','Avisar um adulto se encontrar uma cobra','Manter o quintal limpo, sem entulho']),
+   Object.assign(C('Onde o escorpião costuma se esconder?',['em lugares escuros, como pedras, entulhos e lenha','no meio da água','no alto das árvores','dentro de ninhos de pássaros'],'em lugares escuros, como pedras, entulhos e lenha'),{text:'O escorpião é um animal peçonhento. Ele costuma se esconder em lugares escuros, como pedras, entulhos e montes de lenha. O ferrão, que injeta o veneno, fica na ponta da cauda. Se alguém for picado, deve procurar atendimento médico rapidamente.'}),
+   Object.assign(C('Onde fica o ferrão do escorpião?',['na ponta da cauda','nas patas','na boca','nas asas'],'na ponta da cauda'),{text:'O escorpião é um animal peçonhento. Ele costuma se esconder em lugares escuros, como pedras, entulhos e montes de lenha. O ferrão, que injeta o veneno, fica na ponta da cauda. Se alguém for picado, deve procurar atendimento médico rapidamente.'}),
+   C('Se alguém for picado por um escorpião, o que fazer?',['procurar atendimento médico rapidamente','esperar passar sozinho','colocar terra no local','não contar para ninguém'],'procurar atendimento médico rapidamente'),
+   TF('Animal peçonhento injeta o veneno com ferrão ou presas.',true),
+   TF('Animal venenoso é sempre aquele que morde.',false),
+   TF('Podemos brincar com escorpiões se tivermos cuidado.',false,'Nunca devemos mexer em animais que não conhecemos.'),
+   TF('Se uma abelha ferroar, devemos avisar um adulto.',true)]}
+];
+
+/* =============== MATEMÁTICA =============== */
+const NAMES=['Ana','Pedro','Mariana','Lucas','Júlia','Davi','Sofia','Miguel','Laura','Théo'];
+const OBJ=[['figurinhas','f'],['lápis','m'],['bolinhas de gude','f'],['adesivos','m'],['balas','f'],['livros','m']];
+const qt=o=>o[1]==='f'?'Quantas':'Quantos';
+const cadaF=o=>o[1]==='f'?'cada':'cada';
+const rep=(gens,n)=>Array.from({length:n},(_,i)=>gens[i%gens.length]());
+const R1=x=>[{label:'Resposta',ans:x}];
+
+const genMulDez=()=>{const a=rand(2,9)*10,b=rand(2,9),k=rand(0,4),d=`Dica: ${a/10} × ${b} = ${a/10*b}, depois coloque o zero: ${a*b}.`;
+  if(k===0)return N(`Quanto é ${a} × ${b}?`,R1(a*b),d);
+  if(k===1)return N(`Quanto é ${b} × ${a}?`,R1(a*b),d);
+  if(k===2)return N(`Descubra o número que falta: <b>__ × ${b} = ${a*b}</b>`,R1(a),`${a} × ${b} = ${a*b}`);
+  if(k===3)return N(`Qual é o triplo de ${a}?`,R1(a*3),`Triplo é 3 vezes: 3 × ${a} = ${a*3}.`);
+  return N(`Quanto é ${rand(2,9)} × ${rand(2,9)}? (tabuada)`.replace(/\d × \d/,m=>m),R1(0),'');};
+const genTab=()=>{const a=rand(2,9),b=rand(2,10);return N(`Tabuada: quanto é ${a} × ${b}?`,R1(a*b),`${a} × ${b} = ${a*b}`)};
+const genMulDez2=()=>{const f=genMulDez();return f.fields[0].ans===0?genTab():f};
+
+const genAdd=()=>{const a=rand(120,499),b=rand(120,499),s=a+b;
+  return N(`Calcule <b>${a} + ${b}</b> e faça a prova real.`,[{label:'Resultado',ans:s},{label:`Prova real: resultado − ${b} =`,ans:a}],`${a} + ${b} = ${s}. Prova real: ${s} − ${b} = ${a}.`)};
+const genSub=()=>{const a=rand(300,999),b=rand(100,a-60),d=a-b;
+  return N(`Calcule <b>${a} − ${b}</b> e faça a prova real.`,[{label:'Resultado',ans:d},{label:`Prova real: resultado + ${b} =`,ans:a}],`${a} − ${b} = ${d}. Prova real: ${d} + ${b} = ${a}.`)};
+const genProvaCheck=()=>{const a=rand(300,999),b=rand(100,a-60),d=a-b,wrong=Math.random()<.5,r=wrong?d+10*pick1([-1,1]):d;
+  return C(`${pick1(NAMES)} fez a conta <b>${a} − ${b} = ${r}</b>. Faça a prova real (${r} + ${b}). A conta está certa?`,['Sim, está certa','Não, está errada'],wrong?'Não, está errada':'Sim, está certa',
+    `${r} + ${b} = ${r+b}. ${wrong?`Deu ${r+b}, e não ${a}. O resultado certo é ${d}.`:`Deu ${a}, igual ao número do começo.`}`,{fixed:true})};
+
+const genMulArm=()=>{const big=Math.random()<.4,a=big?rand(101,299):rand(12,49),b=big?rand(2,6):rand(2,9);
+  return N(`Arme a conta no caderno e digite o resultado.`,R1(a*b),`${a} × ${b} = ${a*b}`,{vis:armada(a,'×',b)})};
+const genMulFator=()=>{const b=rand(2,6),x=rand(12,40);return N(`Descubra o número que falta: <b>__ × ${b} = ${x*b}</b>`,R1(x),`Divida: ${x*b} ÷ ${b} = ${x}.`)};
+
+const genDiv=()=>{const d=rand(2,9),qq=Math.random()<.5?rand(10,50):rand(4,9),r=Math.random()<.5?0:rand(1,d-1),n=d*qq+r;
+  return N(`Resolva com a chave: <b>${n} ÷ ${d}</b>`,[{label:'Quociente',ans:qq},{label:'Resto',ans:r}],`${n} ÷ ${d} = ${qq}, resto ${r}. Prova: ${d} × ${qq} + ${r} = ${n}.`)};
+const genDivProva=()=>{const d=rand(3,9),qq=rand(4,12),r=rand(0,d-1),n=d*qq+r;
+  return N(`Na divisão <b>${n} ÷ ${d}</b>, o quociente é ${qq} e o resto é ${r}. Quanto é ${d} × ${qq} + ${r}?`,R1(n),`${d} × ${qq} = ${d*qq}; ${d*qq} + ${r} = ${n}. É a prova da divisão.`)};
+const genDivExata=()=>{const d=rand(3,9),qq=rand(4,9),ex=Math.random()<.5,r=ex?0:rand(1,d-1),n=d*qq+r;
+  return C(`A divisão <b>${n} ÷ ${d}</b> é exata (resto zero)?`,['Sim, é exata','Não, sobra resto'],ex?'Sim, é exata':'Não, sobra resto',`${n} ÷ ${d} = ${qq}, resto ${r}.`,{fixed:true})};
+
+const genReta=()=>{const s10=Math.random()<.6,step=s10?10:5,start=s10?rand(0,9)*100:rand(0,9)*50,end=start+step*10;
+  const idx=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,3).sort((a,b)=>a-b),hid=idx.map(i=>start+i*step);
+  return N(`Que número cada letra representa? A reta anda de ${step} em ${step}.`,hid.map((v,i)=>({label:String.fromCharCode(65+i),ans:v})),`A reta vai de ${step} em ${step}: ${hid.join(', ')}.`,{vis:numberLineSVG(start,end,step,hid)})};
+const genAnteSuc=()=>{const n=rand(101,998);return N(`Escreva o número que vem antes e o que vem depois de <b>${n}</b>.`,[{label:'Antecessor',ans:n-1},{label:'Sucessor',ans:n+1}],`Antes de ${n} vem ${n-1}; depois vem ${n+1}.`)};
+
+const THEMES=[{t:'Fruta preferida da turma',l:['Maçã','Banana','Uva','Laranja']},{t:'Animal de estimação dos alunos',l:['Cachorro','Gato','Peixe','Pássaro']},{t:'Esporte favorito da turma',l:['Futebol','Vôlei','Natação','Judô']},{t:'Sabor de sorvete preferido',l:['Chocolate','Morango','Baunilha','Coco']}];
+const genGrafico=()=>{const th=pick1(THEMES);let v;
+  do{v=th.l.map(()=>pick1([2,4,6,8,10,12]))}while(v.filter(x=>x===Math.max(...v)).length>1||v.filter(x=>x===Math.min(...v)).length>1);
+  const vis=`<p class="cap">${th.t}</p>`+barChartSVG(th.l,v,14,2),i=rand(0,3),k=rand(0,4);
+  if(k===0)return C('Qual foi a opção mais escolhida?',th.l,th.l[v.indexOf(Math.max(...v))],'A barra mais alta é a mais escolhida.',{vis});
+  if(k===1)return C('Qual foi a opção menos escolhida?',th.l,th.l[v.indexOf(Math.min(...v))],'A barra mais baixa é a menos escolhida.',{vis});
+  if(k===2)return N(`Quantos alunos escolheram <b>${th.l[i]}</b>?`,R1(v[i]),`A barra de ${th.l[i]} chega em ${v[i]}.`,{vis});
+  if(k===3)return N('Quantos alunos votaram ao todo?',R1(v.reduce((a,b)=>a+b)),'Some todas as barras: '+v.join(' + ')+' = '+v.reduce((a,b)=>a+b)+'.',{vis});
+  let a=i,b=(i+1+rand(0,2))%4;if(v[a]<v[b])[a,b]=[b,a];
+  return N(`Quantos alunos a mais escolheram <b>${th.l[a]}</b> do que <b>${th.l[b]}</b>?`,R1(v[a]-v[b]),`${v[a]} − ${v[b]} = ${v[a]-v[b]}.`,{vis})};
+
+const genProblema=()=>pick1([
+  ()=>{const n=pick1(NAMES),a=rand(3,8),b=pick1([12,15,20,25,30]),o=pick1(OBJ);return N(`${n} tem ${a} caixas. Em cada caixa há ${b} ${o[0]}. ${qt(o)} ${o[0]} ${n} tem ao todo?`,R1(a*b),`${a} × ${b} = ${a*b}`)},
+  ()=>{const n=pick1(NAMES),d=rand(3,9),qq=rand(4,14),o=pick1(OBJ);return N(`${n} tem ${d*qq} ${o[0]} e vai dividir igualmente entre ${d} amigos. ${qt(o)} ${o[0]} cada amigo recebe?`,R1(qq),`${d*qq} ÷ ${d} = ${qq}`)},
+  ()=>{const a=rand(150,400),b=rand(100,a-20);return N(`Uma escola tem ${a} alunos de manhã e ${b} à tarde. Quantos alunos há ao todo? Quantos a mais estudam de manhã?`,[{label:'Ao todo',ans:a+b},{label:'A mais de manhã',ans:a-b}],`${a} + ${b} = ${a+b}; ${a} − ${b} = ${a-b}`)},
+  ()=>{const n=pick1(NAMES),a=rand(100,200),b=rand(30,90);return N(`${n} tinha R$ ${a},00 e comprou uma bola por R$ ${b},00. Com quantos reais ${n} ficou?`,R1(a-b),`${a} − ${b} = ${a-b}. Prova real: ${a-b} + ${b} = ${a}.`)},
+  ()=>{const d=rand(4,9),qq=rand(5,12),r=rand(1,d-1),n=d*qq+r;return N(`Uma padaria embala ${n} pães em saquinhos com ${d} pães cada. Quantos saquinhos completos serão feitos? Quantos pães sobram?`,[{label:'Saquinhos',ans:qq},{label:'Pães que sobram',ans:r}],`${n} ÷ ${d} = ${qq}, resto ${r}.`)},
+  ()=>{const a=rand(2,9)*10,b=rand(2,9);return N(`Um pacote tem ${a} adesivos. Quantos adesivos há em ${b} pacotes?`,R1(a*b),`${a} × ${b} = ${a*b}`)},
+  ()=>{const n=pick1(NAMES),a=rand(6,12),b=rand(3,6),c=rand(5,15);return N(`Uma caixa tem ${a} lápis. ${n} comprou ${b} caixas e deu ${c} lápis para um amigo. Com quantos lápis ${n} ficou?`,R1(a*b-c),`${a} × ${b} = ${a*b}; ${a*b} − ${c} = ${a*b-c}`)},
+  ()=>{const a=rand(150,300),b=rand(80,a-20);return N(`O livro azul tem ${a} páginas e o livro verde tem ${b}. Quantas páginas o livro azul tem a mais?`,R1(a-b),`${a} − ${b} = ${a-b}`)}
+])();
+
+const CUBO=cubeSVG();
+const CUBO_Q=[
+  C('Qual figura aparece na face de <b>cima</b> do cubo?',['estrela','círculo','triângulo','quadrado'],'estrela','A face de cima é a que fica no alto do desenho.',{vis:CUBO}),
+  C('Qual figura aparece na face da <b>frente</b> do cubo?',['estrela','círculo','triângulo','quadrado'],'círculo','A face da frente é a maior, de frente para você.',{vis:CUBO}),
+  C('Qual figura aparece na face do <b>lado direito</b> do cubo?',['estrela','círculo','triângulo','quadrado'],'triângulo',null,{vis:CUBO}),
+  C('Quantas faces do cubo ficam escondidas neste desenho?',['1','2','3','6'],'3','Vemos 3 das 6 faces. Ficam escondidas: atrás, embaixo e do lado esquerdo.',{vis:CUBO,fixed:true}),
+  C('Quantas faces tem um cubo?',['4','6','8','12'],'6',null,{fixed:true}),
+  C('Quantas arestas (linhas onde duas faces se encontram) tem um cubo?',['6','8','12','16'],'12',null,{fixed:true}),
+  C('Quantos vértices (cantos) tem um cubo?',['4','6','8','12'],'8',null,{fixed:true}),
+  C('Que figura plana vemos ao olhar um cubo de frente?',['quadrado','círculo','triângulo','retângulo comprido'],'quadrado'),
+  C('Qual destes objetos lembra um cubo?',['dado','bola','lata de milho','funil'],'dado'),
+  TF('Todas as faces do cubo têm forma de quadrado.',true),
+  TF('O cubo tem 4 faces.',false,'O cubo tem 6 faces.'),
+  TF('Todas as faces do cubo têm o mesmo tamanho.',true)];
+
+const MA_TOPICS=[
+ {id:'dez',name:'Multiplicação de dezenas exatas',pages:'p. 236, 254, 256',pool:()=>rep([genMulDez2,genMulDez2,genTab],10)},
+ {id:'adsub',name:'Adição, subtração e prova real',pages:'p. 240, 241 e caderno',pool:()=>rep([genAdd,genSub,genProvaCheck],10)},
+ {id:'mularm',name:'Multiplicação armada',pages:'caderno',pool:()=>rep([genMulArm,genMulArm,genMulFator],10)},
+ {id:'div',name:'Divisão com chave',pages:'p. 224 a 230 e caderno',pool:()=>rep([genDiv,genDiv,genDivProva,genDivExata],10)},
+ {id:'reta',name:'Reta numerada',pages:'p. 222, 223',pool:()=>rep([genReta,genReta,genAnteSuc],10)},
+ {id:'graf',name:'Gráficos',pages:'p. 244 e caderno',pool:()=>rep([genGrafico],10)},
+ {id:'cubo',name:'Vistas de um cubo',pages:'p. 237 a 239',pool:()=>CUBO_Q},
+ {id:'prob',name:'Situações-problema',pages:'caderno',pool:()=>rep([genProblema],10)}
+];
+
+/* =============== HISTÓRIA E GEOGRAFIA =============== */
+const TXT_DESM='O desmatamento é a derrubada de árvores. Ele acontece para abrir espaço para plantações, pastos para o gado, minas e cidades. Sem as árvores, o solo fica desprotegido, os rios podem secar e muitos animais perdem o seu lar.';
+const TXT_CIDADE='Antigamente, a cidade tinha poucas ruas asfaltadas e as pessoas andavam a pé, de carroça ou de bonde. Hoje, as cidades têm muitos prédios, carros, ônibus e metrô. O trânsito aumentou e, em muitas cidades, o ar ficou mais poluído.';
+const withText=(q,t)=>Object.assign(q,{text:t});
+const HG_TOPICS=[
+ {id:'agr',name:'Agricultura de subsistência e comercial',pages:'p. 84, 85, 92, 95',pool:()=>[
+   S('Agricultura de subsistência ou comercial?',['Subsistência','Comercial'],[['Dona Rosa planta mandioca e feijão no sítio para a família comer',0],['Fazenda com enormes plantações de soja e muitas máquinas, que vende os grãos para outros países',1],['Horta no quintal com alface e cenoura para o consumo da casa',0],['Grandes plantações de cana-de-açúcar para fazer açúcar vendido nos mercados',1],['Seu Pedro planta milho em um pequeno terreno para fazer fubá e comer em casa',0]],'Na subsistência, a produção alimenta a própria família. Na comercial, produz-se muito para vender.'),
+   Z('Complete.','A {} é o cultivo de plantas, como milho, feijão e arroz. Na agricultura de {}, o que se planta alimenta a própria {}. Na agricultura {}, os alimentos são produzidos em grande quantidade para vender.',['agricultura','subsistência','família','comercial'],['agricultura','subsistência','família','comercial']),
+   P('Toque nos alimentos que vêm da <b>agricultura</b>.',['alface','leite','tomate','carne','arroz','ovo','banana'],['alface','tomate','arroz','banana'],'Leite, carne e ovos vêm da pecuária.'),
+   O('Coloque o caminho do alimento do campo até a nossa mesa em ordem.',['O agricultor planta as sementes.','O agricultor colhe o que plantou.','O alimento é levado em caminhões para as cidades.','O alimento é vendido no mercado.']),
+   C('Quais máquinas são comuns na agricultura comercial?',['tratores e colheitadeiras','carroças e arados de mão','bicicletas','guindastes'],'tratores e colheitadeiras'),
+   C('Qual destes é produto da agricultura comercial no Brasil?',['soja','tapioca feita em casa','horta do quintal','chá de ervas do vizinho'],'soja','Soja, café e cana-de-açúcar são plantados em grande escala para vender.'),
+   TF('Na agricultura comercial é comum usar máquinas, como tratores e colheitadeiras.',true),
+   TF('A agricultura de subsistência produz alimentos apenas para vender.',false),
+   TF('Café, soja e cana-de-açúcar são exemplos de produtos da agricultura comercial.',true),
+   TF('Toda a agricultura é feita em grandes fazendas.',false)]},
+ {id:'pec',name:'Pecuária',pages:'p. 86, 87',pool:()=>[
+   M('Relacione o animal ao que ele fornece.',[['vaca','leite'],['galinha','ovos'],['ovelha','lã'],['boi','carne']]),
+   S('Agricultura ou pecuária?',['Agricultura','Pecuária'],[['leite',1],['arroz',0],['carne',1],['feijão',0],['ovos',1],['milho',0]]),
+   S('Agricultura ou pecuária?',['Agricultura','Pecuária'],[['couro',1],['laranja',0],['frango',1],['trigo',0],['lã',1],['café',0]]),
+   Z('Complete.','A pecuária é a criação de {} para obter alimentos e outros produtos. Do gado também se obtém o {}, usado para fazer sapatos e bolsas. O lugar onde o gado come capim é o {}.',['animais','couro','pasto','plantas'],['animais','couro','pasto']),
+   C('O que é pecuária?',['criação de animais','cultivo de plantas','retirada de minerais','derrubada de árvores'],'criação de animais'),
+   C('Qual destes animais faz parte da criação de gado?',['boi','tartaruga','sapo','tubarão'],'boi'),
+   TF('A criação de galinhas faz parte da pecuária.',true),
+   TF('A criação de bois e vacas é um exemplo de pecuária.',true),
+   TF('A pecuária só existe dentro das cidades.',false,'A pecuária acontece principalmente no campo.'),
+   TF('O leite que tomamos pode vir da pecuária.',true)]},
+ {id:'min',name:'Extrativismo mineral',pages:'p. 90, 91',pool:()=>[
+   Z('Complete.','O extrativismo mineral é a retirada de {} da natureza. O lugar de onde se retiram minerais do solo é a {}. O {} é usado para fazer joias.',['minerais','mina','ouro','areia'],['minerais','mina','ouro']),
+   M('Relacione o mineral ao seu uso.',[['ferro','fabricar carros, pontes e ferramentas'],['ouro','fazer joias'],['argila','fazer tijolos e telhas'],['sal','temperar alimentos']]),
+   P('Toque nos produtos que vêm do <b>extrativismo mineral</b>.',['ouro','madeira','areia','ferro','castanha','sal'],['ouro','areia','ferro','sal']),
+   C('Como se chama o lugar de onde se retiram minerais do solo?',['mina','horta','pasto','porto'],'mina'),
+   C('Qual mineral é usado junto com o cimento na construção de casas?',['areia','ouro','sal','leite'],'areia'),
+   C('O que a mineração pode causar na natureza?',['desmatamento e poluição dos rios','mais chuva nas cidades','aumento das florestas','nada'],'desmatamento e poluição dos rios'),
+   TF('Os minerais se formam rapidamente na natureza e nunca acabam.',false,'Os minerais levam muito tempo para se formar e podem acabar.'),
+   TF('A mineração pode causar desmatamento e poluição dos rios.',true),
+   TF('Os minerais são encontrados no solo e no subsolo.',true),
+   TF('O extrativismo mineral é a retirada de peixes do mar.',false)]},
+ {id:'cc',name:'Campo e cidade em diferentes tempos',pages:'p. 102, 104, 105',pool:()=>[
+   S('Campo ou cidade?',['Campo','Cidade'],[['sítios, fazendas e plantações',0],['prédios, ruas e avenidas',1],['criação de animais e colheita',0],['muito trânsito e barulho',1],['casas distantes e muita área verde',0],['fábricas, lojas e shoppings',1]]),
+   S('Era comum antigamente ou é comum hoje?',['Antigamente','Hoje'],[['iluminar a casa com lampião a querosene',0],['conversar por celular e internet',1],['lavar roupa no rio',0],['usar máquina de lavar roupa',1],['viajar de carroça ou a cavalo',0],['viajar de carro, ônibus e avião',1]]),
+   Z('Complete.','Antigamente, a terra era arada com arados puxados por animais. Hoje, muitos agricultores usam {}. Antigamente, as casas eram iluminadas por lampiões; hoje, a maioria usa {}. Hoje mandamos mensagens pelo {}.',['tratores','energia elétrica','celular','lampião'],['tratores','energia elétrica','celular']),
+   withText(C('Como as pessoas se locomoviam na cidade antigamente?',['a pé, de carroça ou de bonde','de metrô e de ônibus','só de avião','só de carro'],'a pé, de carroça ou de bonde'),TXT_CIDADE),
+   withText(C('O que aumentou nas cidades hoje, segundo o texto?',['o trânsito e a poluição do ar','as carroças','as ruas de terra','o silêncio'],'o trânsito e a poluição do ar'),TXT_CIDADE),
+   C('Qual destas é uma característica da vida no campo?',['criação de animais e plantações','muitos prédios altos','metrô','grandes avenidas'],'criação de animais e plantações'),
+   C('Qual destas é uma característica da cidade?',['muito trânsito e prédios','pasto e plantações','sítios','curral'],'muito trânsito e prédios'),
+   TF('Antigamente, o lampião era usado para iluminar muitas casas.',true),
+   TF('Hoje, as pessoas só se comunicam por cartas.',false),
+   TF('Nas cidades de hoje há mais carros e prédios do que antigamente.',true)]},
+ {id:'imp',name:'Impactos ambientais',pages:'p. 108 a 113',pool:()=>[
+   M('Relacione a ação ao seu impacto.',[['desmatamento','falta de árvores e perda da moradia dos animais'],['queimada','destruição da vegetação, fumaça e ar poluído'],['lixo jogado no rio','água suja e morte de peixes']]),
+   P('Toque nas atitudes que <b>ajudam</b> a cuidar do meio ambiente.',['Separar o lixo reciclável','Jogar óleo de cozinha na pia','Fechar a torneira ao escovar os dentes','Queimar lixo no quintal','Plantar árvores','Deixar a luz acesa em cômodos vazios'],['Separar o lixo reciclável','Fechar a torneira ao escovar os dentes','Plantar árvores']),
+   M('Na coleta seletiva, qual lixeira recebe cada material?',[['papel','lixeira azul'],['plástico','lixeira vermelha'],['vidro','lixeira verde'],['metal','lixeira amarela']]),
+   S('Reduzir, reutilizar ou reciclar?',['Reduzir','Reutilizar','Reciclar'],[['usar o verso de uma folha para desenhar',1],['colocar o jornal velho na lixeira azul para virar papel novo',2],['levar sacola de pano ao mercado em vez de usar sacolas plásticas',0],['transformar uma garrafa plástica em vaso de planta',1]],'Reduzir é consumir menos. Reutilizar é usar de novo. Reciclar é transformar em algo novo.'),
+   withText(C('O que é desmatamento?',['a derrubada de árvores','o plantio de árvores','a limpeza de rios','a coleta de lixo'],'a derrubada de árvores'),TXT_DESM),
+   withText(C('Qual é uma consequência do desmatamento, segundo o texto?',['muitos animais perdem o seu lar','os rios sempre ficam mais cheios','o solo fica mais protegido','as florestas crescem mais rápido'],'muitos animais perdem o seu lar'),TXT_DESM),
+   C('Qual atitude ajuda a proteger as florestas?',['plantar árvores e não usar fogo na mata','jogar lixo na mata','derrubar árvores à toa','soltar balões'],'plantar árvores e não usar fogo na mata'),
+   C('Jogar lixo no rio causa:',['poluição da água','mais peixes','água mais limpa','mais chuva'],'poluição da água'),
+   TF('Reciclar é transformar materiais usados em produtos novos.',true),
+   TF('Queimadas ajudam a manter o ar limpo.',false),
+   TF('Economizar água e energia ajuda o meio ambiente.',true)]}
+];
+
+/* =============== HISTÓRIA E GEOGRAFIA ADAPTADA (p. 86-87) =============== */
+const HG_ADAPTADA_TOPICS=[
+ {id:'pec-adapt',name:'Pecuária',pages:'p. 86, 87',pool:()=>[
+   C('Quem organiza as atividades dos outros trabalhadores?',['Administrador da propriedade','Trabalhador fixo','Arrendatário'],'Administrador da propriedade','O administrador organiza as atividades.'),
+   C('Em qual criação é necessário um número maior de trabalhadores?',['Pecuária intensiva','Pecuária extensiva','Nenhuma'],'Pecuária intensiva','Na intensiva precisa de mais trabalhadores.'),
+   TF('O trabalhador fixo recebe um salário pelo trabalho realizado.',true),
+   TF('Na pecuária extensiva, os animais são criados soltos em grandes áreas.',true),
+   P('Toque nos trabalhadores do campo.',['Administrador da propriedade','Trabalhador fixo','Parceiro','Arrendatário','estábulo','pastagens'],['Administrador da propriedade','Trabalhador fixo','Parceiro','Arrendatário']),
+   P('Toque nos produtos obtidos com a pecuária.',['leite','carnes','ovos','couro','pastagens','estábulo'],['leite','carnes','ovos','couro']),
+   S('Quem faz o quê?',['Administrador','Arrendatário'],[['Organiza as atividades dos outros trabalhadores',0],['Aluga parte da terra dos proprietários',1],['Os trabalhadores podem ser da família ou contratados',0],['Escolhe o que vai plantar ou criar',1]]),
+   S('Pecuária extensiva ou intensiva?',['Extensiva','Intensiva'],[['animais soltos em grandes áreas',0],['animais confinados',1],['alimentam-se nas pastagens',0],['recebem alimentação específica no estábulo',1],['pequeno número de trabalhadores',0],['maior número de trabalhadores',1]]),
+   O('Coloque na ordem do trabalhador volante.',['Vive nas cidades próximas às plantações.','É transportado de ônibus ou de caminhão.','Faz o plantio ou a colheita por um tempo.']),
+   O('Coloque na ordem da pecuária.',['Os animais são criados.','Os animais se reproduzem.','Obtemos leite, carnes, ovos e couro.','Os produtos são transformados nas indústrias.']),
+   W('O administrador organiza as atividades.'),
+   W('Os animais comem nas pastagens.'),
+   M('Relacione o trabalhador à sua função.',[['Administrador da propriedade','organiza as atividades'],['Trabalhador fixo','recebe salário'],['Parceiro','divide parte da produção'],['Arrendatário','aluga parte da terra']]),
+   M('Relacione a palavra ao significado.',[['Confinado','mantido em ambiente cercado'],['Estábulo','área coberta do gado'],['Extensiva','animais soltos'],['Intensiva','animais confinados']]),
+   Z('Complete.','O {} organiza as atividades. O trabalhador fixo recebe {}. O parceiro divide a {}. O arrendatário aluga a {}.',['Administrador','salário','produção','terra'],['Administrador','salário','produção','terra']),
+   Z('Complete.','Na pecuária {}, os animais vivem soltos e comem nas {}. Na pecuária {}, ficam {} no {}.',['extensiva','pastagens','intensiva','confinados','estábulo'],['extensiva','pastagens','intensiva','confinados','estábulo']),
+   C('Quem divide parte da produção com o dono?',['Parceiro','Administrador','Arrendatário'],'Parceiro','O parceiro divide a produção.'),
+   TF('Ovos e leite podem vir da pecuária.',true),
+   F('Como também é chamado o trabalhador volante?',[{label:'Resposta',ans:['boia-fria','boia fria']}],'Também chamado boia-fria.'),
+   F('Onde o gado da pecuária intensiva fica abrigado?',[{label:'Resposta',ans:['estábulo']}],'No estábulo.')]},
+ {id:'pec-autismo',name:'Pecuária adaptada autismo',pages:'p. 86, 87',pool:()=>[
+   C('Onde mora o boi da pecuária intensiva?',['No estábulo','Na pastagem'],'No estábulo','Boi intensivo mora no estábulo.'),
+   TF('Na pecuária extensiva, o boi vive solto.',true),
+   P('Toque nos 2 que a pecuária nos dá.',['leite','carne','estábulo','pastagem'],['leite','carne']),
+   S('Quem faz o quê?',['Administrador','Arrendatário'],[['Organiza as atividades',0],['Aluga a terra',1],['Fala com os trabalhadores',0],['Escolhe o que plantar',1]]),
+   O('Do leite até você. Coloque em ordem.',['A vaca vive no pasto.','Tiramos o leite.','O leite vai para a fábrica.']),
+   W('O boi come capim.'),
+   M('Ligue o animal ao produto.',[['vaca','leite'],['galinha','ovos'],['ovelha','lã']]),
+   Z('Complete com 2 palavras.','O boi vive na {}. O leite vem da {}.',['pastagem','vaca'],['pastagem','vaca']),
+   C('Qual vem da pecuária?',['ovos','estábulo'],'ovos','Ovos vêm da pecuária.'),
+   F('Onde o boi dorme na intensiva? Escreva 1 palavra.',[{label:'Palavra',ans:['estábulo','estabulo']}],'Dorme no estábulo.')]},
+ {id:'min-base',name:'Extrativismo mineral',pages:'p. 90, 91',pool:()=>[
+   C('Qual mineral é usado nos fios elétricos?',['cobre','ferro','calcário','areia'],'cobre','Fios de cobre, usados em instalações elétricas.',{img:'img/hga/min/cobre.jpg'}),
+   Object.assign(TF('O ferro misturado com outros elementos e aquecido pode virar aço.',true),{img:'img/hga/min/ferro.jpg'}),
+   Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílios domésticos','portão de ferro','cimento'],['fios de cobre','utensílios domésticos']),{img:'img/hga/min/cobre.jpg'}),
+   S('Cobre ou ferro?',['Cobre','Ferro'],[['fios elétricos',0],['ferramentas',1],['utensílios domésticos',0],['máquinas',1]]),
+   O('Do mineral ao produto. Coloque em ordem.',['Os minerais levam milhões de anos para se formar.','São extraídos da natureza.','Diminuem na natureza.','Viram produtos como fios e fogão.']),
+   Object.assign(W('O cobre faz fios elétricos.'),{img:'img/hga/min/cobre.jpg'}),
+   M('Ligue o mineral ao produto.',[['cobre','fios de cobre'],['ferro','portão de ferro'],['bauxita','objeto de alumínio'],['calcário','cimento']]),
+   Z('Complete.','O {} faz fios. O {} faz portão. O {} faz cimento.',['cobre','ferro','calcário'],['cobre','ferro','calcário']),
+   C('Qual objeto é feito de alumínio?',['utensílio de cozinha','fios de cobre','portão de ferro'],'utensílio de cozinha','Ralador e panelas são de alumínio.'),
+   F('O cimento é feito a partir de qual recurso?',[{label:'Resposta',ans:['calcário','calcario']}],'Do calcário.',{img:'img/hga/min/cimento.jpg'})]},
+ {id:'min-autismo',name:'Extrativismo mineral autismo',pages:'p. 90, 91',pool:()=>[
+   C('O fio elétrico é feito de quê?',['cobre','areia'],'cobre','Fio é de cobre.',{img:'img/hga/min/cobre.jpg'}),
+   Object.assign(TF('O portão é de ferro.',true),{img:'img/hga/min/ferro.jpg'}),
+   Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílio de cobre','portão de ferro','cimento'],['fios de cobre','utensílio de cobre']),{img:'img/hga/min/cobre.jpg'}),
+   S('Cobre ou ferro?',['Cobre','Ferro'],[['fio elétrico',0],['portão',1],['utensílio doméstico',0],['fogão',1]]),
+   O('Da natureza ao produto.',['O mineral está na natureza.','Tiramos o mineral.','Fazemos o produto.']),
+   Object.assign(W('Cimento vem do calcário.'),{img:'img/hga/min/cimento.jpg'}),
+   M('Ligue.',[['cobre','fios'],['ferro','portão'],['calcário','cimento']]),
+   Z('Complete com 2 palavras.','Fio é de {}. Portão é de {}.',['cobre','ferro'],['cobre','ferro']),
+   Object.assign(TF('Areia é um recurso mineral.',true),{img:'img/hga/min/areia.jpg'}),
+   F('Fio é de quê? Escreva 1 palavra.',[{label:'Palavra',ans:['cobre']}],'De cobre.',{img:'img/hga/min/cobre.jpg'})]}
+];
+
+/* =============== INGLÊS (Poptropica English 3 — Unidades 5 e 6) =============== */
+const EMO=[['baseball cap','🧢'],['shirt','👕'],['jeans','👖'],['shorts','🩳'],['sneakers','👟'],['sandals','👡'],['scarf','🧣'],['socks','🧦'],['jacket','🧥'],['dress','👗'],['hiking boots','🥾'],['flip-flops','🩴']];
+const emojiQs=()=>shuffle(EMO).slice(0,4).map(([w,e])=>{
+  const others=shuffle(EMO.filter(x=>x[0]!==w)).slice(0,3).map(x=>x[0]);
+  return C('<span style="font-size:2.4rem;line-height:1.2">'+e+'</span><br>What is this?',[w,...others],w,'Em inglês: <b>'+w+'</b>.')});
+const sportEmo=[['play soccer','⚽'],['play basketball','🏀'],['play tennis','🎾'],['play baseball','⚾'],['ride a bike','🚲'],['do taekwondo','🥋'],['run','🏃'],['swim','🏊']];
+const sportQs=()=>shuffle(sportEmo).slice(0,4).map(([w,e])=>{
+  const others=shuffle(sportEmo.filter(x=>x[0]!==w)).slice(0,3).map(x=>x[0]);
+  return C('<span style="font-size:2.4rem;line-height:1.2">'+e+'</span><br>What can you do?',[w,...others],w,'Em inglês: <b>'+w+'</b>.')});
+const TXT_PARTY='Hilda: "Hi, I\'m Hilda. I\'m a pirate. I\'m wearing a plain white shirt and a black and red skirt. This is my favorite skirt. I\'m wearing black shoes and white socks. Do you like my fancy hat?"\n\nBen: "I\'m Ben. I\'m a clown. My hair is orange. I\'m wearing a big yellow T-shirt and big blue pants. These are my favorite shoes. And I love my colorful bow tie. Do you like it?"';
+const TXT_UNI='Clara (Mexico): "My school doesn\'t have uniforms. Here, I\'m wearing a plain red T-shirt, black pants, and my favorite sneakers."\n\nScott (United Kingdom): "My school is in Oxford and we have uniforms. I\'m wearing a blue shirt, blue pants, and a blue jacket. I\'m wearing my black school shoes."\n\nEmma (Canada): "I\'m not wearing a uniform. I\'m wearing a pink shirt and my favorite jeans. I love my pink bag!"\n\nJiaming (China): "We have uniforms in my school. I\'m wearing a white shirt, blue shorts, and black socks. These are my favorite sneakers."';
+const TXT_DOL='Monday, July 1st\nI was at the Aquaworld Festival to watch the dolphin show. It was a lot of fun! Dolphins can\'t walk or run, but they can swim 5 to 12 kilometers per hour and jump out of the water. They can jump through hoops and catch a ball. They have very strong fins. They are very smart animals. I love dolphins!';
+const dict=(words,l)=>()=>shuffle(words).slice(0,10).map(w=>F('Listen and write the word.',[{ans:w,say:w,lang:'en-US'}],'The word is <b>'+w+'</b>.'));
+
+const LIS_SENT=[["I'm wearing a baseball cap.","Eu estou usando um boné."],["He's wearing a uniform.","Ele está usando um uniforme."],["She's wearing a pink shirt.","Ela está usando uma camisa rosa."],["Are you wearing sandals?","Você está usando sandálias?"],["Is he wearing a scarf?","Ele está usando um cachecol?"],["Can you play basketball?","Você sabe jogar basquete?"],["I can't catch a ball.","Eu não consigo pegar uma bola."],["She was at the gym.","Ela estava na academia."],["He wasn't at the beach.","Ele não estava na praia."],["Dolphins can jump out of the water.","Golfinhos podem pular para fora da água."],["Please set the table.","Por favor, ponha a mesa."],["Drink a lot of water.","Beba muita água."]];
+const lisQs=()=>{
+  const out=[];
+  const emo=shuffle(EMO).slice(0,3);
+  emo.forEach(([w,e])=>{const o=shuffle(EMO.filter(x=>x[0]!==w)).slice(0,3).map(x=>x[1]);out.push(Object.assign(C('Listen. Which picture is it?',[e,...o],e,'Você ouviu: <b>'+w+'</b>.'),{say:w}))});
+  const words=['baseball cap','sneakers','sandals','scarf','tights','jeans','shorts','jacket','beanie','swimming pool','stadium','beach','gym','tennis court','running track','dolphin'];
+  shuffle(words).slice(0,4).forEach(w=>{const o=shuffle(words.filter(x=>x!==w)).slice(0,3);out.push(Object.assign(C('Listen. Which word do you hear?',[w,...o],w),{say:w}))});
+  shuffle(LIS_SENT).slice(0,5).forEach(([s,pt])=>{const o=shuffle(LIS_SENT.filter(x=>x[0]!==s)).slice(0,3).map(x=>x[1]);out.push(Object.assign(C('Listen. What does it mean?',[pt,...o],pt,'Você ouviu: <b>'+s+'</b>'),{say:s}))});
+  return out};
+
+const EN_TOPICS=[
+ {id:'cv5',name:'Clothes: vocabulary',pages:'Unit 5 · p. 60, 62, 63',pool:()=>[
+   ...emojiQs(),
+   M('Match the English word to the Portuguese word.',[['baseball cap','boné'],['belt','cinto'],['sandals','sandálias'],['scarf','cachecol']]),
+   M('Match the English word to the Portuguese word.',[['sneakers','tênis'],['tights','meia-calça'],['jeans','calça jeans'],['wool sweater','suéter de lã']]),
+   M('Match the English word to the Portuguese word.',[['hiking boots','botas de trilha'],['ski jacket','jaqueta de esqui'],['flip-flops','chinelos'],['uniform','uniforme']]),
+   M('Match the English word to the Portuguese word.',[['plain','liso'],['fancy','chique'],['colorful','colorido'],['beanie','gorro']]),
+   S('Where do we wear it?',['Head','Feet','Body'],[['baseball cap',0],['beanie',0],['sneakers',1],['sandals',1],['flip-flops',1],['hiking boots',1],['jacket',2],['shirt',2],['jeans',2],['sweatshirt',2]]),
+   P('Tap the words that describe clothes (adjectives).',['colorful','scarf','fancy','jeans','plain','belt'],['colorful','fancy','plain'],'Colorful (colorido), fancy (chique) e plain (liso) descrevem as roupas.'),
+   C('Which word means "liso, sem desenhos"?',['plain','fancy','colorful','wool'],'plain'),
+   C('Which word means "chique, enfeitado"?',['fancy','plain','colorful','beanie'],'fancy'),
+   C('Which word means "colorido"?',['colorful','plain','fancy','uniform'],'colorful'),
+   C('We wear ___ on our feet.',['sneakers','a scarf','a beanie','a belt'],'sneakers'),
+   C('We wear a ___ on our head when it is cold.',['beanie','belt','scarf','tights'],'beanie','Beanie = gorro de lã.'),
+   C('A ___ is a very warm jacket for the snow.',['ski jacket','polo shirt','T-shirt','belt'],'ski jacket'),
+   Z('Complete the sentences.','I wear a {} on my head. I wear {} on my feet. I wear a {} around my neck.',['baseball cap','sneakers','scarf','belt','jeans'],['baseball cap','sneakers','scarf']),
+   TF('Flip-flops are a kind of shoe.',true),
+   TF('A uniform is the same clothes that everybody wears at a school or job.',true),
+   TF('Hiking boots are good for the beach.',false,'Hiking boots são botas para caminhadas na montanha.')]},
+ {id:'cg5',name:'What are you wearing?',pages:'Unit 5 · p. 61, 63, 68, 69',pool:()=>[
+   C('What are you wearing?',["I'm wearing a baseball cap.","He's wearing a baseball cap.","Yes, I am.","I'm baseball cap."],"I'm wearing a baseball cap."),
+   C("What's he wearing?",["He's wearing a uniform.","I'm wearing a uniform.","Yes, he is.","She wearing a uniform."],"He's wearing a uniform."),
+   C("What's she wearing?",["She's wearing sandals.","I'm wearing sandals.","Yes, she is.","He's wearing sandals."],"She's wearing sandals.",'She = ela. He = ele.'),
+   C('Are you wearing a scarf? (Não, eu não estou.)',["No, I'm not.","No, I isn't.","No, he isn't.","Yes, I am."],"No, I'm not."),
+   C('Are you wearing shorts? (Sim, estou.)',["Yes, I am.","Yes, I'm.","Yes, he is.","Yes, I does."],"Yes, I am."),
+   C('Is he wearing hiking boots? (Sim.)',["Yes, he is.","Yes, he am.","Yes, I am.","Yes, he isn't."],"Yes, he is."),
+   C('Is she wearing a colorful scarf? (Não.)',["No, she isn't.","No, she aren't.","No, I'm not.","No, he isn't."],"No, she isn't."),
+   W("I'm wearing a baseball cap."),W("He's wearing a blue jacket."),W("She's wearing black shoes."),W('Is he wearing sandals?'),W('Are you wearing a uniform?'),W("What's she wearing?"),
+   M('Match the question to the answer.',[['What are you wearing?',"I'm wearing sneakers."],['Are you wearing a scarf?',"No, I'm not."],['Is he wearing sandals?',"Yes, he is."],["What's she wearing?","She's wearing a dress."]]),
+   Z('Complete.',"I'm {} my favorite sneakers. He {} wearing a jacket. {} you wearing shorts?",['wearing','is','Are','Is','wear'],['wearing','is','Are']),
+   Z('Complete.',"{} she wearing a uniform? No, she {}. She's wearing a T-shirt.",['Is','Are','isn\'t','aren\'t'],['Is',"isn't"]),
+   C('___ my favorite scarf.',['This is','These are','This are','These is'],'This is','Uma coisa só: this is. Mais de uma: these are.'),
+   C('___ my favorite tights.',['These are','This is','This are','These is'],'These are','Tights (meia-calça) é sempre plural: these are.'),
+   C('Complete: "I love my ___."',['scarf','scarfs are','these are','am'],'scarf'),
+   O('Put the guessing game in order.',['Is he wearing a colorful scarf?',"No, he isn't.",'Is he wearing hiking boots?',"Yes, he is. It's Rob!"]),
+   TF("We say: \"He's wearing sandals.\" to talk about what a boy has on.",true),
+   TF('We say "Are you wearing a jacket?" and answer "Yes, he is."',false,'A resposta certa é <b>Yes, I am.</b>')]},
+ {id:'cr5',name:'Reading: costume party and school uniforms',pages:'Unit 5 · p. 63, 70, 71',pool:()=>[
+   withText(C('What is Hilda?',['a pirate','a clown','a teacher','a scientist'],'a pirate'),TXT_PARTY),
+   withText(C('What is Ben?',['a clown','a pirate','a doctor','a police officer'],'a clown'),TXT_PARTY),
+   withText(C('What color is Ben\'s hair?',['orange','black','white','blue'],'orange'),TXT_PARTY),
+   withText(C('What is Hilda wearing?',['a plain white shirt and a black and red skirt','a big yellow T-shirt and blue pants','a uniform','a ski jacket'],'a plain white shirt and a black and red skirt'),TXT_PARTY),
+   withText(C('What is Ben wearing?',['a big yellow T-shirt and big blue pants','a white shirt and a skirt','a jacket and jeans','a uniform'],'a big yellow T-shirt and big blue pants'),TXT_PARTY),
+   withText(C("What is Ben's favorite thing?",['his shoes','his hat','his skirt','his socks'],'his shoes',"'These are my favorite shoes.'"),TXT_PARTY),
+   withText(TF('Hilda is wearing black shoes and white socks.',true),TXT_PARTY),
+   withText(TF('Hilda is wearing a plain hat.',false,'Ela diz: "Do you like my <b>fancy</b> hat?"'),TXT_PARTY),
+   withText(C('Who says "I\'m wearing a blue shirt, blue pants, and a blue jacket."?',['Scott','Clara','Emma','Jiaming'],'Scott'),TXT_UNI),
+   withText(C('Who is from Mexico?',['Clara','Scott','Emma','Jiaming'],'Clara'),TXT_UNI),
+   withText(C('Who is from Canada?',['Emma','Clara','Scott','Jiaming'],'Emma'),TXT_UNI),
+   withText(C('Who is from China?',['Jiaming','Clara','Scott','Emma'],'Jiaming'),TXT_UNI),
+   withText(C('Who is from the United Kingdom?',['Scott','Emma','Clara','Jiaming'],'Scott'),TXT_UNI),
+   withText(M('Write C (Clara), S (Scott), E (Emma) or J (Jiaming).',[["She isn't wearing a uniform. She's wearing a pink shirt.",'E'],["He's wearing a uniform. He isn't wearing a jacket.",'J'],["She's wearing a T-shirt and sneakers.",'C'],["He isn't wearing sandals. He's wearing shoes.",'S']]),TXT_UNI),
+   withText(TF('Clara\'s school has uniforms.',false,'Clara diz: "My school doesn\'t have uniforms."'),TXT_UNI),
+   withText(TF('Scott\'s school is in Oxford.',true),TXT_UNI),
+   withText(TF('Emma is wearing her favorite jeans.',true),TXT_UNI)]},
+ {id:'cp5',name:'Polite phrases and chores',pages:'Unit 5 · p. 65, 66 · Social Science',pool:()=>[
+   C('When we get a present, we say:',['Thank you.',"I'm sorry.",'Excuse me.','Please.'],'Thank you.'),
+   C('When we hurt someone, we say:',["I'm sorry.",'Thank you.',"You're welcome.",'Please.'],"I'm sorry."),
+   C('When we ask for something, we say:',['Please.',"You're welcome.","I'm happy for you.","I'm sorry."],'Please.'),
+   C('When someone says "Thank you," we say:',["You're welcome.",'Please.','Excuse me.',"I'm sorry."],"You're welcome."),
+   C('When someone tells us good news, we say:',["I'm happy for you.","I'm sorry.","You're welcome.",'Excuse me.'],"I'm happy for you."),
+   C('When we want to get someone\'s attention, we say:',['Excuse me.','Thank you.',"I'm happy for you.","You're welcome."],'Excuse me.'),
+   M('Match the situation to the polite phrase.',[['I get a present.','Thank you.'],['I hurt my friend.',"I'm sorry."],['I want a glass of water.','Please.'],['My friend says "Thank you."',"You're welcome."]]),
+   M('Match the situation to the polite phrase.',[['My friend wins a prize.',"I'm happy for you."],['I need the teacher to look at me.','Excuse me.'],['I ask for a pencil.','Please.'],['I break a toy by accident.',"I'm sorry."]]),
+   M('Match the chore to the Portuguese.',[['set the table','pôr a mesa'],['clean my bedroom','arrumar meu quarto'],['make my bed','arrumar minha cama'],['wash the dishes','lavar a louça']]),
+   C('Mom: "Amy, please ___ the table."',['set','wash','make','clean'],'set'),
+   C('Mom: "Amy, please ___ your bed."',['make','set','wash','play'],'make'),
+   C('Mom: "Please, Amy. Wash the ___."',['dishes','bed','bedroom','shoes'],'dishes'),
+   P('Tap the chores (things we do to help at home).',['set the table','play soccer','wash the car','make my bed','run','clean my bedroom'],['set the table','wash the car','make my bed','clean my bedroom']),
+   Z('Complete.','"{} set the table, Amy." "OK, Mom." — "{} you!" "You\'re welcome." — "{} me, can I come in?"',['Please','Thank','Excuse','Sorry'],['Please','Thank','Excuse']),
+   TF('We say "Excuse me" to say thank you.',false,'"Thank you" é para agradecer. "Excuse me" chama a atenção de alguém.'),
+   TF('When someone says "Thank you", we can answer "You\'re welcome."',true)]},
+ {id:'sv6',name:'Sports and abilities: can / can\'t',pages:'Unit 6 · p. 72, 73, 76, 77, 80',pool:()=>[
+   ...sportQs(),
+   M('Match the English to the Portuguese.',[['play soccer','jogar futebol'],['ride a bike','andar de bicicleta'],['catch a ball','pegar uma bola'],['do taekwondo','praticar taekwondo']]),
+   M('Match the English to the Portuguese.',[['play basketball','jogar basquete'],['play tennis','jogar tênis'],['run','correr'],['jump','pular']]),
+   C('Can you play tennis? (Sim, eu posso.)',["Yes, I can.","Yes, I do.","Yes, I am.","No, I can't."],'Yes, I can.'),
+   C('Can he swim? (Não.)',["No, he can't.","No, he isn't.","No, I can't.","No, he don't."],"No, he can't."),
+   C('Can she ride a bike? (Sim.)',['Yes, she can.','Yes, she is.','Yes, I can.','Yes, he can.'],'Yes, she can.'),
+   C('He ___ fly. He doesn\'t have wings.',["can't",'can','is','does'],"can't"),
+   C('I can run and jump, ___ I can\'t catch a ball.',['but','and','or','so'],'but','But = mas.'),
+   W('I can run and jump.'),W("I can't play basketball."),W('Can she play tennis?'),W("He can ride a bike."),
+   Z('Complete the chant.',"I {} run, and jump. I can {} a ball. But I {} catch a ball. I can't play {}.",['can','catch',"can't",'basketball','am'],['can','catch',"can't",'basketball']),
+   S('Can a dolphin or can\'t a dolphin?',['can','can\'t'],[['swim',0],['jump out of the water',0],['catch a ball',0],['walk',1],['run',1],['fly',1]]),
+   C('PROD 2 says: "I can swim." What can PROD 2 do?',['swim','fly','run fast','play tennis'],'swim'),
+   M('Read the story and match.',[['Is PROD 2 strong?','Yes, he is.'],['Can PROD 2 play basketball?',"No, he can't, but he can play tennis."],['Can PROD 1 fly?',"No, he can't. He doesn't have wings."],['Can PROD 2 catch?',"Yes. He's good at catching."]]),
+   M('Read the story and match.',[['Can PROD 1 swim?',"Yes, he can. He's in the swimming pool."],['Can PROD 1 run fast?',"No, he can't. He's slow."],['Can PROD 2 catch?',"Yes. He's good at catching."],['Is PROD 2 strong?','Yes, he is.']]),
+   TF('"Can you play soccer?" is a question about an ability.',true),
+   TF('"I can\'t catch a ball" means "I can catch a ball".',false,"Can't = não consigo.")]},
+ {id:'sf6',name:'Sports facilities and was / wasn\'t',pages:'Unit 6 · p. 74, 75',pool:()=>[
+   M('Match the place to the Portuguese.',[['gym','academia'],['beach','praia'],['swimming pool','piscina'],['stadium','estádio']]),
+   M('Match the place to the Portuguese.',[['soccer field','campo de futebol'],['basketball court','quadra de basquete'],['tennis court','quadra de tênis'],['ski slope','pista de esqui']]),
+   M('Match the place to the Portuguese.',[['baseball field','campo de beisebol'],['running track','pista de corrida'],['gym','academia'],['beach','praia']]),
+   C('Where can you play basketball?',['at the basketball court','at the beach','at the swimming pool','at the ski slope'],'at the basketball court'),
+   C('Where can you play soccer?',['at the soccer field','at the gym','at the tennis court','at the beach'],'at the soccer field'),
+   C('Where can you swim?',['at the swimming pool','at the baseball field','at the running track','at the gym'],'at the swimming pool'),
+   C('Where can you ski?',['at the ski slope','at the stadium','at the tennis court','at the beach'],'at the ski slope'),
+   C('Where can you run in a race?',['at the running track','at the swimming pool','at the ski slope','at the tennis court'],'at the running track'),
+   C('Where can you play tennis?',['at the tennis court','at the gym','at the beach','at the stadium'],'at the tennis court'),
+   C('Yesterday I ___ at the gym. (eu estive)',['was','were','am','is'],'was'),
+   C('She ___ at the beach. She was at the stadium.',["wasn't",'was','am','are'],"wasn't",'Wasn\'t = não estava.'),
+   C('He ___ at the baseball field. (ele estava)',['was','wasn\'t','were','is'],'was'),
+   Z('Complete the song.','She {} at the basketball court. Can she play basketball? Yes, she {}. He {} at the gym. Can he climb the rope? Yes, he can.',['was','can',"wasn't",'is'],['was','can','was']),
+   W('She was at the gym.'),W("She wasn't at the beach."),W('He was at the baseball field.'),
+   O('Put the sentences in order.',['She wasn\'t at the beach.','She was at the stadium.','Can she run fast?','Yes, she can.']),
+   TF('"Was" talks about the past (passado).',true,'Was/wasn\'t = estava/não estava.'),
+   TF('"She wasn\'t at the gym" means "She was at the gym".',false),
+   TF('We can ski at the ski slope.',true)]},
+ {id:'sr6',name:'Reading: dolphins',pages:'Unit 6 · p. 75',pool:()=>[
+   withText(C('Where was the writer on Monday, July 1st?',['at the Aquaworld Festival','at the beach','at the gym','at the stadium'],'at the Aquaworld Festival'),TXT_DOL),
+   withText(C('What did the writer watch?',['the dolphin show','a soccer game','a tennis match','a school play'],'the dolphin show'),TXT_DOL),
+   withText(TF('Dolphins can walk and run.',false,'O texto diz: "Dolphins can\'t walk or run".'),TXT_DOL),
+   withText(TF('Dolphins can jump out of the water.',true),TXT_DOL),
+   withText(TF('Dolphins can catch a ball.',true),TXT_DOL),
+   withText(TF('Dolphins have very strong fins.',true),TXT_DOL),
+   withText(C('Dolphins can ...',['swim and jump','walk and run','fly','climb trees'],'swim and jump'),TXT_DOL),
+   withText(C("Dolphins can't ...",['walk or run','swim','jump through hoops','catch a ball'],'walk or run'),TXT_DOL),
+   withText(C('Dolphins are very ___ animals.',['smart','slow','plain','fancy'],'smart','Smart = inteligente.'),TXT_DOL),
+   withText(C('Did the writer like the show?',['Yes. "It was a lot of fun!"','No. It was boring.','No. The writer was sad.','We don\'t know.'],'Yes. "It was a lot of fun!"'),TXT_DOL),
+   Z('Read, then complete with words from the text.<br><small style="display:block;margin-top:8px;font-weight:600">'+TXT_DOL.replace(/\n/g,'<br>')+'</small>','Dolphins can {} through hoops and {} a ball. They are very {} animals.',['jump','catch','smart','walk'],['jump','catch','smart']),
+   TF('The writer loves dolphins.',true)]},
+ {id:'sh6',name:'Health and daily activities',pages:'Unit 6 · p. 77, 78 · Health',pool:()=>[
+   M('Match the English to the Portuguese.',[['go for a walk','dar uma caminhada'],['do push-ups','fazer flexões'],['ride your bike','andar de bicicleta'],['play sports','praticar esportes']]),
+   M('Match the English to the Portuguese.',[['Stretch your arms up.','Estique os braços para cima.'],['Bend your knees.','Dobre os joelhos.'],['Turn around.','Dê uma volta.'],['Twist your body to the left.','Gire o corpo para a esquerda.']]),
+   S('Healthy (✓) or not healthy (✗)?',['Healthy','Not healthy'],[['Exercise every day.',0],['Ride your bike to school.',0],['Eat a lot of fruit.',0],['Drink a lot of water.',0],['Go to bed early.',0],['Drink soda.',1],['Play computer games all day.',1],['Eat cake and ice cream every day.',1]]),
+   P('Tap the healthy activities.',['Exercise every day.','Drink soda.','Eat a lot of fruit.','Play computer games.','Drink a lot of water.','Eat cake and ice cream.'],['Exercise every day.','Eat a lot of fruit.','Drink a lot of water.']),
+   C('Which one is healthy?',['Go to bed early.','Drink soda.','Eat cake and ice cream.','Play computer games.'],'Go to bed early.'),
+   C('Which one is NOT healthy?',['Drink soda.','Drink water.','Ride your bike.','Eat fruit.'],'Drink soda.'),
+   C('Do you go for a walk? (Sim.)',['Yes, I do.','Yes, I can.','Yes, I am.','Yes, I was.'],'Yes, I do.'),
+   C('"Be active. ___ every day."',['Exercise','Drink soda','Play games','Sleep late'],'Exercise'),
+   C('When you "twist your body to the right", you ...',['turn your body to the right','jump up','sit down','stretch your arms'],'turn your body to the right'),
+   O('Do the exercises in order (Stay fit!).',['Stretch your arms up.','Bend your knees.','Twist your body to the left.','Twist your body to the right.','Turn around.']),
+   W('Stretch your arms up.'),W('Bend your knees.'),W('Go to bed early.'),
+   Z('Complete.','{} a lot of water. {} your bike to school. {} cake and ice cream every day? That is not healthy.',['Drink','Ride','Eat','Turn'],['Drink','Ride','Eat'])
+   ,TF('Playing computer games all day is a healthy activity.',false),
+   TF('Drinking a lot of water is healthy.',true)]},
+ {id:'lis',name:'Listen and choose',pages:'ouvir e escolher (use o som)',pool:lisQs},
+ {id:'ouv',name:'Listen and write',pages:'palavras das Unidades 5 e 6',pool:dict(['baseball cap','sneakers','sandals','scarf','tights','jeans','shorts','jacket','uniform','beanie','plain','fancy','colorful','soccer','basketball','tennis','baseball','swimming pool','stadium','beach','gym','run','jump','swim','walk','dolphin'])}
+];
+
+/* =============== INGLÊS: SOUND LAB (ouvir e falar) =============== */
+const LAB=[
+ {id:'clo',name:'Roupas',items:[
+  ['baseball cap','boné','🧢','BÊIS-ból quép'],['belt','cinto','','bélt'],['sandals','sandálias','👡','SÃN-dôls'],['sneakers','tênis','👟','SNÍ-quers'],['flip-flops','chinelos','🩴','FLIP-flóps'],['jeans','calça jeans','👖','djínz'],['shorts','short','🩳','xórts'],['shirt','camisa','👕','xêrt'],['polo shirt','camisa polo','','PÔU-lou xêrt'],['sweatshirt','moletom','','SUÉT-xêrt'],['jacket','jaqueta','🧥','DJÃ-quit'],['uniform','uniforme','','IÚ-ni-fórm'],['scarf','cachecol','🧣','squárf'],['tights','meia-calça','','táits'],['beanie','gorro','','BÍ-ni'],['hiking boots','botas de trilha','🥾','HÁI-quin búts'],['ski jacket','jaqueta de esqui','','SQUÍ DJÃ-quit'],['wool sweater','suéter de lã','','UÚL SUÉ-ter'],['colorful','colorido','','CÂ-lor-ful'],['fancy','chique','','FÃN-si'],['plain','liso','','plêin']]},
+ {id:'esp',name:'Esportes',items:[
+  ['run','correr','🏃','rân'],['jump','pular','','djâmp'],['swim','nadar','🏊','suím'],['catch a ball','pegar uma bola','','quétch ei ból'],['ride a bike','andar de bicicleta','🚲','ráid ei báik'],['play soccer','jogar futebol','⚽','plêi SÓ-quer'],['play basketball','jogar basquete','🏀','plêi BÉS-quit-ból'],['play tennis','jogar tênis','🎾','plêi TÉ-nis'],['play baseball','jogar beisebol','⚾','plêi BÊIS-ból'],['do taekwondo','praticar taekwondo','🥋','dú tai-quân-DÔU'],['go for a walk','dar uma caminhada','','gôu fór ei uóc'],['do push-ups','fazer flexões','','dú PÚX-âps']]},
+ {id:'loc',name:'Lugares',items:[
+  ['gym','academia','','djím'],['beach','praia','🏖️','bítch'],['swimming pool','piscina','','SUÍ-min púl'],['stadium','estádio','🏟️','STÊI-di-um'],['soccer field','campo de futebol','','SÓ-quer fíld'],['basketball court','quadra de basquete','','BÉS-quit-ból córt'],['tennis court','quadra de tênis','','TÉ-nis córt'],['baseball field','campo de beisebol','','BÊIS-ból fíld'],['running track','pista de corrida','','RÂ-nin trék'],['ski slope','pista de esqui','','SQUÍ slôup'],['dolphin','golfinho','🐬','DÓL-fin']]},
+ {id:'fra',name:'Frases',items:[
+  ['Thank you.','Obrigado(a).','','THÉN-quiú'],["You're welcome.",'De nada.','','iór UÉL-cam'],["I'm sorry.",'Desculpe.','','áim SÓ-ri'],['Excuse me.','Com licença.','','ics-QUIÚS mi'],['Please.','Por favor.','','plíz'],["I'm happy for you.",'Fico feliz por você.','','áim HÉ-pi fór iú'],
+  ['What are you wearing?','O que você está vestindo?','','UÓT ár iú UÉ-rin?'],["I'm wearing a baseball cap.",'Estou usando um boné.','','áim UÉ-rin ei BÊIS-ból quép'],["He's wearing a uniform.",'Ele está de uniforme.','','hiz UÉ-rin ei IÚ-ni-fórm'],["She's wearing sandals.",'Ela está de sandálias.','','xiz UÉ-rin SÃN-dôls'],['Are you wearing a scarf?','Você está usando cachecol?','','ár iú UÉ-rin ei squárf?'],['Can you play tennis?','Você sabe jogar tênis?','','quén iú plêi TÉ-nis?'],["I can't catch a ball.",'Não consigo pegar uma bola.','','ái quént quétch ei ból'],['She was at the gym.','Ela estava na academia.','','xi uóz ét dhe djím'],["He wasn't at the beach.",'Ele não estava na praia.','','hi UÓ-zent ét dhe bítch']]}
+];
+const LAB_TIPS=[
+ ['th','Ponha a pontinha da língua entre os dentes e sopre: <b>thank you</b>, <b>three</b>.',['thank you','three']],
+ ['sh','Parece o "x" de xícara: <b>shirt</b>, <b>shoes</b>, <b>shorts</b>.',['shirt','shoes','shorts']],
+ ['j / g','Som de "dj": <b>jeans</b>, <b>jacket</b>, <b>jump</b>, <b>gym</b>.',['jeans','jacket','jump','gym']],
+ ['w','Faça um biquinho, como em "uau": <b>wearing</b>, <b>welcome</b>, <b>swim</b>.',['wearing','welcome','swim']],
+ ['s no fim','Depois de som suave vira "z": <b>jeans</b>, <b>sandals</b>, <b>tights</b> (ts).',['jeans','sandals','tights']],
+ ['-ing','Termina num "n" nasal, sem falar o "g": <b>running</b>, <b>wearing</b>.',['running','wearing']]
+];
+const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;
+const lev=(a,b)=>{const m=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=b.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return m[b.length]};
+const clean=s=>norm(s).replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+const heard=(alts,target)=>{const t=clean(target),lim=t.length<=5?1:t.length<=12?2:4;return alts.some(a=>{a=clean(a);return a===t||lev(a,t)<=lim})};
+function recognize(target,out){
+  if(!SRC){out('Este aparelho não reconhece voz. Tudo bem: ouça e repita em voz alta!');return}
+  let r;try{r=new SRC()}catch(e){out('Não consegui abrir o microfone.');return}
+  r.lang='en-US';r.maxAlternatives=5;r.interimResults=false;let got=false;
+  out('🎤 Pode falar…');
+  r.onresult=e=>{got=true;const alts=[...e.results[0]].map(a=>a.transcript);
+    out(heard(alts,target)?'✅ Muito bem! Ouvi: “'+alts[0]+'”':'🔁 Ouvi: “'+alts[0]+'”. Ouça de novo e tente outra vez.',heard(alts,target))};
+  r.onerror=e=>{got=true;out(e.error==='not-allowed'||e.error==='service-not-allowed'?'Libere o microfone no navegador para usar esta função.':e.error==='no-speech'?'Não ouvi nada. Fale mais perto do aparelho.':'Não deu certo agora. Tente de novo.')};
+  r.onend=()=>{if(!got)out('Não ouvi nada. Toque no 🎤 e fale em seguida.')};
+  try{r.start()}catch(e){out('Espere um instante e toque de novo.')}
+}
+function speakEN(t,rate){speak(t,rate,'en-US')}
+const audioRow=(sel)=>`<div class="say audio"><button type="button" class="mini" data-a="0.85">🔊 Listen</button><button type="button" class="mini" data-a="0.55">🐢 Slow</button></div>${canSpeak()?'':'<p class="hint">Este aparelho não fala em inglês. Peça a um adulto para ler em voz alta.</p>'}`;
+function bindAudio(root,text){root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>speakEN(text,+b.dataset.a))}
+
+let labTab='clo';
+function renderLab(){
+  app.dataset.subject='en';
+  const g=LAB.find(x=>x.id===labTab)||LAB[0];
+  app.innerHTML=`<div class="wrap">
+    <div class="bar"><button class="mini" id="bk">← Inglês</button><div class="bar-t"><b>Sound Lab</b><span>ouvir, repetir e falar</span></div></div>
+    <p class="lead" style="margin-top:14px">Toque no 🔊 para ouvir, no 🐢 para ouvir devagar${SRC?' e no 🎤 para falar. O app diz se entendeu.':'. Depois repita em voz alta!'}</p>
+    ${SRC?'<p class="hint">O microfone usa o reconhecimento de voz do seu aparelho. Use com um adulto por perto.</p>':''}
+    ${canSpeak()?'':'<p class="hint">Este aparelho não tem voz em inglês. Tente em outro navegador ou aparelho.</p>'}
+    <div class="tabs" role="tablist">${LAB.map(x=>`<button type="button" class="mini" role="tab" data-tab="${x.id}" aria-pressed="${x.id===g.id}">${x.name}</button>`).join('')}<button type="button" class="mini" data-tab="tips" aria-pressed="${labTab==='tips'}">Dicas de som</button></div>
+    <div class="stack" id="labList"></div>
+    <div class="btnrow"><button class="btn" id="bq">Teste de ouvido</button></div></div>`;
+  const list=$('#labList');
+  if(labTab==='tips'){
+    list.innerHTML=LAB_TIPS.map((t,i)=>`<div class="wcard tip"><div class="wt"><b>${t[0]}</b><p>${t[1]}</p></div><div class="wb">${t[2].map((w,j)=>`<button type="button" class="mini" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('')}</div></div>`).join('')+'<p class="hint">O que está escrito em letras maiúsculas na dica de cada palavra é a sílaba mais forte. É só uma aproximação: o som certo é o do áudio.</p>';
+    list.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>speakEN(b.dataset.say,0.8));
+  }else{
+    list.innerHTML=g.items.map((it,i)=>`<div class="wcard" data-i="${i}"><span class="we" aria-hidden="true">${it[2]||'🔤'}</span><div class="wt"><b>${esc(it[0])}</b><small>${esc(it[1])}</small><em>${esc(it[3])}</em><p class="wres" aria-live="polite"></p></div><div class="wb"><button type="button" class="mini" data-a="0.85" aria-label="Ouvir">🔊</button><button type="button" class="mini" data-a="0.55" aria-label="Ouvir devagar">🐢</button>${SRC?'<button type="button" class="mini" data-mic="1" aria-label="Falar">🎤</button>':''}</div></div>`).join('');
+    list.querySelectorAll('.wcard').forEach(c=>{const it=g.items[+c.dataset.i];
+      c.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>speakEN(it[0],+b.dataset.a));
+      const mic=c.querySelector('[data-mic]');if(mic)mic.onclick=()=>{const res=c.querySelector('.wres');speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();recognize(it[0],(m,ok)=>{res.textContent=m;res.dataset.ok=ok===true?'1':ok===false?'0':''})}});
+  }
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{labTab=b.dataset.tab;renderLab()});
+  $('#bk').onclick=()=>{renderSubject('en');top()};
+  $('#bq').onclick=()=>start('en','lis');
+}
+
+/* =============== MATÉRIAS =============== */
+const IC={
+  pt:'Aa',
+  ci:'<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-14 14-14 0 9-6 14-14 14z"/><path d="M5 19c2-4 5-7 9-9"/></svg>',
+  ma:'×÷',
+  en:'En',
+  hg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
+  hga:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>'};
+const SUBJECTS=[
+  {id:'hga',name:'História e Geo (base livro)',exam:'2026-10-19',topics:HG_ADAPTADA_TOPICS},
+  {id:'hg',name:'História e Geografia',exam:'2026-10-19',topics:HG_TOPICS},
+  {id:'pt',name:'Português',exam:'2026-10-05',topics:PT_TOPICS},
+  {id:'ci',name:'Ciências',exam:'2026-10-08',topics:CI_TOPICS},
+  {id:'ma',name:'Matemática',exam:'2026-10-15',topics:MA_TOPICS},
+  {id:'en',name:'Inglês',exam:'2026-10-16',topics:EN_TOPICS}
+];
+function examInfo(iso){
+  const d=new Date(iso+'T00:00:00'),t=new Date();t.setHours(0,0,0,0);
+  const diff=Math.round((d-t)/864e5),dd=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+  if(diff>1)return `Prova em ${dd} · faltam ${diff} dias`;
+  if(diff===1)return `Prova amanhã (${dd})`;
+  if(diff===0)return `Prova hoje (${dd})`;
+  return `Prova de ${dd}`;
+}
+const TROPHY='<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg>';
+const starsOf=p=>p>=90?3:p>=70?2:p>=50?1:0;
+const starHtml=n=>`<span class="stars" aria-label="${n} de 3 estrelas">${'★'.repeat(n)}<span class="e">${'★'.repeat(3-n)}</span></span>`;
+const app=$('#app');
+let SES=null;
+const top=()=>window.scrollTo(0,0);
+/* modo regular / autismo / tudo: autismo = só tópicos id *-autismo */
+const isAut=t=>/autismo/.test(t.id);
+function visibleTopics(sub){if(store.mode==='autismo')return sub.topics.filter(isAut);if(store.mode==='regular')return sub.topics.filter(t=>!isAut(t));return sub.topics.slice()}
+function visibleSubjects(){if(store.mode==='autismo')return SUBJECTS.filter(s=>s.topics.some(isAut));return SUBJECTS.slice()}
+function modeTabs(){return `<div class="tabs" role="group" aria-label="Modo de questões"><button type="button" class="mini" data-mode="regular" aria-pressed="${store.mode==='regular'}">Regular</button><button type="button" class="mini" data-mode="autismo" aria-pressed="${store.mode==='autismo'}">Adaptado autismo</button><button type="button" class="mini" data-mode="tudo" aria-pressed="${store.mode==='tudo'}">Tudo</button></div>`}
+function wireMode(rerender){app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{store.mode=b.dataset.mode;save();rerender()})};
+
+/* =============== TELAS =============== */
+function renderHome(){
+  app.dataset.subject='ma';
+  const hello=store.name?`Oi, ${esc(store.name)}!`:'Vamos treinar para a prova?';
+  app.innerHTML=`<div class="wrap">
+    <header class="hero"><p class="kicker">3º ano · 3º trimestre</p><h1>${hello}</h1>
+    <p class="lead">Escolha uma matéria e responda. Você vê na hora o que acertou e o que precisa rever. Nas contas, use papel e lápis.</p>
+<div class="skins"><span>Tema:</span><button type="button" class="mini" data-skin="azul" aria-pressed="${store.skin!=='rosa'}">💙 Azul</button><button type="button" class="mini" data-skin="rosa" aria-pressed="${store.skin==='rosa'}">🌸 Rosa</button></div>
+<div><span class="hint">Modo:</span>${modeTabs()}</div>
+    ${store.name?'':`<form id="nameForm" class="nameform"><label for="nameIn">Seu primeiro nome ou apelido (fica só neste aparelho)</label><div class="row"><input id="nameIn" maxlength="16" autocomplete="off"><button class="btn" type="submit">Salvar</button></div></form>`}</header>
+    <div class="subjects">${visibleSubjects().map(s=>`<button class="sub" data-subject="${s.id}" data-go="${s.id}"><span class="tile">${IC[s.id].startsWith('<')?IC[s.id]:esc(IC[s.id])}</span><span><h3>${s.name}</h3><small>${examInfo(s.exam)}</small></span></button>`).join('')}</div>
+    <div class="foot"><span>Cada vez que você treina, as questões mudam. Seu progresso fica salvo só neste aparelho.</span><button class="link" id="reset">Apagar meu progresso</button></div></div>`;
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{renderSubject(b.dataset.go);top()});
+  app.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{renderRanking();top()});
+  app.querySelectorAll('[data-skin]').forEach(b=>b.onclick=()=>{store.skin=b.dataset.skin;save();applySkin();renderHome()});
+  wireMode(renderHome);
+  const f=$('#nameForm');if(f)f.onsubmit=e=>{e.preventDefault();store.name=cleanName($('#nameIn').value);save();renderHome()};
+  const rs=$('#reset');rs.onclick=()=>{if(rs.dataset.sure){store={name:'',points:0,board:'',scores:{},dev:store.dev,skin:store.skin,mode:store.mode};save();renderHome()}else{rs.dataset.sure=1;rs.textContent='Tem certeza? Toque de novo para apagar.'}};
+}
+function renderSubject(id){
+  const sub=SUBJECTS.find(s=>s.id===id);app.dataset.subject=id;
+  const sc=k=>store.scores[id+'/'+k];
+  const vts=visibleTopics(sub);
+  app.innerHTML=`<div class="wrap">
+    <div class="bar"><button class="mini" id="home">← Início</button><div class="bar-t"><b>${sub.name}</b><span>${examInfo(sub.exam)}</span></div>${id==='ma'?'<button class="mini" id="bTab">Tabuada</button>':''}</div>
+    <div class="shead"><span class="tile">${IC[id].startsWith('<')?IC[id]:esc(IC[id])}</span><div><h2>${sub.name}</h2><p class="lead">Treino de 10 questões por assunto.</p></div></div>
+    ${modeTabs()}
+    <div class="stack">
+      ${id==='en'?`<div class="topic"><div class="tx"><h3>Sound Lab</h3><div class="chips"><span class="pg">ouvir, repetir e falar</span></div><p class="best">Escute cada palavra e frase, repita e treine a pronúncia.</p></div><button class="btn" id="bLab">Abrir</button></div>`:''}
+      <div class="topic full"><div class="tx"><h3>Simulado completo</h3><div class="chips"><span class="pg">todos os assuntos misturados</span></div><p class="best">${sc('simulado')?'Melhor: '+sc('simulado').best+'%':'O resultado e as respostas aparecem só no final.'}</p></div>${starHtml(starsOf(sc('simulado')?sc('simulado').best:0))}<button class="btn" data-sim="1">Fazer</button></div>
+      ${vts.map(t=>`<div class="topic"><div class="tx"><h3>${t.name}</h3><div class="chips"><span class="pg">${t.pages}</span></div>${sc(t.id)?`<p class="best">Melhor: ${sc(t.id).best}% · ${sc(t.id).tries} treino${sc(t.id).tries>1?'s':''}</p>`:''}</div>${starHtml(starsOf(sc(t.id)?sc(t.id).best:0))}<button class="btn" data-t="${t.id}">Treinar</button></div>`).join('')}
+    </div></div>`;
+  $('#home').onclick=()=>{renderHome();top()};
+  wireMode(()=>{renderSubject(id);top()});
+  const tb=$('#bTab');if(tb)tb.onclick=openTab;
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>start(id,b.dataset.t));
+  app.querySelector('[data-sim]').onclick=()=>start(id,null);
+  const lb=$('#bLab');if(lb)lb.onclick=()=>{renderLab();top()};
+}
+function start(subId,topicId,reuse){
+  const sub=SUBJECTS.find(s=>s.id===subId);let qs,title;
+  if(reuse){qs=reuse.qs;title=reuse.title}
+  else if(topicId){const t=sub.topics.find(t=>t.id===topicId);qs=shuffle(t.pool()).slice(0,10);title=t.name}
+  else{const vts=visibleTopics(sub);const n=Math.max(2,Math.round(24/Math.max(1,vts.length)));qs=[];vts.forEach(t=>qs.push(...shuffle(t.pool()).slice(0,n)));title='Simulado completo'}
+  const base=reuse?reuse.base:{subId,topicId};
+  SES={sub,base,title,mode:(!reuse&&!topicId)?'simulado':'treino',qs,i:0,res:[],checked:false,retry:!!reuse};
+  renderQuestion();top();
+}
+function feedback(q,ok,note){
+  const t=ok?pick1(['Muito bem!','Isso mesmo!','Acertou!','Perfeito!']):pick1(['Quase!','Vamos rever.','Ainda não.']);
+  return `<div class="fb ${ok?'ok':'bad'}"><b>${ok?'✓':'✗'} ${t}</b>${ok?'':`<p>Resposta certa: <strong>${esc(answerText(q))}</strong></p>`}${note?`<p>${esc(note)}</p>`:''}${q.exp?`<p class="exp">${q.exp}</p>`:''}</div>`;
+}
+function renderQuestion(){
+  const q=SES.qs[SES.i],n=SES.qs.length,last=SES.i===n-1;app.dataset.subject=SES.sub.id;
+  app.innerHTML=`<div class="wrap">
+    <div class="bar"><button class="mini" id="bExit">← Sair</button><div class="bar-t"><b>${esc(SES.title)}</b><span>${SES.mode==='simulado'?'Simulado: o resultado vem no fim':'Treino: confira cada resposta'}</span></div>${SES.sub.id==='ma'?'<button class="mini" id="bTab">Tabuada</button>':''}<span class="count">${SES.i+1}/${n}</span></div>
+    <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${SES.i}"><i style="--p:${SES.i/n*100}%"></i></div>
+    <section class="qcard">${q.img?`<div class="qrow"><img class="qimg" src="${q.img}" alt="Pista visual"><p class="qtext">${q.q}</p></div>`:`<p class="qtext">${q.q}</p>`}${q.say?audioRow():''}${q.text?`<blockquote class="passage">${esc(q.text).replace(/\n/g,'<br>')}</blockquote>`:''}${q.vis||''}<div id="qbody"></div><div id="fb" aria-live="polite"></div></section>
+    <div class="actions"><button class="btn" id="bMain" disabled>Conferir</button></div></div>`;
+  if(q.say)bindAudio(app.querySelector('.qcard'),q.say);
+  const btn=$('#bMain');let cur=null;
+  const ch=()=>{if(!SES.checked&&cur)btn.disabled=!cur.ready()};
+  cur=R[q.t](q,$('#qbody'),ch);
+  btn.textContent=SES.mode==='treino'?'Conferir':(last?'Ver resultado':'Próxima');
+  btn.onclick=()=>{
+    if(SES.mode==='treino'&&!SES.checked){
+      const ok=cur.grade();cur.mark(ok);SES.res[SES.i]={q,ok};SES.checked=true;
+      $('#fb').innerHTML=feedback(q,ok,cur.note&&cur.note());
+      btn.textContent=last?'Ver resultado':'Próxima';btn.disabled=false;
+      $('#fb').scrollIntoView({block:'nearest',behavior:'smooth'});
+    }else{
+      if(SES.mode==='simulado')SES.res[SES.i]={q,ok:cur.grade()};
+      SES.i++;SES.checked=false;
+      if(SES.i>=n)renderResult();else renderQuestion();
+      top();
+    }};
+  $('#qbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!btn.disabled)btn.click()});
+  $('#bExit').onclick=()=>{renderSubject(SES.sub.id);top()};
+  const tb=$('#bTab');if(tb)tb.onclick=openTab;
+  const first=$('#qbody input');if(first&&!first.closest('.frow').querySelector('[data-r]'))first.focus({preventScroll:true});
+}
+function renderResult(){
+  const total=SES.qs.length,right=SES.res.filter(r=>r&&r.ok).length,pct=Math.round(right/total*100),wrong=SES.res.filter(r=>r&&!r.ok),st=starsOf(pct),earned=right*10;
+  store.points=(store.points||0)+earned;save();syncScore();
+  if(!SES.retry){const k=SES.base.subId+'/'+(SES.base.topicId||'simulado'),o=store.scores[k]||{best:0,tries:0};o.best=Math.max(o.best,pct);o.tries++;store.scores[k]=o;save()}
+  const msg=pct>=90?'Excelente! Você está pronto para a prova.':pct>=70?'Muito bom! Revise só os erros abaixo.':pct>=50?'Está indo bem. Veja os erros e tente de novo.':'Vamos com calma: leia os erros abaixo e treine mais uma vez.';
+  app.innerHTML=`<div class="wrap">
+    <div class="bar"><button class="mini" id="bBack">← ${esc(SES.sub.name)}</button><div class="bar-t"><b>Resultado</b><span>${esc(SES.title)}</span></div></div>
+    <div class="res"><p class="kicker">Você acertou</p><div class="big">${right}<span style="font-size:.5em;color:var(--muted)"> de ${total}</span></div>${starHtml(st)}<p class="ptsup">+${earned} pontos</p><p class="lead">${msg}</p></div>
+    <div class="btnrow">${wrong.length?`<button class="btn" id="bErr">Refazer os erros (${wrong.length})</button>`:''}<button class="btn ghost" id="bAgain">Treinar de novo</button></div>
+    ${wrong.length?`<h2 style="margin-bottom:12px">Para rever</h2><ul class="rev">${wrong.map(w=>`<li>${w.q.img?`<img class="qimg" src="${w.q.img}" alt="Pista visual" style="width:64px;height:64px">`:''}<p class="rq">${w.q.q}</p>${w.q.vis||''}<p>Resposta certa: <strong>${esc(answerText(w.q))}</strong></p>${w.q.exp?`<p class="hint">${w.q.exp}</p>`:''}</li>`).join('')}</ul>`:''}</div>`;
+  $('#bBack').onclick=()=>{renderSubject(SES.sub.id);top()};
+  $('#bAgain').onclick=()=>start(SES.base.subId,SES.base.topicId);
+  const e=$('#bErr');if(e)e.onclick=()=>start(SES.base.subId,null,{qs:wrong.map(w=>w.q),title:'Revisão dos erros',base:SES.base});
+}
+
+/* ranking online (api.php no mesmo site); se a API não responder, usa o modo cartão */
+const API_URLS=['api.php','/estudo/api.php'];let apiOk=null;
+function devId(){if(!store.dev){store.dev=(self.crypto&&crypto.randomUUID?crypto.randomUUID():'d'+Date.now().toString(36)+Math.random().toString(36).slice(2,12));save()}return store.dev}
+async function api(body){
+  const urls=apiOk?[apiOk]:API_URLS;let last;
+  for(const u of urls){
+    try{
+      const r=await fetch(u,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'});
+      if(!r.ok)throw new Error('http '+r.status);
+      const j=await r.json();if(j.error)throw new Error(j.error);
+      apiOk=u;return j}
+    catch(e){last=e}}
+  throw last}
+async function syncScore(){
+  if(!store.name)return false;
+  try{const j=await api({device:devId(),name:store.name,points:store.points||0});return j.ok===true}catch(e){return false}
+}
+async function sha12(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,12)}
+
+/* ranking da turma: só nome e pontos, montado por colagem de cartões */
+function parseCards(text){
+  const out=[];
+  String(text).split(/\n+/).forEach(l=>{
+    l=l.trim().replace(/^\d{1,2}\s*[º°.)]\s*/,'');
+    const m=l.match(/^(.{1,24}?)\s*(?:—|–|\||:|·|-)\s*(\d{1,6})\s*(?:pts?|pontos?)?\s*$/i);
+    if(m){const name=cleanName(m[1]);if(name)out.push({name,pts:+m[2]})}});
+  return out;
+}
+function buildBoard(text){
+  const map=new Map();
+  const add=e=>{const k=norm(e.name),o=map.get(k);if(!o||e.pts>o.pts)map.set(k,e)};
+  parseCards(text).forEach(add);
+  if(store.name)add({name:store.name,pts:store.points||0,me:true});
+  const me=store.name?norm(store.name):null;
+  return [...map.entries()].map(([k,e])=>Object.assign({},e,{me:k===me})).sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name,'pt-BR')).slice(0,60);
+}
+function copyText(text,msgEl){
+  const ok=()=>{msgEl.textContent='Copiado!'};
+  const fail=()=>{msgEl.textContent='Não consegui copiar. Selecione o texto e copie.'};
+  try{navigator.clipboard.writeText(text).then(ok,fail)}catch(e){fail()}
+}
+function renderRanking(){
+  app.dataset.subject='ma';
+  const editing=!store.name;
+  app.innerHTML=`<div class="wrap">
+    <div class="bar"><button class="mini" id="home">← Início</button><div class="bar-t"><b>Ranking da turma</b><span>só nome e pontos</span></div></div>
+    <div class="stack" style="margin-top:16px">
+      <section class="qcard"><h3>Meu cartão</h3>
+        <div id="cardBox"></div>
+        <p class="hint">Use só o primeiro nome ou um apelido. Você ganha 10 pontos por resposta certa. Mande o cartão para quem organiza o ranking da turma.</p></section>
+      <section class="qcard"><h3>Ranking</h3>
+        <label for="board" class="hint">Cole os cartões dos colegas, um por linha. Exemplo: Ana — 340 pts</label>
+        <textarea id="board" rows="5" autocomplete="off" placeholder="Ana — 340 pts&#10;Davi — 280 pts"></textarea>
+        <div class="row"><button class="btn" id="mk">Montar ranking</button><button class="mini" id="cpr">Copiar ranking</button></div>
+        <p class="hint" id="cpmsg" aria-live="polite"></p>
+        <ol class="rank" id="rank"></ol></section></div></div>`;
+  $('#home').onclick=()=>{renderHome();top()};
+  const box=$('#cardBox'),msg=$('#cpmsg');
+  function drawCard(edit){
+    if(edit||!store.name){
+      box.innerHTML=`<form id="nf" class="nameform"><label for="nm">Seu primeiro nome ou apelido</label><div class="row"><input id="nm" maxlength="16" autocomplete="off" value="${esc(store.name||'')}"><button class="btn" type="submit">Salvar</button></div></form>`;
+      $('#nf').onsubmit=e=>{e.preventDefault();store.name=cleanName($('#nm').value);save();drawCard(false);draw();syncScore()};
+    }else{
+      box.innerHTML=`<p class="cardtxt">${esc(store.name+' — '+(store.points||0)+' pts')}</p><div class="row"><button class="btn" id="cp">Copiar meu cartão</button><button class="mini" id="chg">Trocar nome</button></div>`;
+      $('#cp').onclick=()=>copyText(store.name+' — '+(store.points||0)+' pts',msg);
+      $('#chg').onclick=()=>drawCard(true);
+    }
+  }
+  let list=[];
+  function draw(){
+    const ta=$('#board');store.board=ta.value.slice(0,4000);save();
+    list=buildBoard(ta.value);
+    $('#rank').innerHTML=list.length?list.map((e,i)=>`<li class="${e.me?'me':''}"><span class="pos">${i+1}º</span><span class="nm">${esc(e.name)}${e.me?' (você)':''}</span><span class="pt">${e.pts.toLocaleString('pt-BR')} pts</span></li>`).join(''):'<li class="empty">Salve seu nome para aparecer aqui.</li>';
+  }
+  $('#board').value=store.board||'';
+  $('#mk').onclick=()=>{msg.textContent='';draw()};
+  $('#cpr').onclick=()=>{draw();copyText(list.map((e,i)=>`${i+1}º ${e.name} — ${e.pts} pts`).join('\n'),msg)};
+  drawCard(editing);draw();
+  /* tenta o ranking online; se funcionar, ele substitui o modo cartão */
+  (async()=>{
+    try{
+      if(store.name)await syncScore();
+      const j=await api();
+      const mine=(self.crypto&&crypto.subtle)?await sha12(devId()):'';
+      const sec=$('#board').closest('section');
+      sec.innerHTML=`<h3>Ranking da turma</h3><p class="hint">Todos os que treinam neste site aparecem aqui. Só nome e pontos.</p><ol class="rank" id="rank"></ol><div class="row"><button class="mini" id="rf">Atualizar</button></div><p class="hint" id="rfm" aria-live="polite"></p>`;
+      const paint=rows=>{$('#rank').innerHTML=rows.length?rows.map((e,i)=>`<li class="${e.id===mine?'me':''}"><span class="pos">${i+1}º</span><span class="nm">${esc(e.name)}${e.id===mine?' (você)':''}</span><span class="pt">${e.points.toLocaleString('pt-BR')} pts</span></li>`).join(''):'<li class="empty">Ninguém no ranking ainda. Salve seu nome e faça um treino!</li>'};
+      paint(j.ranking);
+      $('#rf').onclick=async()=>{const m=$('#rfm');m.textContent='';try{await syncScore();paint((await api()).ranking)}catch(e){m.textContent='Não consegui atualizar agora.'}};
+      const cm=$('#cardBox').closest('section');const h=cm.querySelector('.hint');if(h)h.textContent='Use só o primeiro nome ou um apelido. Você ganha 10 pontos por resposta certa. Seus pontos entram no ranking automaticamente.';
+      const cp=$('#cp');if(cp)cp.remove();
+    }catch(e){/* sem API: segue no modo cartão */}
+  })();
+}
+/* tabuada de consulta */
+function openTab(){
+  const ov=$('#ov');ov.dataset.subject='ma';
+  ov.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="Tabuada"><div class="sheet-h"><b>Tabuada</b><button class="mini" id="ovX">Fechar</button></div><div class="tgrid">${[1,2,3,4,5,6,7,8,9,10].map(k=>`<div class="tb"><b>Tabuada do ${k}</b>${Array.from({length:10},(_,i)=>`${k} × ${i+1} = ${k*(i+1)}`).join('<br>')}</div>`).join('')}</div></div>`;
+  ov.hidden=false;$('#ovX').onclick=closeTab;$('#ovX').focus();
+}
+function closeTab(){$('#ov').hidden=true}
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeTab()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTab()});
+
+load();applySkin();renderHome();
+})();
+</script>
+
+</body>
+</html>
