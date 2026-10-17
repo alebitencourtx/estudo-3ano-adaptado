@@ -1076,7 +1076,9 @@ function wireAdm(){const q=SES.qs[SES.i];const msg=x=>{const m=$('#admMsg');if(m
 /* ---------- patches de revisão (gerados por aplicar_revisoes.py) ---------- */
 /*@@PATCH-START@@*/
 const PAT_REMOVE=new Set([]);
-const PAT_EDIT={};
+const PAT_EDIT={
+"cloze|complete. cana de 1996: {}. cana de 2020: {}.":{"text": "Colheita de cana de 1996: {}. Colheita de 2020: {}."}
+};
 /*@@PATCH-END@@*/
 function patched(list){return list.filter(q=>!PAT_REMOVE.has(qid(q))).map(q=>{const e=PAT_EDIT[qid(q)];return e?Object.assign({},q,e):q})}
 
