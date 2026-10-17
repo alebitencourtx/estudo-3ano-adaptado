@@ -25,7 +25,7 @@ opcoes-resposta .feed{text-align:left}
   const TOTAL = 4;
   const RODADAS = [
     {
-      pergunta: 'O desmatamento pode acabar com espécies de animais e plantas?',
+      pergunta: 'O desmatamento pode levar espécies à extinção?',
       certa: 'Sim',
       erradas: ['Não'],
       msg: 'O desmatamento leva espécies à extinção e empobrece o solo.',
@@ -39,14 +39,14 @@ opcoes-resposta .feed{text-align:left}
       img: '../../img/hga/imp/esgoto.jpg'
     },
     {
-      pergunta: 'O agrotóxico usado demais faz bem para a saúde?',
+      pergunta: 'Usar agrotóxicos sem cuidado faz bem à saúde?',
       certa: 'Não',
       erradas: ['Sim'],
       msg: 'O agrotóxico contamina o solo e a água, e prejudica a saúde.',
       img: '../../img/hga/imp/agrotoxico.jpg'
     },
     {
-      pergunta: 'O uso excessivo de água pode faltar água para as pessoas?',
+      pergunta: 'Se usarmos água demais, pode faltar água para as pessoas?',
       certa: 'Sim',
       erradas: ['Não'],
       msg: 'O uso excessivo pode reduzir a água disponível para as pessoas.',
@@ -55,7 +55,10 @@ opcoes-resposta .feed{text-align:left}
   ];
   const FECHAMENTO = 'O desmatamento também afeta o curso dos rios e o regime de chuvas.';
   const rodape = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
-                 '<details class="detalhes"><summary>Créditos das imagens</summary><p>' + esc(FECHAMENTO) + '</p></details>';
+                 '<details class="detalhes"><summary>Créditos das imagens</summary><p>' + esc(FECHAMENTO) + '</p>' +
+                 '<p>O uso frequente e inadequado de agrotóxicos pode prejudicar a saúde humana e animal.</p>' +
+                 '<p>O uso excessivo de água pode reduzir a água disponível para o consumo das pessoas.</p>' +
+                 '<p>O desmatamento é proibido em diversas localidades, mas ainda ocorre de forma irregular.</p></details>';
 
   const app = document.getElementById('app');
   let i = 0, acertos = 0;

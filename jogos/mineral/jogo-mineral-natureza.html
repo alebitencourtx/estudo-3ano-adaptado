@@ -21,6 +21,7 @@
 .apoio figure{margin:0;text-align:center}
 .apoio img{width:130px;height:92px;object-fit:cover;border-radius:12px;border:2px solid var(--line)}
 .apoio figcaption{font-weight:700;font-size:.9rem;margin-top:4px}
+.dica{margin-top:14px}
 </style>
 </head>
 <body>
@@ -29,32 +30,32 @@
 (function () {
   'use strict';
 
-  /* 🌎 Da natureza ao produto — ordenar 4 passos nos espaços numerados 1 a 4.
+  /* 🌎 Da natureza ao produto — ordenar 3 passos nos espaços numerados 1 a 3.
      Base: livro p. 90 e 91 (extrativismo mineral). Vocabulário de resumos/min-90-91.md:
        os minerais levam milhões de anos para se formar; são extraídos da natureza;
-       diminuem na natureza; viram produtos de uso cotidiano (fios, fogão).
-     Regras TEA: 1 instrução por tela, 4 peças, sem cronômetro, erro mostra a frase
+       viram produtos de uso cotidiano.
+     Regras TEA: 1 instrução por tela, 3 peças, sem cronômetro, erro mostra a frase
      do passo certo, o alvo certo brilha e a peça continua selecionada. */
 
   const app = document.getElementById('app');
   const ID = 'min-natureza';
-  const TOTAL = 4;
+  const TOTAL = 3;
 
   const PASSOS = {
     '1': { nome: 'Os minerais levam milhões de anos para se formar.', msg: 'Os minerais levam milhões de anos para se formar.' },
-    '2': { nome: 'Os minerais são extraídos da natureza.',            msg: 'Os minerais são extraídos da natureza.' },
-    '3': { nome: 'Os minerais diminuem na natureza.',                 msg: 'Os minerais diminuem na natureza.' },
-    '4': { nome: 'Os minerais viram produtos, como fios e fogão.',    msg: 'Os minerais viram produtos, como fios e fogão.' }
+    '2': { nome: 'Eles são extraídos da natureza.',                   msg: 'Eles são extraídos da natureza.' },
+    '3': { nome: 'Eles viram produtos do nosso dia a dia.',           msg: 'Eles viram produtos do nosso dia a dia.' }
   };
 
-  const INSTRUCAO = 'Ponha na ordem: da natureza até o produto.';
-  const DICA = 'Arraste o passo para o número certo. Ou toque no passo e depois no número.';
-  const FRASE_CHAVE = 'Os minerais levam milhões de anos para se formar. Por isso, ao serem extraídos, diminuem na natureza.';
+  const INSTRUCAO = 'Coloque os 3 passos na ordem.';
+  const DICA = 'Arraste um passo até o número. Ou toque no passo e depois no número.';
+  const FRASE_CHAVE = 'Os minerais levam milhões de anos para se formar. Quando são retirados, diminuem na natureza.';
 
   let errados = {};          // passos que já erraram (não contam como acerto de primeira)
   let feitas = 0;            // peças encaixadas
-  let primeira = 0;          // acertos de primeira (0 a 4) → estrelas
+  let primeira = 0;          // acertos de primeira (0 a 3) → estrelas
   let brilhoTimer = null;
+  let fimTimer = null;
   let feed = null, topo = null, barra = null;
 
   /* ---------- pedaços de tela ---------- */
@@ -63,7 +64,7 @@
       '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
         '<li>Fotos do livro didático, p. 90 e 91 (uso escolar): fios de cobre e portão de ferro.</li>' +
         '<li>Ícones Twemoji, CC-BY 4.0.</li>' +
-      '</ul><p>' + FRASE_CHAVE + '</p></details>';
+      '</ul></details>';
   }
 
   function alvoHtml(id) {
@@ -87,22 +88,25 @@
     errados = {};
     feitas = 0;
     primeira = 0;
+    if (fimTimer) { clearTimeout(fimTimer); fimTimer = null; }
 
-    const ids = JogoKit.embaralhar(['1', '2', '3', '4']);   // bandeja embaralhada a cada partida
+    const ids = JogoKit.embaralhar(['1', '2', '3']);   // bandeja embaralhada a cada partida
 
     app.innerHTML =
       '<jogo-topo icone="🌎" titulo="Da natureza ao produto" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
+        '<p class="pergunta">' + JogoKit.esc(INSTRUCAO) + '</p>' +
         '<fala-botoes texto="' + JogoKit.esc(INSTRUCAO) + '"></fala-botoes>' +
         '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
         '<div class="apoio">' +
-          '<figure><img src="../../img/hga/min/cobre.jpg" alt="Fios elétricos de cobre"><figcaption>Fios de cobre</figcaption></figure>' +
+          '<figure><img src="../../img/hga/min/cobre.jpg" alt="Fios de cobre"><figcaption>Fios de cobre</figcaption></figure>' +
           '<figure><img src="../../img/hga/min/ferro.jpg" alt="Portão de ferro"><figcaption>Portão de ferro</figcaption></figure>' +
         '</div>' +
+        '<details class="detalhes dica"><summary>Ver dica</summary><p>' + JogoKit.esc(FRASE_CHAVE) + '</p></details>' +
       '</section>' +
       '<section class="card">' +
-        '<div class="alvos">' + ['1', '2', '3', '4'].map(alvoHtml).join('') + '</div>' +
+        '<div class="alvos">' + ['1', '2', '3'].map(alvoHtml).join('') + '</div>' +
         '<div class="bandeja" data-bandeja aria-label="Passos">' + ids.map(pecaHtml).join('') + '</div>' +
         '<p class="feed" data-feed aria-live="polite"></p>' +
       '</section>' +
@@ -160,7 +164,8 @@
     JogoKit.falar(p.msg);
     atualizar();
 
-    if (feitas >= TOTAL) terminar();
+    /* espera um pouco para o último ✓ aparecer antes de trocar de tela */
+    if (feitas >= TOTAL && !fimTimer) fimTimer = setTimeout(function () { fimTimer = null; terminar(); }, 900);
   }
 
   function errar(peca) {
@@ -188,12 +193,13 @@
   function terminar() {
     JogoKit.progresso.melhor(ID, primeira);      // melhor = acertos de primeira
     const msg = primeira === TOTAL
-      ? 'Muito bem! Você pôs os 4 passos na ordem certa.'
-      : 'Você pôs os 4 passos na ordem: da natureza até o produto.';
+      ? 'Muito bem! Tudo na ordem certa.'
+      : 'Você pôs os 3 passos na ordem.';
     app.innerHTML =
       '<tela-fim icone="🌎" titulo="Da natureza ao produto" estrelas="' + primeira + '" total="' + TOTAL + '"' +
         ' resumo="Tudo na ordem certa!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
       rodape();
+    JogoKit.falar('Tudo na ordem certa!', 0.85);
     subir();
   }
 

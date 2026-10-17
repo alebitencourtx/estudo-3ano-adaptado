@@ -37,7 +37,7 @@ const PARES = [
   { id:'colheitadeira', nome:'Colheitadeira', foto:'../../img/hga/agr/colheitadeira.jpg',
     fato:'Máquina: a colheitadeira.' },
   { id:'ordenha',       nome:'Ordenha',       foto:'../../img/hga/agr/ordenha.jpg',
-    fato:'Hoje, a ordenha pode ser com robôs.' }
+    fato:'Há cem anos, a ordenha era manual.' }
 ];
 const TOTAL = 3;                 /* 3 pares */
 const ID_PROG = 'mem-agr';       /* chave do progresso (menor nº de tentativas) */
@@ -82,8 +82,8 @@ function renderJogo() {
     '<jogo-topo icone="🌾" titulo="Memória do campo" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
     '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
     '<section class="card">' +
-      '<p class="pergunta" id="instrucao">Encontre os dois iguais. Ache os 3 pares.</p>' +
-      '<fala-botoes texto="Encontre os dois iguais. Ache os 3 pares."></fala-botoes>' +
+      '<p class="pergunta" id="instrucao">Encontre duas cartas com a mesma imagem. Ache os 3 pares.</p>' +
+      '<fala-botoes texto="Encontre duas cartas com a mesma imagem. Ache os 3 pares."></fala-botoes>' +
       '<div class="tabuleiro" id="tabuleiro" aria-label="Cartas do jogo" style="margin-top:16px">' +
         cartas.map(cartaHtml).join('') +
       '</div>' +

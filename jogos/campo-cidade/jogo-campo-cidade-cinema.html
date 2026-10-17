@@ -19,41 +19,48 @@
 .ligar .opcao.foto .fato{font-size:.95rem;font-weight:700;line-height:1.2}
 .ligar .opcao.pulso{animation:pulso .45s ease 3}
 .ligar .opcao.brilho{animation:brilho .9s ease 2}
+.quadro{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:8px;color:var(--ink)}
+.quadro th,.quadro td{border:2px solid var(--line);padding:6px 8px;text-align:left}
+.quadro th{background:var(--acc-soft);font-family:var(--font-display)}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
-/* ===== O ano e o fato — ligar o ano ao fato do cinema (p. 102, 104, 105) =====
+/* ===== O ano e o fato — ligar o ano ao fato do cinema (p. 104 e 105) =====
    Vocabulário fechado de _espec/campo-cidade.md:
      1895 → mudo e preto e branco · 1927 → primeiro filme com falas
      1937 → cor nos desenhos (Branca de Neve) · 1953 → cinema em 3-D (Museu de cera).
-   Regras TEA: 4 pares, uma instrução, feedback imediato com a frase do ano,
-   erro aponta a foto certa e o ano continua selecionado (nada trava). */
+   Regras TEA: 4 pares, UMA instrução (o áudio repete a mesma), feedback imediato
+   que diz a resposta certa em palavras, e o ano continua selecionado (nada trava). */
 (function () {
   'use strict';
 
   var FATOS = [
     { ano: '1895', fato: 'Mudo e preto e branco', foto: '../../img/hga/cc/cinema-1895.jpg',
-      alt: 'Foto antiga da primeira exibição de cinema, em 1895',
+      alt: 'Cena do filme A saída dos trabalhadores da fábrica, de 1895',
+      audio: '1895. Mudo e preto e branco.',
       msg: '1895: o cinema era mudo e preto e branco.' },
     { ano: '1927', fato: 'Primeiro filme com falas', foto: '../../img/hga/cc/cinema-1927.jpg',
       alt: 'Foto do filme de 1927, o primeiro com falas',
+      audio: '1927. Primeiro filme com falas.',
       msg: '1927: o primeiro filme com falas.' },
-    { ano: '1937', fato: 'Cor nos desenhos', foto: '../../img/hga/cc/branca-neve.jpg',
+    { ano: '1937', fato: 'Cor nos desenhos (Branca de Neve)', foto: '../../img/hga/cc/branca-neve.jpg',
       alt: 'Foto do desenho de 1937, Branca de Neve, já colorido',
-      msg: '1937: os desenhos ganharam cor.' },
-    { ano: '1953', fato: 'Cinema em 3-D', foto: '../../img/hga/cc/museu-cera.jpg',
+      audio: '1937. Cor nos desenhos. Branca de Neve.',
+      msg: '1937: os desenhos ganharam cor, com Branca de Neve.' },
+    { ano: '1953', fato: 'Cinema em 3-D (Museu de cera)', foto: '../../img/hga/cc/museu-cera.jpg',
       alt: 'Foto do filme de 1953, em 3-D',
-      msg: '1953: o cinema em 3-D.' }
+      audio: '1953. Cinema em 3-D. Museu de cera.',
+      msg: '1953: o cinema em 3-D, com Museu de cera.' }
   ];
   var TOTAL = FATOS.length;
   var ID = 'cc-cinema';
-  var APOIO = 'Ligue o ano ao fato do cinema.';
+  var APOIO = 'Ligue o ano ao fato.';
   var DICA = 'Toque no ano e depois na foto.';
 
   var CREDITOS = [
-    'Fotos do livro de História e Geografia do 3º ano, p. 102, 104 e 105 (uso escolar).',
+    'Fotos do livro de História e Geografia do 3º ano, p. 104 e 105 (uso escolar).',
     'Cinema mudo (1895), filme com falas (1927), Branca de Neve (1937) e Museu de cera em 3-D (1953).',
     'Ícones de emoji: Twemoji (CC BY 4.0).'
   ];
@@ -82,7 +89,6 @@
       '<jogo-topo icone="🎬" titulo="O ano e o fato" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<p class="pergunta">Qual fato é de cada ano?</p>' +
         '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>' +
         '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
         '<div class="ligar">' +
@@ -130,12 +136,20 @@
     if (sel) sel.classList.remove('sel');
     sel = el;
     el.classList.add('sel');
-    JogoKit.falar(el.textContent.trim(), 0.85);
+    /* ouve o fato do ano escolhido (ex.: "1937. Cor nos desenhos. Branca de Neve.") */
+    var d = dado(el.dataset.ano);
+    JogoKit.falar(d ? d.audio : el.textContent.trim(), 0.85);
   }
 
   function tocarFoto(el) {
     if (el.classList.contains('feito')) return;
-    if (!sel) { diz(DICA, false); return; }
+    var df = dado(el.dataset.ano);
+    if (!sel) {
+      /* sem ano escolhido: ouve o fato da foto e lembra o primeiro passo */
+      diz(DICA, false);
+      if (df) JogoKit.falar(df.audio, 0.85);
+      return;
+    }
 
     var ano = sel.dataset.ano;
     var d = dado(ano);
@@ -153,11 +167,11 @@
       atualizar();
       if (S.feitos === TOTAL) setTimeout(renderFim, 900);
     } else {
-      /* erro: mostra a frase do ano escolhido e destaca a foto certa.
+      /* erro: diz em palavras qual é a foto do ano escolhido e destaca essa foto.
          O ano continua selecionado — é só tocar na foto certa. */
       S.errou[ano] = true;
-      diz('✗ Não é essa. ' + d.msg, false);
-      JogoKit.falar(d.msg, 0.85);
+      diz('✗ Essa foto não é de ' + ano + '. A foto de ' + ano + ' é: ' + d.fato + '.', false);
+      JogoKit.falar('Essa foto não é de ' + ano + '. A foto de ' + ano + ' é: ' + d.audio, 0.85);
       var certa = app.querySelector('.opcao.foto[data-ano="' + ano + '"]');
       if (certa) {
         certa.classList.add('brilho');
@@ -195,6 +209,15 @@
     app.innerHTML =
       '<tela-fim icone="🎬" titulo="O ano e o fato" estrelas="' + n + '" total="' + TOTAL + '" ' +
         'resumo="Você ligou tudo!"></tela-fim>' +
+      '<section class="card">' +
+        '<details class="detalhes" open><summary>O que mudou no cinema (p. 105)</summary>' +
+          '<table class="quadro">' +
+            '<tr><th>Tipo</th><th>Em 1895</th><th>Atualmente</th></tr>' +
+            '<tr><td>Mudo ou sonoro</td><td>mudo</td><td>sonoro</td></tr>' +
+            '<tr><td>Preto e branco ou colorido</td><td>preto e branco</td><td>colorido</td></tr>' +
+            '<tr><td>Tecnologia 3-D</td><td>não existia</td><td>existe</td></tr>' +
+          '</table></details>' +
+      '</section>' +
       rodapeHtml();
 
     JogoKit.falar('Você ligou tudo!', 0.85);

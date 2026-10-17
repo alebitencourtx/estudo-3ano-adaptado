@@ -194,6 +194,9 @@ img{max-width:100%}
 .lixeira.feita{border-style:solid;background:var(--ok-soft)}
 .lixeira .encaixados{min-height:44px}
 
+/* utilitário: texto só para leitor de tela (permite 1 <h1> por tela sem poluir o visual) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
 /* celulares pequenos */
 @media (max-width:420px){
   .top h1{font-size:1.4rem}

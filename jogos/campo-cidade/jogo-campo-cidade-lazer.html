@@ -12,6 +12,7 @@
 <style>
   .apoio{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:16px;
     border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
+  .apoio.ico{max-height:150px;object-fit:contain;background:#fff}
   .prox{margin-top:16px}
   opcoes-resposta .feed{text-align:left}
 </style>
@@ -22,7 +23,7 @@
 (function () {
   'use strict';
 
-  /* 🧺 O passeio de dona Alice — quiz de 5 rodadas, uma pergunta por tela.
+  /* 🧺 O passeio de dona Alice — quiz de 6 rodadas, uma pergunta por tela.
      Base: depoimento "Passeio especial" de dona Alice (livro p. 102).
      Vocabulário fechado de _espec/campo-cidade.md.
      Componente do kit: <opcoes-resposta> (feedback imediato; a resposta certa sempre aparece).
@@ -30,23 +31,26 @@
 
   const app = document.getElementById('app');
   const ID = 'cc-lazer';
-  const TOTAL = 5;
+  const TOTAL = 6;
+  /* o Jardim da Luz só ilustra a rodada do Jardim da Luz; o piquenique usa a cesta */
   const FOTO = '../../img/hga/cc/jardim-luz.jpg';
-  const ALT = 'Foto antiga do Jardim da Luz, de 1910';
+  const ALT = 'Foto antiga de pessoas passeando no Jardim da Luz, em 1910';
+  const CESTA = '../../img/jogo/cc/cesta.svg';
+  const ALT_CESTA = 'Cesta de piquenique';
 
   const RODADAS = [
     {
       pergunta: 'Onde dona Alice fazia piquenique?',
       certa: 'Na Cantareira e no Parque Antártica',
-      erradas: ['No cinema', 'Na fábrica'],
-      msg: 'Ela ia com as famílias amigas.',
-      img: FOTO,
-      alt: ALT
+      erradas: ['No Jardim da Luz', 'No cinema'],
+      msg: 'Ela fazia piquenique na Cantareira e no Parque Antártica.',
+      img: CESTA,
+      alt: ALT_CESTA
     },
     {
-      pergunta: 'Aos domingos, depois do almoço, Alice ia passear onde?',
+      pergunta: 'Onde Alice passeava aos domingos depois do almoço?',
       certa: 'No Jardim da Luz',
-      erradas: ['Na escola', 'No mercado'],
+      erradas: ['Na Cantareira', 'No Parque Antártica'],
       msg: 'Ela passeava no Jardim da Luz.',
       img: FOTO,
       alt: ALT
@@ -54,24 +58,32 @@
     {
       pergunta: 'Quem ia junto com Alice?',
       certa: 'As famílias amigas',
-      erradas: ['Os robôs', 'As máquinas'],
+      erradas: ['Os irmãos Lumière', 'Os trabalhadores da fábrica'],
       msg: 'Ia com as famílias amigas.'
     },
     {
-      pergunta: 'Como Alice achava o Jardim da Luz?',
+      pergunta: 'O que Alice dizia sobre o Jardim da Luz?',
       certa: 'Muito bem tratado e agradável',
-      erradas: ['Sujo e perigoso', 'Cheio de carros'],
+      erradas: ['Na Cantareira', 'No Parque Antártica'],
       msg: 'Ela dizia: tudo muito bem tratado, agradável.'
     },
     {
       pergunta: 'Em que cidade fica o Jardim da Luz?',
       certa: 'São Paulo',
-      erradas: ['França', 'Estados Unidos'],
+      erradas: ['Na França', 'Nos Estados Unidos'],
       msg: 'O Jardim da Luz fica em São Paulo.'
+    },
+    {
+      pergunta: 'Em que ano foi tirada a foto do Jardim da Luz?',
+      certa: 'Em 1910',
+      erradas: ['Em 1895', 'Em 1927'],
+      msg: 'A foto do Jardim da Luz é de 1910.',
+      img: FOTO,
+      alt: ALT
     }
   ];
 
-  let i = 0;          // rodada da vez (0 a 4)
+  let i = 0;          // rodada da vez (0 a 5)
   let acertos = 0;    // acertos de primeira (a criança responde uma vez por rodada)
 
   /* ---------- pedaços de tela ---------- */
@@ -96,7 +108,7 @@
 
     app.innerHTML =
       '<jogo-topo icone="🧺" titulo="O passeio de dona Alice" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
-      '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+      '<barra-progresso valor="' + (i + 1) + '" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
         '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
         '<p class="hint">Toque na resposta.</p>' +
@@ -117,7 +129,7 @@
     /* foto de apoio, quando houver: logo abaixo do enunciado e acima das opções */
     if (r.img) {
       const foto = document.createElement('img');
-      foto.className = 'apoio';
+      foto.className = 'apoio' + (/\.svg$/i.test(r.img) ? ' ico' : '');
       foto.src = r.img;
       foto.alt = r.alt || '';
       op.insertBefore(foto, op.querySelector('.opcoes'));
@@ -155,6 +167,7 @@
       '<tela-fim icone="🧺" titulo="O passeio de dona Alice" estrelas="' + acertos + '" total="' + TOTAL + '"' +
         ' resumo="Você respondeu tudo!"></tela-fim>' +
       rodape();
+    JogoKit.falar('Você respondeu tudo!', 0.85);
     subir();
   }
 

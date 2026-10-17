@@ -35,8 +35,8 @@
     '3': { foto: '../../img/hga/agr/queijo.jpg', nome: 'Fazer os queijos', msg: 'Por último, fazer os queijos.' }
   };
 
-  const INSTRUCAO = 'O senhor Alfredo acordava muito cedo: juntava o gado, ordenhava as vacas e fazia os queijos.';
-  const DICA = 'Ponha as fotos na ordem: 1, 2, 3.';
+  const FALA_ALFREDO = 'O senhor Alfredo acordava muito cedo: juntava o gado, ordenhava as vacas e fazia os queijos.';
+  const DICA = 'Ponha as fotos na ordem do trabalho do senhor Alfredo: 1, 2 e 3.';
 
   let errados = {};          // passos que já erraram (não contam como acerto de primeira)
   let feitas = 0;            // peças encaixadas
@@ -46,10 +46,11 @@
 
   /* ---------- pedaços de tela ---------- */
   function rodape() {
-    return '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>' +
+    return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
       '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
       '<li>Fotos do livro didático, p. 94 e 95 (uso escolar).</li>' +
       '<li>Depoimento do senhor Alfredo (livro, p. 94 e 95).</li>' +
+      '<li>Ícones: Twemoji, CC-BY 4.0.</li>' +
       '</ul></details>';
   }
 
@@ -75,11 +76,16 @@
     const ids = JogoKit.embaralhar(['1', '2', '3']);   // bandeja embaralhada a cada partida
 
     app.innerHTML =
+      '<h1 class="sr-only">Do leite ao queijo</h1>' +
       '<jogo-topo icone="🌾" titulo="Do leite ao queijo" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<fala-botoes texto="' + JogoKit.esc(INSTRUCAO) + '"></fala-botoes>' +
+        '<fala-botoes texto="' + JogoKit.esc(DICA) + '"></fala-botoes>' +
         '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
+        '<details class="detalhes"><summary>A fala do senhor Alfredo</summary>' +
+          '<p>' + JogoKit.esc(FALA_ALFREDO) + '</p>' +
+          '<fala-botoes texto="' + JogoKit.esc(FALA_ALFREDO) + '"></fala-botoes>' +
+        '</details>' +
       '</section>' +
       '<section class="card">' +
         '<div class="alvos">' + ['1', '2', '3'].map(alvoHtml).join('') + '</div>' +
@@ -112,10 +118,15 @@
   function colocar(peca, alvo) {                 // usado pelo arrasto e pelo modo toque
     if (!peca || !alvo || peca.dataset.feita) return;
     if (alvo.dataset.id === peca.dataset.alvo) acertar(peca, alvo);
-    else errar(peca);
+    else errar(peca, alvo);
   }
 
-  function aoSelecionar() { /* nada: a peça selecionada continua valendo depois do erro */ }
+  /* ao pegar a foto, o áudio diz o nome do passo (apoio de leitura) */
+  function aoSelecionar(peca) {
+    if (!peca) return;
+    const p = PASSOS[peca.dataset.id];
+    if (p) JogoKit.falar(p.nome, 0.85);
+  }
 
   function acertar(peca, alvo) {
     const p = PASSOS[peca.dataset.id];
@@ -143,11 +154,13 @@
     if (feitas >= TOTAL) terminar();
   }
 
-  function errar(peca) {
-    const p = PASSOS[peca.dataset.id];
+  function errar(peca, alvo) {
     errados[peca.dataset.id] = true;
     peca.dataset.tent = String((parseInt(peca.dataset.tent, 10) || 0) + 1);
 
+    /* o feedback mostra a frase do passo CERTO daquele número, não a da peça arrastada */
+    const passo = (alvo && PASSOS[alvo.dataset.id]) || PASSOS[peca.dataset.alvo];
+    const n = (alvo && alvo.dataset.id) || peca.dataset.alvo;
     const certo = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
     if (certo) {
       certo.classList.add('brilho');
@@ -155,9 +168,10 @@
       brilhoTimer = setTimeout(function () { certo.classList.remove('brilho'); }, 2000);
     }
 
+    const msg = 'Aqui é o passo ' + n + ': ' + passo.msg;
     feed.className = 'feed bad';
-    feed.textContent = '✗ ' + p.msg;
-    JogoKit.falar(p.msg);
+    feed.textContent = '✗ ' + msg;
+    JogoKit.falar(msg, 0.85);
   }
 
   function atualizar() {
@@ -171,6 +185,7 @@
       ? 'Muito bem! Você pôs as fotos na ordem do senhor Alfredo.'
       : 'Você pôs as fotos na ordem: juntar o gado, ordenhar as vacas e fazer os queijos.';
     app.innerHTML =
+      '<h1 class="sr-only">Do leite ao queijo</h1>' +
       '<tela-fim icone="🌾" titulo="Do leite ao queijo" estrelas="' + primeira + '" total="' + TOTAL + '"' +
         ' resumo="Tudo na ordem certa!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
       rodape();

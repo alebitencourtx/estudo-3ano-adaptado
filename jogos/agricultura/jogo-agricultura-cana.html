@@ -47,16 +47,18 @@ const PARADAS = [
     alt: 'Foto de 2020: máquina colhendo cana',
     frase: '2020: a colheita é com máquinas.',
     completo: 'Em Potirendaba (SP), a colheita é com colheitadeira e caminhão.' },
-  { ano: 'Hoje', foto: '../../img/hga/agr/colheitadeira.jpg',
-    alt: 'Foto de hoje: colheitadeira na plantação de cana',
-    frase: 'Hoje, 9 em cada 10 usam só colheitadeira.',
+  /* harvester.jpg é a foto de cana com máquina (p. 93); colheitadeira.jpg é outra
+     cultura (p. 84) e não pode ilustrar a cana */
+  { ano: 'Hoje', foto: '../../img/hga/agr/harvester.jpg',
+    alt: 'Foto da colheita de cana com máquina',
+    frase: 'Hoje, 9 em cada 10 usam só colheita mecanizada.',
     completo: 'Hoje, 9 em cada 10 propriedades usam só colheita mecanizada.' }
 ];
 const ID = 'tempo-cana';
-const INSTRUCAO = 'Passeie pela colheita da cana. Toque na parada que está brilhando.';
-const DICA = 'Toque na parada que está brilhando.';
+const INSTRUCAO = 'Toque na parada destacada.';
+const DICA = 'Toque na parada destacada.';
 const CREDITOS = [
-  'Fotos da colheita da cana: livro do 3º ano, História e Geografia — p. 92 e 93 (uso escolar).',
+  'Fotos da colheita da cana (1996 e 2020): livro do 3º ano, História e Geografia — p. 92 e 93 (uso escolar).',
   'Conteúdo conforme a linha do tempo da cana-de-açúcar (livro, p. 92 e 93).'
 ];
 
@@ -90,15 +92,17 @@ function boot () {
       '</div>';
   }
 
-  /* painel: a foto grande e o texto completo da parada da vez */
+  /* painel: a foto grande e o texto completo da parada da vez — com áudio */
   function painelHtml () {
     const p = PARADAS[Math.min(S.i, PARADAS.length - 1)];
+    const texto = p.ano + '. ' + p.frase + ' ' + p.completo;
     return '<section class="card painel" aria-live="polite">' +
       '<img class="foto painel-foto" src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">' +
       '<div class="texto">' +
         '<p class="ano">' + esc(p.ano) + '</p>' +
         '<p class="frase">' + esc(p.frase) + '</p>' +
         '<p class="completo">' + esc(p.completo) + '</p>' +
+        '<fala-botoes texto="' + esc(texto) + '"></fala-botoes>' +
       '</div>' +
     '</section>';
   }
@@ -107,6 +111,7 @@ function boot () {
   function render () {
     const n = PARADAS.length, i = S.i;
     app.innerHTML =
+      '<h1 class="sr-only">A cana no tempo</h1>' +
       '<jogo-topo icone="🌾" titulo="A cana no tempo" contador="' + i + '/' + n +
         '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="' + i + '" total="' + n + '"></barra-progresso>' +
@@ -132,12 +137,14 @@ function boot () {
   function renderFim () {
     K.progresso.melhor(ID, PARADAS.length);
     app.innerHTML =
+      '<h1 class="sr-only">A cana no tempo</h1>' +
       '<tela-fim icone="🌾" titulo="A cana no tempo" estrelas="3" total="3" ' +
         'resumo="Você visitou todas as paradas!" ' +
         'msg="Muito bem! Você viu a colheita da cana mudar no tempo."></tela-fim>' +
       '<section class="card">' +
-        '<details class="detalhes" open><summary>O que a cana vira</summary><ul>' +
-          '<li>A cana vira açúcar e álcool.</li>' +
+        '<details class="detalhes" open><summary>O que a cana produz</summary><ul>' +
+          '<li>Até 2010, cerca de metade da colheita da cana no Brasil era manual.</li>' +
+          '<li>Com a cana se faz açúcar e álcool.</li>' +
           '<li>Mesmo com máquinas, há trabalhadores: quem conduz a colheitadeira e o caminhão.</li>' +
         '</ul></details>' +
       '</section>' +

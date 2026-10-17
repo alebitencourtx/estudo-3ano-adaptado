@@ -26,19 +26,20 @@
 <main id="app"></main>
 <script>
 /* ===== Memória dos minerais — jogo da memória (extrativismo mineral, p. 90, 91) =====
-   Conteúdo do livro: cobre faz fios elétricos; o ferro faz portões e ferramentas;
-   o cimento é feito a partir do calcário. 3 pares (6 cartas).
+   Conteúdo do livro: o cobre faz fios elétricos; o ferro faz portões e ferramentas;
+   do calcário vem o cimento. 3 pares (6 cartas).
    Sem cronômetro: o placar guarda o MENOR número de tentativas.
    Fotos do livro didático; ícones Twemoji, CC-BY 4.0. */
 
 const PARES = [
   { id:'cobre',   nome:'Cobre',   foto:'../../img/hga/min/cobre.jpg',   fato:'Fios de cobre.' },
   { id:'ferro',   nome:'Ferro',   foto:'../../img/hga/min/ferro.jpg',   fato:'Portão de ferro.' },
-  { id:'cimento', nome:'Cimento', foto:'../../img/hga/min/cimento.jpg', fato:'Cimento: feito a partir do calcário.' }
+  { id:'cimento', nome:'Calcário', foto:'../../img/hga/min/cimento.jpg', fato:'Do calcário vem o cimento.' }
 ];
 const TOTAL = 3;                 /* 3 pares */
 const ID_PROG = 'mem-min';       /* chave do progresso (menor nº de tentativas) */
 const ESPERA = 900;              /* ms com as 2 cartas diferentes abertas */
+const INSTRUCAO = 'Encontre os 3 pares de fotos iguais.';
 
 const app = document.getElementById('app');
 let S = null;                    /* estado da partida */
@@ -56,6 +57,13 @@ function gravarRecorde(n) {
   const antigo = lerRecorde();
   if (antigo == null || n < antigo) JogoKit.progresso.gravar(ID_PROG, n);   /* menor é melhor */
   return antigo == null || n < antigo;
+}
+
+/* ---------- estrelas: menos tentativas, mais estrelas ---------- */
+function estrelas(tentativas) {
+  if (tentativas <= TOTAL) return TOTAL;         /* 3 tentativas = acertou todos de primeira */
+  if (tentativas <= TOTAL + 2) return TOTAL - 1; /* 4 ou 5 tentativas */
+  return 1;
 }
 
 /* ---------- conteúdo ---------- */
@@ -79,8 +87,8 @@ function renderJogo() {
     '<jogo-topo icone="⛏️" titulo="Memória dos minerais" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
     '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
     '<section class="card">' +
-      '<p class="pergunta" id="instrucao">Encontre as duas fotos iguais. Ache os 3 pares.</p>' +
-      '<fala-botoes texto="Encontre as duas fotos iguais. Ache os 3 pares."></fala-botoes>' +
+      '<p class="pergunta" id="instrucao">' + INSTRUCAO + '</p>' +
+      '<fala-botoes texto="' + INSTRUCAO + '"></fala-botoes>' +
       '<div class="tabuleiro" id="tabuleiro" aria-label="Cartas do jogo" style="margin-top:16px">' +
         cartas.map(cartaHtml).join('') +
       '</div>' +
@@ -147,7 +155,8 @@ function tocar(carta) {
     }
   } else {                                                /* diferentes: nunca punir */
     S.trava = true;
-    diz('Essa não é igual. Tente de novo.', '');           /* feedback neutro: sem cor de erro */
+    diz('Olhe de novo. Procure as duas iguais.', '');      /* feedback neutro: sem cor de erro */
+    JogoKit.falar('Olhe de novo. Procure as duas iguais.', 0.85);
     timer = setTimeout(() => {
       timer = null;
       fechar(a); fechar(b);
@@ -175,14 +184,14 @@ function mostrarFim() {
   const rec = lerRecorde();
   const novo = gravarRecorde(S.tentativas);
   const recorde = novo ? S.tentativas : rec;
+  const n = estrelas(S.tentativas);
   const msg = (novo && rec != null ? 'Novo recorde! ' : '') +
-    'Você fez os 3 pares em ' + S.tentativas + (S.tentativas === 1 ? ' tentativa. ' : ' tentativas. ') +
-    'Seu recorde: ' + recorde + (recorde === 1 ? ' tentativa.' : ' tentativas.');
+    'Você fez os 3 pares em ' + S.tentativas + (S.tentativas === 1 ? ' tentativa.' : ' tentativas.');
 
   app.innerHTML =
-    '<tela-fim icone="⛏️" titulo="Memória dos minerais" estrelas="' + TOTAL + '" total="' + TOTAL + '" ' +
+    '<tela-fim icone="⛏️" titulo="Memória dos minerais" estrelas="' + n + '" total="' + TOTAL + '" ' +
       'resumo="Você achou os 3 pares!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' + rodape;
-  JogoKit.falar('Você achou os 3 pares!', 0.85);
+  JogoKit.falar('Você achou os 3 pares! Seu recorde: ' + recorde + (recorde === 1 ? ' tentativa.' : ' tentativas.'), 0.85);
   window.scrollTo(0, 0);
 }
 

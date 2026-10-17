@@ -10,10 +10,9 @@
 <link rel="stylesheet" href="../jogo-kit.css">
 <script src="../jogo-kit.js"></script>
 <style>
-  .apoio{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:16px;
-    border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
   .prox{margin-top:16px}
   opcoes-resposta .feed{text-align:left}
+  opcoes-resposta .hint{text-align:left}
 </style>
 </head>
 <body>
@@ -25,52 +24,56 @@
   /* 🔩 Para que serve? — quiz de 5 rodadas, uma pergunta por tela.
      Base: livro p. 90 e 91. Vocabulário de resumos/min-90-91.md.
      Componente do kit: <opcoes-resposta> (feedback imediato; a resposta certa sempre aparece).
+     Cada opção leva a sua própria foto do livro (o apoio não repete a mesma foto em toda rodada).
      Regras TEA: frases curtas, 3 opções, sem cronômetro, áudio em cada rodada. */
 
   const app = document.getElementById('app');
   const ID = 'min-perguntas';
   const TOTAL = 5;
+  const HINT = 'Toque na resposta.';
+
+  /* foto do livro para cada opção (quando existe) */
+  const FOTO = {
+    'Cobre': 'cobre',
+    'Ferro': 'ferro',
+    'Areia': 'areia',
+    'Calcário': 'cimento',
+    'Cimento': 'cimento',
+    'Alumínio': 'aluminio',
+    'Bauxita': 'aluminio'
+  };
+  const icone = texto => FOTO[texto] ? ('../../img/hga/min/' + FOTO[texto] + '.jpg') : '';
 
   const RODADAS = [
     {
-      pergunta: 'O fio elétrico é feito de qual mineral?',
+      pergunta: 'Qual mineral é usado para fazer fios elétricos?',
       certa: 'Cobre',
       erradas: ['Areia', 'Calcário'],
-      msg: 'O cobre faz fios elétricos.',
-      img: '../../img/hga/min/cobre.jpg',
-      alt: 'Fio de cobre'
+      msg: 'O cobre faz fios elétricos.'
     },
     {
-      pergunta: 'O ferro com outros elementos e altas temperaturas vira o quê?',
+      pergunta: 'O ferro, com outros elementos e muito calor, vira o quê?',
       certa: 'Aço',
       erradas: ['Cimento', 'Alumínio'],
-      msg: 'O ferro pode virar aço.',
-      img: '../../img/hga/min/ferro.jpg',
-      alt: 'Ferro'
+      msg: 'O ferro pode virar aço.'
     },
     {
-      pergunta: 'De qual mineral vem o alumínio?',
+      pergunta: 'Qual mineral é usado para fazer alumínio?',
       certa: 'Bauxita',
       erradas: ['Cobre', 'Areia'],
-      msg: 'O alumínio vem da bauxita.',
-      img: '../../img/hga/min/aluminio.jpg',
-      alt: 'Objetos de alumínio'
+      msg: 'O alumínio vem da bauxita.'
     },
     {
-      pergunta: 'O cimento é feito a partir de qual recurso?',
+      pergunta: 'Qual recurso é usado para fazer cimento?',
       certa: 'Calcário',
       erradas: ['Ferro', 'Areia'],
-      msg: 'O cimento vem do calcário.',
-      img: '../../img/hga/min/cimento.jpg',
-      alt: 'Cimento'
+      msg: 'O cimento vem do calcário.'
     },
     {
-      pergunta: 'Para que usamos a areia?',
+      pergunta: 'Em que atividade a areia é usada?',
       certa: 'Na construção',
       erradas: ['Para fazer fios elétricos', 'Para virar aço'],
-      msg: 'A areia é usada na construção.',
-      img: '../../img/hga/min/areia.jpg',
-      alt: 'Areia'
+      msg: 'A areia é usada na construção.'
     }
   ];
 
@@ -101,30 +104,33 @@
       '<jogo-topo icone="🔩" titulo="Para que serve?" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
-        '<p class="hint">Toque na resposta.</p>' +
         '<div data-quiz></div>' +
         '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
       '</section>' +
       rodape();
 
-    /* o quiz em si é o componente do kit */
+    /* o quiz em si é o componente do kit: cada opção com a sua foto do livro */
     const op = document.createElement('opcoes-resposta');
+    const opcoes = JogoKit.embaralhar([r.certa].concat(r.erradas));
     op.montar({
       pergunta: r.pergunta,
-      opcoes: JogoKit.embaralhar([r.certa].concat(r.erradas)),
+      opcoes: opcoes,
       certa: r.certa,
-      msg: r.msg
+      msg: r.msg,
+      icones: opcoes.map(icone)
     });
 
-    /* foto de apoio: logo abaixo do enunciado e acima das opções */
-    const foto = document.createElement('img');
-    foto.className = 'apoio';
-    foto.src = r.img;
-    foto.alt = r.alt || '';
-    op.insertBefore(foto, op.querySelector('.opcoes'));
-
     app.querySelector('[data-quiz]').appendChild(op);
+
+    /* o enunciado vem primeiro; o áudio e a dica vêm logo depois dele */
+    const fala = document.createElement('fala-botoes');
+    fala.setAttribute('texto', r.pergunta);
+    const dica = document.createElement('p');
+    dica.className = 'hint';
+    dica.textContent = HINT;
+    const antesDasOpcoes = op.querySelector('.opcoes');
+    op.insertBefore(fala, antesDasOpcoes);
+    op.insertBefore(dica, antesDasOpcoes);
 
     const prox = app.querySelector('[data-prox]');
     prox.onclick = proxima;

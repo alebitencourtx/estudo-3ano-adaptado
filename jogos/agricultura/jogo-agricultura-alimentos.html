@@ -11,7 +11,6 @@
 <script src="../jogo-kit.js"></script>
 <style>
   .prox{margin-top:16px}
-  .apoio-fala{margin-top:14px}
   fichas-toque .feed{text-align:left}
 </style>
 </head>
@@ -22,16 +21,17 @@
   'use strict';
 
   /* 🍚 De onde vem a comida? — agricultura, 2 rodadas de "toque nos certos".
-     Base: livro p. 84, 85, 92 a 95. Vocabulário de resumos/agr-84-85-92-95.md.
+     Base: livro p. 84 e p. 92 a 95. Vocabulário de
+     resumos/agr-84-85-92-95.md.
      Componente do kit: <fichas-toque> (toca para marcar, "Conferir" revela ✓/✗
      e a resposta certa sempre aparece em .certa).
+     Carga por tela do LEIA-ME: 2 rodadas de 4 fichas.
      Regras TEA: frases curtas, sem cronômetro, áudio do enunciado em cada rodada,
      "Conferir" só libera com o número certo de fichas marcadas. */
 
   const app = document.getElementById('app');
   const ID = 'agr-alimentos';
   const TOTAL = 2;
-  const APOIO = 'O arroz e o feijão, as frutas e as verduras vêm da agricultura.';
 
   /* ícones das fichas (todos existem em ../../img/jogo/agr/) */
   const ICONES = {
@@ -39,9 +39,8 @@
     'Feijão': '../../img/jogo/agr/feijao.svg',
     'Frutas': '../../img/jogo/agr/frutas.svg',
     'Verduras': '../../img/jogo/agr/verduras.svg',
-    'Leite': '../../img/jogo/agr/leite.svg',
-    'Ovos': '../../img/jogo/agr/ovos.svg',
-    'Carne': '../../img/jogo/agr/carne.svg'
+    'Açúcar': '../../img/jogo/agr/acucar.svg',
+    'Álcool': '../../img/jogo/agr/alcool.svg'
   };
 
   const RODADAS = [
@@ -49,15 +48,17 @@
       pergunta: 'Toque nos 4 alimentos que vêm da agricultura.',
       hint: 'Toque em 4 fichas e depois em Conferir.',
       certas: ['Arroz', 'Feijão', 'Frutas', 'Verduras'],
-      distratores: ['Leite', 'Ovos', 'Carne'],
-      msg: 'O arroz, o feijão, as frutas e as verduras vêm da agricultura.'
+      distratores: ['Açúcar', 'Álcool', 'Cana-de-açúcar'],
+      msg: 'O arroz, o feijão, as frutas e as verduras vêm da agricultura.',
+      apoio: 'O arroz e o feijão, as frutas e as verduras vêm da agricultura.'
     },
     {
-      pergunta: 'Toque nos 3 alimentos que vêm da pecuária.',
-      hint: 'Toque em 3 fichas e depois em Conferir.',
-      certas: ['Leite', 'Ovos', 'Carne'],
-      distratores: ['Arroz', 'Feijão'],
-      msg: 'O leite, os ovos e a carne vêm dos animais.'
+      pergunta: 'Toque nos 2 produtos feitos da cana-de-açúcar.',
+      hint: 'Toque em 2 fichas e depois em Conferir.',
+      certas: ['Açúcar', 'Álcool'],
+      distratores: ['Arroz', 'Feijão', 'Frutas'],
+      msg: 'Da cana-de-açúcar se fazem açúcar e álcool.',
+      apoio: 'A cana-de-açúcar é usada para fazer açúcar e álcool.'
     }
   ];
 
@@ -68,8 +69,7 @@
   function rodape() {
     return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
       '<details class="detalhes"><summary>Créditos das imagens</summary>' +
-      '<p>No campo, as pessoas trabalham na agricultura e na pecuária.</p><ul>' +
-      '<li>Palavras do livro didático, p. 84, 85 e 92 a 95 (uso escolar).</li>' +
+      '<ul><li>Palavras do livro didático, p. 84, 85 e 92 a 95 (uso escolar).</li>' +
       '<li>Fotos do livro didático (uso escolar).</li>' +
       '<li>Ícones de emoji: Twemoji (CC BY 4.0).</li>' +
       '</ul></details>';
@@ -99,7 +99,6 @@
         '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
         '<p class="hint">' + JogoKit.esc(r.hint) + '</p>' +
         '<div data-toque></div>' +
-        '<div class="apoio-fala"><fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes></div>' +
         '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
       '</section>' +
       rodape();
@@ -110,7 +109,8 @@
       pergunta: r.pergunta,
       fichas: fichasDa(r),
       certas: r.certas,
-      msg: r.msg
+      msg: r.msg,
+      apoio: r.apoio
     });
     app.querySelector('[data-toque]').appendChild(ft);
 

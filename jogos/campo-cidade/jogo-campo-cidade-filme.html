@@ -46,17 +46,21 @@
       certa: 'Sim',
       msg: 'O filme de 1895 era mudo.',
       img: '../../img/hga/cc/cinema-1895.jpg',
-      alt: 'Foto antiga da primeira exibição de cinema, em 1895'
+      alt: 'Cena do filme A saída dos trabalhadores da fábrica, de 1895'
     },
     {
-      pergunta: 'Hoje os filmes são em preto e branco?',
-      certa: 'Não',
-      msg: 'Hoje os filmes são coloridos.'
+      pergunta: 'Hoje os filmes são coloridos?',
+      certa: 'Sim',
+      msg: 'Hoje os filmes são coloridos.',
+      img: '../../img/hga/cc/branca-neve.jpg',
+      alt: 'Foto do desenho de 1937, Branca de Neve, já colorido'
     },
     {
       pergunta: 'O 3-D já existia em 1895?',
       certa: 'Não',
-      msg: 'O 3-D não existia em 1895.'
+      msg: 'O 3-D chegou em 1953, com Museu de cera.',
+      img: '../../img/hga/cc/museu-cera.jpg',
+      alt: 'Foto do filme de 1953, em 3-D'
     },
     {
       pergunta: 'O primeiro filme com falas foi em 1927?',
@@ -162,6 +166,7 @@
         ' resumo="Você respondeu tudo!"></tela-fim>' +
       quadro() +
       rodape();
+    JogoKit.falar('Você respondeu tudo!', 0.85);
     subir();
   }
 

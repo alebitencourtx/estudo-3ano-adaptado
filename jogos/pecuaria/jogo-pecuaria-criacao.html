@@ -11,8 +11,8 @@
 <script src="../jogo-kit.js"></script>
 <style>
   jogo-topo,barra-progresso,tela-fim{display:block}
-  /* cartões só de texto: o JogoKit.pecaHtml nasce com um <img> vazio — esconda-o */
-  .peca > img[src=""]{display:none}
+  /* cartões só de texto: o JogoKit.pecaHtml nasce com um <img> (aqui vazio) — esconda-o */
+  .peca > img{display:none}
   /* no texto, o nome do cartão continua visível depois de encaixado */
   .peca .nome{font-size:.95rem;max-width:12em;text-align:center;line-height:1.2}
   .peca.encaixada .nome{display:block}
@@ -23,29 +23,44 @@
 <main id="app"></main>
 <script>
 /* ===== Solto ou confinado? (pecuária, livro p. 86, 87) =====
-   Classificar 6 cartões em 2 caixas: pecuária extensiva × intensiva.
-   Dois modos: arrastar (dedo e mouse) e tocar (cartão e depois a caixa).
-   Regras TEA: 1 instrução, 2 destinos, frases curtas (≤ 10 palavras),
-   sem cronômetro, erro sem punição — mostra a resposta certa e destaca
-   a caixa certa; a peça continua selecionada.
+   Classificar 8 cartões em 2 caixas: pecuária extensiva × intensiva.
+   Três rodadas, com até 3 cartões por tela; o contador continua somando os 8.
+   Dois modos: arrastar (dedo e mouse) e tocar.
+   Regras TEA: 1 instrução, 2 destinos, até 3 peças por tela,
+   sem cronômetro, erro sem punição — diz onde vai o cartão e mostra a frase
+   certa; a peça continua selecionada.
    Fotos: livro do 3º ano, p. 86 e 87. Emojis: Twemoji (CC-BY 4.0). */
 
 const ID = 'pec-criacao';
-const TOTAL = 6;
+const TOTAL = 8;                     /* 8 cartões, em 3 rodadas de até 3 */
+const POR_RODADA = 3;
+const ICO_VAZIO = 'data:,';          /* evita o <img src=""> do pecaHtml (não pede a página) */
 
 const ALVOS = [
-  { id: 'extensiva', nome: 'Extensiva', foto: '../../img/hga/pec/pasto.jpg',  alt: 'Gado solto no pasto' },
-  { id: 'intensiva', nome: 'Intensiva', foto: '../../img/hga/pec/curral.jpg', alt: 'Gado confinado no curral' }
+  { id: 'extensiva', nome: 'Extensiva', foto: '../../img/hga/pec/pasto.jpg',  alt: 'Gado criado solto no pasto em Rio Rufino, Santa Catarina' },
+  { id: 'intensiva', nome: 'Intensiva', foto: '../../img/hga/pec/curral.jpg', alt: 'Gado criado confinado em curral em Itaobim, Minas Gerais' }
 ];
 
 const PECAS = [
-  { id: 'solto',     alvo: 'extensiva', nome: 'Solto em grandes áreas',                  msg: 'Na extensiva, o gado fica solto.' },
-  { id: 'pastagens', alvo: 'extensiva', nome: 'Come nas pastagens',                      msg: 'Na extensiva, o gado come nas pastagens.' },
-  { id: 'poucos',    alvo: 'extensiva', nome: 'Poucos trabalhadores',                    msg: 'Na extensiva, poucos trabalhadores cuidam do gado.' },
-  { id: 'confinado', alvo: 'intensiva', nome: 'Confinado',                               msg: 'Na intensiva, o gado fica confinado.' },
-  { id: 'estabulo',  alvo: 'intensiva', nome: 'Come alimentação específica no estábulo', msg: 'Na intensiva, o gado come no estábulo.' },
-  { id: 'mais',      alvo: 'intensiva', nome: 'Mais trabalhadores',                      msg: 'Na intensiva, mais trabalhadores cuidam do gado.' }
+  { id: 'solto',     alvo: 'extensiva', ico: ICO_VAZIO, nome: 'Solto em grandes áreas',                  msg: 'Na extensiva, o gado fica solto.' },
+  { id: 'pastagens', alvo: 'extensiva', ico: ICO_VAZIO, nome: 'Come nas pastagens',                      msg: 'Na extensiva, o gado come nas pastagens.' },
+  { id: 'poucos',    alvo: 'extensiva', ico: ICO_VAZIO, nome: 'Poucos trabalhadores',                    msg: 'Na extensiva, poucos trabalhadores cuidam do gado.' },
+  { id: 'confinado', alvo: 'intensiva', ico: ICO_VAZIO, nome: 'Confinado',                               msg: 'Na intensiva, o gado fica confinado. Confinado quer dizer mantido em ambiente cercado.' },
+  { id: 'sem-grande-area', alvo: 'intensiva', ico: ICO_VAZIO, nome: 'Não precisa de grandes extensões de terra', msg: 'Na intensiva, não são necessárias grandes extensões de terra.' },
+  { id: 'estabulo',  alvo: 'intensiva', ico: ICO_VAZIO, nome: 'Alimentação específica no estábulo', msg: 'No estábulo, área coberta onde o gado fica abrigado, ele recebe alimentação específica.' },
+  { id: 'ordenha',   alvo: 'intensiva', ico: ICO_VAZIO, nome: 'Ordenha mecânica', msg: 'A retirada de leite pode ser feita por ordenha mecânica.' },
+  { id: 'mais',      alvo: 'intensiva', ico: ICO_VAZIO, nome: 'Mais trabalhadores',                      msg: 'Na intensiva, é necessário um número maior de trabalhadores.' }
 ];
+
+/* 3 rodadas de até 3 cartões (cada rodada tem as 2 caixas) */
+const RODADAS = [
+  ['solto', 'pastagens', 'confinado'],
+  ['poucos', 'sem-grande-area', 'estabulo'],
+  ['ordenha', 'mais']
+];
+
+const APOIO = 'Na extensiva o gado vive solto. Na intensiva o gado fica no estábulo.';
+const HINT = 'Arraste o cartão. Ou toque nele e na caixa.';
 
 const CREDITOS = [
   'Fotos de pasto e de curral: livro do 3º ano, p. 86 e 87.',
@@ -58,7 +73,8 @@ const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tó
   + '</ul></details>';
 
 const app = document.getElementById('app');
-let S = null;                       /* { colocadas, primeiras } */
+let rodada = 0;                     /* rodada da vez (0 e 1) */
+let S = null;                       /* { colocadas, naRodada, primeiras } */
 
 /* componentes web criados por innerHTML: garante que já renderizaram */
 function montarComponentes() {
@@ -89,19 +105,28 @@ function pulso(el) {
   setTimeout(() => el.classList.remove('pulso'), 1400);
 }
 
-/* ---------- tela do jogo ---------- */
+const nomeDoAlvo = id => (ALVOS.filter(a => a.id === id)[0] || {}).nome || '';
+
+/* ---------- uma rodada: até 3 cartões na bandeja ---------- */
 function renderJogo() {
+  rodada = 0;
+  S = { colocadas: 0, naRodada: 0, primeiras: 0 };
+  renderRodada();
+}
+
+function renderRodada() {
   JogoKit.arrasto.limpar();
-  S = { colocadas: 0, primeiras: 0 };
-  const pecas = JogoKit.embaralhar(PECAS);
+  S.naRodada = 0;
+  const pecas = JogoKit.embaralhar(RODADAS[rodada].map(id => PECAS.filter(p => p.id === id)[0]));
 
   app.innerHTML =
-    '<jogo-topo icone="🐄" titulo="Solto ou confinado?" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
-    + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
+    '<h1 class="sr-only">Solto ou confinado?</h1>'
+    + '<jogo-topo icone="🐄" titulo="Solto ou confinado?" contador="' + S.colocadas + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
+    + '<barra-progresso valor="' + S.colocadas + '" total="' + TOTAL + '"></barra-progresso>'
     + '<section class="card">'
-      + '<p class="pergunta">Coloque cada cartão na caixa certa.</p>'
-      + '<fala-botoes texto="Na extensiva o gado vive solto. Na intensiva o gado fica no estábulo."></fala-botoes>'
-      + '<p class="hint">Arraste o cartão para a caixa. Ou toque no cartão e depois na caixa.</p>'
+      + '<p class="pergunta">Coloque cada cartão na caixa: Extensiva ou Intensiva.</p>'
+      + '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>'
+      + '<p class="hint">' + JogoKit.esc(HINT) + '</p>'
       + '<div class="alvos" id="alvos" style="margin-top:16px">'
         + ALVOS.map(a =>
             '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="' + JogoKit.esc(a.nome) + '">'
@@ -148,14 +173,18 @@ function soltar(peca, alvo) {
     if (caixa) caixa.appendChild(peca);
     JogoKit.arrasto.limpar();
     S.colocadas++;
+    S.naRodada++;
     diz('✓ ' + peca.dataset.msg, true);
     JogoKit.falar(peca.dataset.msg, 0.85);
     atualizar();
     if (S.colocadas === TOTAL) setTimeout(renderFim, 900);
+    else if (S.naRodada === POR_RODADA) setTimeout(proximaRodada, 1500);
   } else {
     peca.dataset.tent = tent + 1;
-    diz('✗ ' + peca.dataset.msg, false);
-    JogoKit.falar(peca.dataset.msg, 0.85);
+    /* erro diz ONDE vai o cartão (nome da caixa) + a frase certa do livro */
+    const certoAviso = 'Vai na caixa ' + nomeDoAlvo(peca.dataset.alvo) + '. ' + peca.dataset.msg;
+    diz('✗ ' + certoAviso, false);
+    JogoKit.falar(certoAviso, 0.85);
     pulso(peca);
     /* a peça continua selecionada: é só tocar na caixa certa de novo */
     const bom = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
@@ -166,17 +195,24 @@ function soltar(peca, alvo) {
   }
 }
 
+function proximaRodada() {
+  rodada++;
+  renderRodada();
+}
+
 /* ---------- tela final ---------- */
 function renderFim() {
   JogoKit.arrasto.limpar();
   const a = S.primeiras, n = TOTAL;
   JogoKit.progresso.melhor(ID, a);
+  const estrelas = Math.max(1, a);              /* nunca termina com 0 estrela */
   const msg = a === n ? 'Você acertou tudo de primeira! Muito bem!'
     : (a === n - 1 ? 'Muito bem! Quase tudo de primeira.'
     : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
 
   app.innerHTML =
-    '<tela-fim icone="🐄" titulo="Solto ou confinado?" estrelas="' + a + '" total="' + n + '"'
+    '<h1 class="sr-only">Solto ou confinado?</h1>'
+    + '<tela-fim icone="🐄" titulo="Solto ou confinado?" estrelas="' + estrelas + '" total="' + n + '"'
     + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
     + RODAPE;
 

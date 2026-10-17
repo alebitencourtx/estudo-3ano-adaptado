@@ -12,6 +12,7 @@
 <style>
   .apoio{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:16px;
     border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
+  .apoio-texto{margin:10px 0 0;font-weight:700;color:var(--ink)}
   .prox{margin-top:16px}
   opcoes-resposta .feed{text-align:left}
 </style>
@@ -33,23 +34,24 @@
 
   const RODADAS = [
     {
-      pergunta: 'O que é o meeiro?',
+      pergunta: 'O que faz um meeiro?',
       certa: 'Um agricultor que reparte a produção com o dono da terra',
       erradas: ['Um robô que tira o leite', 'Um instrumento simples'],
       msg: 'O meeiro reparte a produção.'
     },
     {
-      pergunta: 'O que traz a vaca até a sala de ordenha com robôs?',
+      /* a ordenha.jpg é a ilustração da ordenha manual (p. 94): não serve para robôs.
+         A pergunta se apoia só no texto do livro (p. 94). */
+      pergunta: 'O que atrai a vaca até a sala de ordenha com robôs?',
       certa: 'A ração no cocho',
       erradas: ['O facão', 'A enxada'],
       msg: 'A vaca vai sozinha, atraída pela ração.',
-      img: '../../img/hga/agr/ordenha.jpg',
-      alt: 'Vaca na sala de ordenha'
+      apoio: 'Em 2013, chegou ao Brasil a ordenha com robôs.'
     },
     {
       pergunta: 'O que a cana vira?',
       certa: 'Açúcar e álcool',
-      erradas: ['Leite e queijo', 'Cimento'],
+      erradas: ['Leite e queijo', 'Máquinas'],
       msg: 'A cana vira açúcar e álcool.',
       img: '../../img/hga/agr/cana-facao.jpg',
       alt: 'Colheita de cana com facão'
@@ -57,12 +59,19 @@
     {
       pergunta: 'Para que serve o chip no pescoço da vaca?',
       certa: 'Traz informações de cada animal',
-      erradas: ['Corta a cana', 'Faz o queijo'],
+      erradas: ['Atrai a vaca ao cocho', 'Faz o queijo'],
       msg: 'O chip informa cada animal.',
       img: '../../img/hga/agr/chip.jpg',
       alt: 'Chip no pescoço da vaca'
     }
   ];
+
+  /* ícone por opção (o kit aceita um ícone por opção) */
+  const ICONES = {
+    'Açúcar e álcool': '../../img/jogo/agr/acucar.svg',
+    'Leite e queijo': '../../img/jogo/agr/leite.svg',
+    'Máquinas': '../../img/jogo/agr/trator.svg'
+  };
 
   let i = 0;          // rodada da vez (0 a 3)
   let acertos = 0;    // acertos de primeira (a criança responde uma vez por rodada)
@@ -71,7 +80,7 @@
   function rodape() {
     return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
       '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
-      '<li>Fotos do livro didático, p. 92, 93, 94 e 95 (uso escolar).</li>' +
+      '<li>Fotos e textos do livro didático, p. 92, 94 e 95 (uso escolar).</li>' +
       '<li>Perguntas com palavras do livro (p. 84, 85, 92, 93, 94 e 95).</li>' +
       '<li>Ícones de emoji: Twemoji (CC BY 4.0).</li>' +
       '</ul></details>';
@@ -88,11 +97,13 @@
     const r = RODADAS[i];
 
     app.innerHTML =
+      '<h1 class="sr-only">Perguntas da agricultura</h1>' +
       '<jogo-topo icone="🤖" titulo="Perguntas da agricultura" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
         '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
         '<p class="hint">Toque na resposta.</p>' +
+        (r.apoio ? '<p class="apoio-texto">' + JogoKit.esc(r.apoio) + '</p>' : '') +
         '<div data-quiz></div>' +
         '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
       '</section>' +
@@ -100,11 +111,13 @@
 
     /* o quiz em si é o componente do kit */
     const op = document.createElement('opcoes-resposta');
+    const opcoes = JogoKit.embaralhar([r.certa].concat(r.erradas));
     op.montar({
       pergunta: r.pergunta,
-      opcoes: JogoKit.embaralhar([r.certa].concat(r.erradas)),
+      opcoes: opcoes,
       certa: r.certa,
-      msg: r.msg
+      msg: r.msg,
+      icones: opcoes.map(function (o) { return ICONES[o] || ''; })
     });
 
     /* foto de apoio, quando houver: logo abaixo do enunciado e acima das opções */
@@ -145,6 +158,7 @@
   function terminar() {
     JogoKit.progresso.melhor(ID, acertos);
     app.innerHTML =
+      '<h1 class="sr-only">Perguntas da agricultura</h1>' +
       '<tela-fim icone="🤖" titulo="Perguntas da agricultura" estrelas="' + acertos + '" total="' + TOTAL + '"' +
         ' resumo="Você respondeu tudo!"></tela-fim>' +
       rodape();

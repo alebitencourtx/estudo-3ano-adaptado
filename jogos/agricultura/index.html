@@ -22,6 +22,7 @@ const JOGOS = [
   {arquivo:'jogo-agricultura-memoria.html', icone:'🌾', nome:'Memória do campo', como:'Encontre os dois iguais', oque:'Arado, colheitadeira e ordenha.', id:'mem-agr'},
   {arquivo:'jogo-agricultura-leite.html', icone:'🥛', nome:'O leite no tempo', como:'Passeie pelas paradas', oque:'Há cem anos, hoje, 2013 com robôs.', id:'tempo-leite'},
   {arquivo:'jogo-agricultura-alimentos.html', icone:'🍚', nome:'De onde vem a comida?', como:'Toque nos certos', oque:'Arroz, feijão, frutas e verduras.', id:'agr-alimentos'},
+  {arquivo:'jogo-agricultura-sim-nao.html', icone:'🌾', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Subsistência, máquinas, cana e robô.', id:'agr-simnao'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -37,7 +38,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🌾 Agricultura</h1>
-  <p class="sub">p. 84, 85, 92, 95 · 7 jogos · base do livro</p>
+  <p class="sub">p. 84, 85, 92, 95 · 8 jogos · base do livro</p>
   <p class="sub">Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.</p>
 </header>
 <section class="cards">

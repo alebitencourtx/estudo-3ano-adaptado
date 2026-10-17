@@ -28,7 +28,7 @@ opcoes-resposta .feed{text-align:left}
 <body>
 <main id="app"></main>
 <script>
-/* ===== O trabalhador volante — quiz de 4 rodadas, uma pergunta por tela (pecuária, p. 86, 87) =====
+/* ===== O trabalhador volante — quiz de 5 rodadas, uma pergunta por tela (pecuária, p. 86, 87) =====
    Conteúdo do livro (lista fechada em resumos/pec-86-87.md):
      trabalhador volante / boia-fria → plantio ou colheita por um tempo determinado;
      vive nas cidades próximas; é transportado de ônibus ou de caminhão.
@@ -40,14 +40,14 @@ opcoes-resposta .feed{text-align:left}
   const esc = JogoKit.esc;
 
   const ID_PROG = 'pec-volante';
-  const TOTAL = 4;
+  const TOTAL = 5;
 
   const APOIO = 'O trabalhador volante faz plantio ou colheita por um tempo determinado.';
   const DICA = 'Leia a pergunta e toque na resposta. Ou ouça com 🔊.';
 
   const RODADAS = [
     {
-      pergunta: 'Como também é chamado o trabalhador volante?',
+      pergunta: 'Que outro nome o livro dá ao trabalhador volante?',
       certa: 'Boia-fria',
       erradas: ['Administrador', 'Arrendatário'],
       msg: 'O trabalhador volante também é chamado boia-fria.',
@@ -63,14 +63,20 @@ opcoes-resposta .feed{text-align:left}
     {
       pergunta: 'Onde muitos trabalhadores volantes vivem?',
       certa: 'Nas cidades próximas',
-      erradas: ['Dentro da fazenda', 'Em outros países'],
+      erradas: ['Nas pastagens', 'No estábulo'],
       msg: 'Muitos vivem nas cidades próximas.'
     },
     {
-      pergunta: 'Como esses trabalhadores vão até o trabalho?',
+      pergunta: 'Como o trabalhador volante é levado até o trabalho?',
       certa: 'De ônibus ou de caminhão',
-      erradas: ['De avião', 'A pé'],
+      erradas: ['No plantio', 'Na colheita'],
       msg: 'Eles são transportados de ônibus ou de caminhão.'
+    },
+    {
+      pergunta: 'Como são as condições de trabalho de alguns trabalhadores do campo?',
+      certa: 'Sem equipamentos adequados, por longo período e com baixa remuneração',
+      erradas: ['Recebendo um salário', 'Dividindo parte da produção'],
+      msg: 'Alguns trabalham sem equipamentos adequados, por um longo período e com baixa remuneração.'
     }
   ];
 
@@ -88,7 +94,7 @@ opcoes-resposta .feed{text-align:left}
     '</ul><p>' + esc(FECHAMENTO) + '</p></details>';
 
   const app = document.getElementById('app');
-  let i = 0;          /* rodada da vez (0 a 3) */
+  let i = 0;          /* rodada da vez (0 a 4) */
   let acertos = 0;    /* acertos de primeira (uma resposta por rodada) */
 
   /* ---------- telas ---------- */

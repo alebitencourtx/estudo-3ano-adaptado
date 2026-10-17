@@ -3,41 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Memória dos bichos — Jogos do 3º ano</title>
+<title>Memória do pasto e do curral — Jogos do 3º ano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../jogo-kit.css">
 <script src="../jogo-kit.js"></script>
 <style>
-/* ===== Memória dos bichos — ajustes locais (o resto vem do jogo-kit.css) =====
+/* ===== Memória do pasto e do curral — ajustes locais (o resto vem do jogo-kit.css) =====
    Regras TEA: sem cronômetro, sem erro punido, poucas opções, feedback imediato. */
-.tabuleiro{grid-template-columns:repeat(3,1fr)}          /* 6 cartas = 2 linhas de 3 */
+.tabuleiro{grid-template-columns:repeat(4,1fr)}          /* 8 cartas = 2 linhas de 4 (cabe na tela) */
 .carta{flex-direction:column;gap:6px;cursor:pointer}
 .carta .verso{font-size:2rem;line-height:1}
 .carta.virada img{width:64%;height:auto;max-height:64%;object-fit:contain}
-.carta .nome{font-size:.95rem}
+.carta .nome{font-size:.9rem}
 .carta.travada{cursor:default}
 .recorde{color:var(--muted);font-size:.9rem;margin:10px 0 0;text-align:center;font-weight:700}
-@media (max-width:420px){ .tabuleiro{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:420px){
+  .tabuleiro{gap:8px}
+  .carta{padding:4px}
+  .carta .verso{font-size:1.4rem}
+  .carta .nome{font-size:.75rem}
+}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
-/* ===== Memória dos bichos — jogo da memória (pecuária, p. 86) =====
-   Conteúdo do livro: vaca dá leite, galinha dá ovos, ovelha dá lã.
-   3 pares (6 cartas). Sem cronômetro: o placar guarda o MENOR número de tentativas.
+/* ===== Memória do pasto e do curral — jogo da memória (pecuária, p. 86) =====
+   Encontre os dois pares de fotos do livro: gado solto e gado confinado.
+   2 pares (4 cartas). Sem cronômetro: o placar guarda o MENOR número de tentativas.
    Imagens: emojis Twemoji (CC-BY 4.0). */
 
 const BICHOS = [
-  { id:'vaca',    nome:'Vaca',    ico:'../../img/jogo/pec/emoji/vaca.svg',    frase:'A vaca dá leite.' },
-  { id:'galinha', nome:'Galinha', ico:'../../img/jogo/pec/emoji/galinha.svg', frase:'A galinha dá ovos.' },
-  { id:'ovelha',  nome:'Ovelha',  ico:'../../img/jogo/pec/emoji/ovelha.svg',  frase:'A ovelha dá lã.' }
+  { id:'extensiva', nome:'Pecuária extensiva', ico:'../../img/hga/pec/pasto.jpg',
+    frase:'Na extensiva, os animais são criados soltos em grandes áreas.' },
+  { id:'intensiva', nome:'Pecuária intensiva', ico:'../../img/hga/pec/curral.jpg',
+    frase:'Na intensiva, os animais são criados confinados.' }
 ];
-const TOTAL = 3;                 /* 3 pares */
+const TOTAL = 2;                 /* 2 pares = 4 cartas */
 const ID_PROG = 'mem-pec';       /* chave do progresso (menor nº de tentativas) */
 const ESPERA = 900;              /* ms com as 2 cartas diferentes abertas */
+const INSTRUCAO = 'Encontre os dois pares de fotos iguais.';
 
 const app = document.getElementById('app');
 let S = null;                    /* estado da partida */
@@ -56,10 +63,9 @@ function gravarRecorde(n) {
 }
 
 /* ---------- conteúdo ---------- */
-const rodape = '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>'
+const rodape = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
   + '<details class="detalhes"><summary>Créditos das imagens</summary><ul>'
-  + '<li>Ícones dos bichos: Twemoji, CC-BY 4.0.</li>'
-  + '<li>Conteúdo: livro do 3º ano, páginas 86 e 87 (vaca dá leite, galinha dá ovos, ovelha dá lã).</li>'
+  + '<li>Fotos do livro didático do 3º ano, página 86: gado solto no pasto e gado confinado no curral.</li>'
   + '</ul></details>';
 
 /* ---------- telas ---------- */
@@ -71,19 +77,20 @@ function comecar() {
 
 function renderJogo() {
   const rec = lerRecorde();
-  const cartas = JogoKit.embaralhar(BICHOS.concat(BICHOS));      /* 3 pares embaralhados */
+  const cartas = JogoKit.embaralhar(BICHOS.concat(BICHOS));      /* 2 pares embaralhados */
   app.innerHTML =
-    '<jogo-topo icone="🐄" titulo="Memória dos bichos" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<h1 class="sr-only">Memória do pasto e do curral</h1>' +
+    '<jogo-topo icone="🐄" titulo="Memória do pasto e do curral" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
     '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
     '<section class="card">' +
-      '<p class="pergunta" id="instrucao">Encontre os dois iguais. Ache os 3 pares.</p>' +
-      '<fala-botoes texto="Encontre os dois iguais. Ache os 3 pares."></fala-botoes>' +
+      '<p class="pergunta" id="instrucao">' + INSTRUCAO + '</p>' +
+      '<fala-botoes texto="' + INSTRUCAO + '"></fala-botoes>' +
       '<div class="tabuleiro" id="tabuleiro" aria-label="Cartas do jogo" style="margin-top:16px">' +
         cartas.map(cartaHtml).join('') +
       '</div>' +
       '<p class="feed" id="feed" aria-live="polite"></p>' +
       '<p class="recorde" id="recorde">' +
-        (rec == null ? 'Cada bicho aparece em duas cartas.'
+        (rec == null ? 'Encontre as duas fotos iguais.'
                      : 'Seu recorde: ' + rec + (rec === 1 ? ' tentativa.' : ' tentativas.')) +
       '</p>' +
     '</section>' + rodape;
@@ -144,7 +151,8 @@ function tocar(carta) {
     }
   } else {                                              /* diferentes: nunca punir */
     S.trava = true;
-    diz('Essa não é igual. Tente de novo.', '');
+    diz('As duas cartas são diferentes.', '');
+    JogoKit.falar('As duas cartas são diferentes.', 0.85);
     timer = setTimeout(() => {
       timer = null;
       fechar(a); fechar(b);
@@ -173,13 +181,14 @@ function mostrarFim() {
   const novo = gravarRecorde(S.tentativas);
   const recorde = novo ? S.tentativas : rec;
   const msg = (novo && rec != null ? 'Novo recorde! ' : '') +
-    'Você fez os 3 pares em ' + S.tentativas + (S.tentativas === 1 ? ' tentativa. ' : ' tentativas. ') +
+    'Você fez os 2 pares em ' + S.tentativas + (S.tentativas === 1 ? ' tentativa. ' : ' tentativas. ') +
     'Seu recorde: ' + recorde + (recorde === 1 ? ' tentativa.' : ' tentativas.');
 
   app.innerHTML =
-    '<tela-fim icone="🐄" titulo="Memória dos bichos" estrelas="' + TOTAL + '" total="' + TOTAL + '" ' +
-      'resumo="Você achou os 3 pares!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' + rodape;
-  JogoKit.falar('Você achou os 3 pares!', 0.85);
+    '<h1 class="sr-only">Memória do pasto e do curral</h1>' +
+    '<tela-fim icone="🐄" titulo="Memória do pasto e do curral" estrelas="' + TOTAL + '" total="' + TOTAL + '" ' +
+      'resumo="Você achou os 2 pares!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' + rodape;
+  JogoKit.falar('Você achou os 2 pares!', 0.85);
   window.scrollTo(0, 0);
 }
 

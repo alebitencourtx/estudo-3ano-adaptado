@@ -28,16 +28,16 @@
 <body>
 <main id="app"></main>
 <script>
-/* ===== Linha do tempo do cinema — p. 102, 104, 105 =====
+/* ===== Linha do tempo do cinema — p. 104 e 105 =====
    Lazer nas cidades brasileiras há cerca de cem anos: o cinema e as
    mudanças dele (mudo → sonoro, preto e branco → colorido, 3-D).
    Regras TEA: 1 instrução por tela, sem cronômetro, aprendizagem sem erro —
    só a parada destacada avança; tocar fora de ordem só explica qual é a vez.
-   Fotos do livro: p. 102 (1895), p. 104 (1927 e 1937) e p. 105 (1953). */
+   Fotos do livro: p. 104 (1895, 1927 e 1937) e p. 105 (1953). */
 
 const PARADAS = [
   { ano: 1895, foto: '../../img/hga/cc/cinema-1895.jpg',
-    alt: 'Foto antiga da primeira exibição de cinema, em 1895',
+    alt: 'Cena do filme A saída dos trabalhadores da fábrica, de 1895',
     frase: '1895: o cinema era mudo e preto e branco.' },
   { ano: 1927, foto: '../../img/hga/cc/cinema-1927.jpg',
     alt: 'Foto do filme de 1927, o primeiro com falas',
@@ -50,10 +50,9 @@ const PARADAS = [
     frase: '1953: o cinema em 3-D, com Museu de cera.' }
 ];
 const ID = 'tempo-cc';
-const INSTRUCAO = 'Passeie pela linha do tempo do cinema. Toque na parada que está brilhando.';
-const DICA = 'Toque na parada que está brilhando.';
+const INSTRUCAO = 'Toque na parada que está brilhando.';
 const CREDITOS = [
-  'Fotos do cinema: livro do 3º ano, História e Geografia — p. 102, 104 e 105 (uso escolar).',
+  'Fotos do cinema: livro do 3º ano, História e Geografia — p. 104 e 105 (uso escolar).',
   'História do cinema conforme o quadro da p. 105.'
 ];
 
@@ -96,11 +95,15 @@ function boot () {
       '<barra-progresso valor="' + i + '" total="' + n + '"></barra-progresso>' +
       '<section class="card">' +
         '<fala-botoes texto="' + esc(INSTRUCAO) + '"></fala-botoes>' +
-        '<p class="hint">' + esc(DICA) + '</p>' +
+        '<p class="hint">' + esc(INSTRUCAO) + '</p>' +
         '<div class="trilha">' + PARADAS.map(paradaHtml).join('') + '</div>' +
         '<p class="feed" id="feed" aria-live="polite"></p>' +
       '</section>' +
       rodapeHtml() + creditosHtml();
+
+    /* o contador do topo também é anunciado (aria-live) */
+    const cont = app.querySelector('jogo-topo [data-contador]');
+    if (cont) cont.setAttribute('aria-live', 'polite');
 
     app.querySelectorAll('.parada').forEach(el => {
       const k = +el.dataset.i;
@@ -113,11 +116,12 @@ function boot () {
   }
 
   function renderFim () {
-    K.progresso.melhor(ID, PARADAS.length);
+    /* a linha do tempo é sempre visitada inteira: grava "concluído", não uma nota */
+    K.progresso.melhor(ID, 1);
     app.innerHTML =
       '<tela-fim icone="🎬" titulo="Linha do tempo do cinema" estrelas="4" total="4" ' +
         'resumo="Você visitou todas as paradas!" ' +
-        'msg="Muito bem! Você viu o cinema mudar do mudo ao sonoro."></tela-fim>' +
+        'msg="Muito bem! Você viu os quatro anos do cinema."></tela-fim>' +
       '<section class="card">' +
         '<details class="detalhes" open><summary>O que mudou no cinema (p. 105)</summary>' +
           '<table class="quadro">' +

@@ -3,307 +3,236 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Jogo da Pecuária · Treino do 3º Ano</title>
+<title>Perguntas da pecuária — Jogos do 3º ano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
 <style>
-/* ===== Jogo da Pecuária — PoC (p. 86, 87) =====
-   Mesma linguagem visual do treino (paleta, fontes, fita).
-   Regras TEA: 1 instrução por rodada, frases curtas, 2 opções,
-   sem cronômetro, feedback imediato com a resposta certa. */
-:root{
-  --font-display:'Baloo 2','Nunito',system-ui,sans-serif;
-  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --paper:#EEF3FB; --grid:#DCE5F4; --card:#FFFFFF; --ink:#18264A; --muted:#55628A; --line:#CBD6EC;
-  --ok:#16794F; --ok-soft:#DDF4E8; --bad:#B63030; --bad-soft:#FBE4E4; --focus:#2A55C4; --star:#E09A00;
-  --on-acc:#FFFFFF;
-  --hg:#965F10; --hg-soft:#FBEED2;          /* cor da matéria: HG */
-  --acc:var(--hg); --acc-soft:var(--hg-soft);
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#0F1730; --grid:#17213F; --card:#18223F; --ink:#E9EEFB; --muted:#A5B1D2; --line:#2B3963;
-  --ok:#58D39B; --ok-soft:#153A2B; --bad:#FF8F8F; --bad-soft:#44202A; --focus:#8FB0FF; --star:#FFC83D; --on-acc:#0E1530;
-  --hg:#F2B650; --hg-soft:#3B2F14; color-scheme:dark}}
-:root[data-skin="rosa"]{
-  --paper:#FFF4F8; --grid:#FBE1EB; --card:#FFFFFF; --ink:#4A1D3A; --muted:#85556F; --line:#F2C9DA;
-  --focus:#C2255C; --star:#F7BC1D; --on-acc:#FFFFFF;
-  --hg:#A56A00; --hg-soft:#FFF0C2}
-@media (prefers-color-scheme:dark){:root[data-skin="rosa"]:not([data-theme="light"]){
-  --paper:#261424; --grid:#331B30; --card:#36202F; --ink:#FFEAF2; --muted:#D9B0C7; --line:#5C3553;
-  --focus:#FF9CC4; --star:#FFD43B;
-  --hg:#FFD95A; --hg-soft:#4A3A14}}
-
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  font-family:var(--font-body); color:var(--ink); background:var(--paper);
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-  background-size:28px 28px; -webkit-text-size-adjust:100%;
-}
-main{max-width:720px;margin:0 auto;padding:18px 16px 48px}
-h1,h2{font-family:var(--font-display);margin:0}
-button{font-family:inherit;cursor:pointer}
-a{color:var(--focus)}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-
-/* ---------- cabeçalho ---------- */
-.top{text-align:center;margin-bottom:18px}
-.top h1{font-size:1.75rem;line-height:1.15}
-.top .sub{color:var(--muted);margin:6px 0 0;font-size:.95rem}
-.top.small{display:flex;align-items:center;justify-content:space-between;text-align:left;margin-bottom:10px}
-.fita{width:26px;height:26px;object-fit:contain;vertical-align:middle;background:transparent;border:0}
-.cont{font-weight:800;color:var(--muted)}
-
-/* ---------- botões ---------- */
-.mini{min-height:44px;padding:8px 14px;border-radius:12px;border:2px solid var(--line);
-  background:var(--card);color:var(--ink);font-weight:800;font-size:.95rem}
-.btn{display:block;width:100%;min-height:56px;padding:14px 18px;border-radius:16px;
-  border:2px solid var(--acc);background:var(--acc-soft);color:var(--ink);font-weight:800;font-size:1.1rem;
-  font-family:var(--font-display)}
-.btn.jogar{width:auto;flex:none}
-.say{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-.hint{color:var(--muted);font-size:.9rem;margin:6px 0 0}
-
-/* ---------- cartões ---------- */
-.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
-.cards{display:flex;flex-direction:column;gap:12px}
-.fase{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.fase .ico{font-size:2rem;line-height:1}
-.fase .txt{flex:1 1 200px}
-.fase h2{font-size:1.2rem}
-.fase .sub{margin:4px 0 0;color:var(--muted);font-size:.9rem}
-.fase .marca{margin:6px 0 0;color:var(--acc);font-weight:800;font-size:.95rem}
-.fase-nome{font-size:1rem;color:var(--acc);margin-bottom:12px}
-
-/* ---------- rodada ---------- */
-.bar{height:14px;background:var(--card);border:2px solid var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px}
-.bar i{display:block;height:100%;background:var(--acc);transition:width .25s ease}
-.foto{display:block;width:100%;max-height:280px;object-fit:cover;border-radius:16px;
-  border:2px solid var(--line);background:var(--acc-soft);margin-bottom:14px}
-.pergunta{font-family:var(--font-display);font-size:1.35rem;line-height:1.3;margin:0}
-.opts{display:flex;flex-direction:column;gap:10px;margin-top:16px}
-.opt{display:block;width:100%;min-height:64px;padding:14px 18px;border-radius:16px;
-  border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:800;font-size:1.15rem;text-align:left}
-.opt:disabled{cursor:default}
-.opt.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
-.opt.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
-.feed{font-weight:700;margin:14px 0 0;min-height:1.4em}
-.feed.ok{color:var(--ok)}
-.feed.bad{color:var(--bad)}
-.prox{margin-top:14px}
-.rodape{margin:22px 0 0;text-align:center;font-size:.95rem}
-
-/* ---------- fim ---------- */
-.fim{text-align:center}
-.fim .estrelas{font-size:2rem;letter-spacing:4px;margin:10px 0}
-.fim .resumo{font-family:var(--font-display);font-size:1.5rem;margin:8px 0 0}
-.fim .msg{color:var(--muted);margin:8px 0 0}
-.fim .acoes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
-.fim .acoes .btn{width:auto}
+  /* ajustes locais do jogo "Perguntas da pecuária" (não altera o jogo-kit.css) */
+  .foto-rodada{display:block;width:100%;max-height:280px;object-fit:cover;border-radius:16px;
+    border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
+  .ico-rodada{display:block;width:112px;height:112px;object-fit:contain;margin:12px auto 0;
+    border-radius:16px;border:2px solid var(--line);background:var(--acc-soft);padding:8px}
+  .prox{margin-top:16px}
+  opcoes-resposta .feed{text-align:left}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
-/* ===== Jogo da Pecuária (PoC) — conteúdo das p. 86 e 87 =====
-   Fonte do conteúdo: resumos/pec-86-87.md (listas fechadas do livro).
-   Sem cronômetro, sem penalidade, 2 opções por rodada, resposta certa sempre aparece. */
+(function () {
+  'use strict';
 
-const KEY='treino3ano.jogo.pec.v1';        /* progresso deste jogo (separado do treino) */
-let prog={};
-try{const r=localStorage.getItem(KEY);if(r)prog=JSON.parse(r)||{}}catch(e){}
-const saveProg=()=>{try{localStorage.setItem(KEY,JSON.stringify(prog))}catch(e){}};
+  /* 🎯 Perguntas da pecuária — quiz de 5 rodadas, uma pergunta por tela.
+     Conteúdo fechado: resumos/pec-86-87.md (livro p. 86 e 87): pecuária extensiva
+     (solto, pastagens) × intensiva (confinado, estábulo, ordenha), carnes e couro.
+     Componente do kit: <opcoes-resposta> (feedback imediato; a resposta certa sempre
+     aparece e a errada fica marcada).
+     Regras TEA: frases curtas (≤ 10 palavras), 2 opções do livro, sem cronômetro,
+     áudio do enunciado e da resposta, "Próxima" só depois de responder. */
 
-/* herda a cor (azul/rosa) escolhida no treino principal — mesma chave do index.html */
-try{const t=JSON.parse(localStorage.getItem('treino3ano.v1')||'{}');document.documentElement.dataset.skin=(t&&t.skin)==='rosa'?'rosa':'azul'}catch(e){}
+  var app = document.getElementById('app');
+  var ID = 'pec-perguntas';
+  var TOTAL = 7;
 
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  var DICA = 'Toque na resposta. Ou ouça com 🔊.';
 
-/* ---------- voz (mesmo padrão do index: 🔊 0.85 e 🐢 0.55) ---------- */
-const canSpeak=()=>'speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined';
-function speak(text,rate,lang){
-  try{if(!canSpeak()||!text)return;window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);u.lang=lang||'pt-BR';u.rate=rate||0.85;
-    window.speechSynthesis.speak(u)}catch(e){}
-}
-const audioRow=()=>'<div class="say audio"><button type="button" class="mini" data-a="0.85">🔊 Ouvir</button>'
-  +'<button type="button" class="mini" data-a="0.55">🐢 Devagar</button></div>'
-  +(canSpeak()?'':'<p class="hint">Este aparelho não fala. Peça a um adulto para ler em voz alta.</p>');
+  /* foto (rodadas 1 e 2) ou ícone (rodadas 4 e 5); na tela as 2 opções saem embaralhadas */
+  var RODADAS = [
+    {
+      pergunta: 'O que é pecuária?',
+      certa: 'Criação e reprodução de animais',
+      errada: 'Plantio ou colheita',
+      msg: 'Pecuária é a criação e a reprodução de animais.'
+    },
+    {
+      pergunta: 'Que importância a pecuária tem no Brasil?',
+      certa: 'É uma atividade econômica importante',
+      errada: 'É um trabalhador volante',
+      msg: 'A pecuária é uma atividade econômica importante no Brasil.'
+    },
+    {
+      foto: '../../img/hga/pec/pasto.jpg',
+      alt: 'Gado solto no pasto',
+      pergunta: 'Na pecuária extensiva, onde o gado come?',
+      certa: 'Nas pastagens',
+      errada: 'No estábulo',
+      msg: 'Na extensiva, o gado come nas pastagens.'
+    },
+    {
+      foto: '../../img/hga/pec/curral.jpg',
+      alt: 'Gado confinado no curral',
+      pergunta: 'Na pecuária intensiva, como o gado fica?',
+      certa: 'Confinado no curral',
+      errada: 'Solto no pasto',
+      msg: 'Na intensiva, o gado fica confinado.'
+    },
+    {
+      pergunta: 'Onde o gado recebe alimentação específica na intensiva?',
+      certa: 'No estábulo',
+      errada: 'Nas pastagens',
+      msg: 'No estábulo, o gado recebe alimentação específica.'
+    },
+    {
+      ico: '../../img/jogo/pec/emoji/leite.svg',
+      alt: 'Leite',
+      pergunta: 'O que se tira do gado na ordenha?',
+      certa: 'O leite',
+      errada: 'O couro',
+      msg: 'A ordenha retira o leite.'
+    },
+    {
+      pergunta: 'Como pode ser feita a ordenha na pecuária intensiva?',
+      certa: 'Por ordenha mecânica',
+      errada: 'Nas pastagens',
+      msg: 'Na intensiva, a retirada do leite pode ser feita por ordenha mecânica.'
+    }
+  ];
 
-/* ---------- conteúdo (só palavras do livro) ---------- */
-const FASES=[
- {id:'f1',icone:'🐄',nome:'Solto ou no curral?',dica:'Pecuária extensiva e intensiva',rodadas:[
-   {img:'../../img/hga/pec/pasto.jpg',q:'Como vive o boi nesta foto?',
-    opts:['Solto no pasto','Confinado no curral'],ok:0,
-    exp:'Na pecuária extensiva, o boi vive solto no pasto.'},
-   {img:'../../img/hga/pec/curral.jpg',q:'Como vive o boi nesta foto?',
-    opts:['Confinado no curral','Solto no pasto'],ok:0,
-    exp:'Na pecuária intensiva, o boi vive confinado no curral.'},
-   {img:'../../img/hga/pec/curral.jpg',q:'Onde o boi da intensiva fica abrigado?',
-    opts:['Na pastagem','No estábulo'],ok:1,
-    exp:'O estábulo é a área coberta do gado.'},
-   {img:'../../img/hga/pec/pasto.jpg',q:'Onde o boi da extensiva come?',
-    opts:['No estábulo','Nas pastagens'],ok:1,
-    exp:'Na extensiva, o gado se alimenta nas pastagens.'},
-   {img:null,q:'Qual pecuária precisa de mais trabalhadores?',
-    opts:['A intensiva','A extensiva'],ok:0,
-    exp:'A intensiva precisa de mais trabalhadores.'}]},
+  var LEMBRETE = 'Por meio da pecuária obtemos leite, carnes, ovos e couro.';
+  var CREDITOS = [
+    'Fotos do livro do 3º ano, p. 86 e 87 (gado solto no pasto e gado confinado no curral).',
+    'Ícone de emoji (leite): Twemoji, CC-BY 4.0.'
+  ];
 
- {id:'f2',icone:'👨‍🌾',nome:'Quem faz o quê?',dica:'Os trabalhadores do campo',rodadas:[
-   {img:null,q:'Quem organiza as atividades?',
-    opts:['O administrador da propriedade','O arrendatário'],ok:0,
-    exp:'O administrador organiza as atividades.'},
-   {img:null,q:'Quem recebe um salário?',
-    opts:['O trabalhador fixo','O parceiro'],ok:0,
-    exp:'O trabalhador fixo recebe salário.'},
-   {img:null,q:'Quem divide parte da produção com o dono?',
-    opts:['O administrador da propriedade','O parceiro'],ok:1,
-    exp:'O parceiro divide parte da produção.'},
-   {img:null,q:'Quem aluga parte da terra?',
-    opts:['O arrendatário','O trabalhador fixo'],ok:0,
-    exp:'O arrendatário aluga parte da terra.'},
-   {img:null,q:'Quem faz o plantio ou a colheita por um tempo?',
-    opts:['O administrador da propriedade','O boia-fria'],ok:1,
-    exp:'O volante, também chamado boia-fria, faz o plantio ou a colheita por um tempo.'}]},
+  var i = 0;          /* rodada da vez (0 a 6) */
+  var acertos = 0;    /* acertos de primeira (uma resposta por rodada) */
 
- {id:'f3',icone:'🥛',nome:'O que a pecuária dá?',dica:'Leite, carnes, ovos e couro',rodadas:[
-   {img:'../../img/hga/agr/ordenha.jpg',q:'O que acontece nesta foto?',
-    opts:['Tira o leite','Planta milho'],ok:0,
-    exp:'A ordenha tira o leite da vaca.'},
-   {img:'../../img/hga/agr/queijo.jpg',q:'O que é feito com o leite?',
-    opts:['Carne','Queijo'],ok:1,
-    exp:'Com o leite se faz queijo.'},
-   {img:'../../img/hga/agr/gado.jpg',q:'O que a pecuária cria nesta foto?',
-    opts:['Galinhas e patos','Bois e vacas'],ok:1,
-    exp:'A pecuária cria bois e vacas.'},
-   {img:null,q:'O que a galinha nos dá?',
-    opts:['Ovos','Lã'],ok:0,
-    exp:'Da galinha vêm os ovos.'},
-   {img:null,q:'Do que é feito o couro?',
-    opts:['Das plantas','Da pele dos animais'],ok:1,
-    exp:'O couro é feito da pele dos animais.'}]}
-];
+  /* ---------- pedaços de tela ---------- */
+  function rodape() {
+    return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary>' +
+      '<p>' + JogoKit.esc(LEMBRETE) + '</p><ul>' +
+      CREDITOS.map(function (c) { return '<li>' + JogoKit.esc(c) + '</li>'; }).join('') +
+      '</ul></details>';
+  }
 
-const app=document.getElementById('app');
-let S=null;                       /* estado da rodada: {fase,i,acertos} */
+  /* componentes web criados por innerHTML: garante que já renderizaram */
+  function montarComponentes() {
+    app.querySelectorAll('jogo-topo,barra-progresso,tela-fim').forEach(function (el) {
+      if (!el.firstElementChild && typeof el.connectedCallback === 'function') el.connectedCallback();
+    });
+  }
 
-/* ---------- telas ---------- */
-function renderHome(){
-  app.innerHTML=`
-  <header class="top">
-    <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> Jogo da Pecuária</h1>
-    <p class="sub">História e Geo (base livro) · p. 86, 87</p>
-  </header>
-  <section class="cards">
-    ${FASES.map(f=>{
-      const b=prog[f.id];
-      return `<article class="card fase">
-        <span class="ico" aria-hidden="true">${f.icone}</span>
-        <div class="txt">
-          <h2>${esc(f.nome)}</h2>
-          <p class="sub">${esc(f.dica)}</p>
-          ${b!=null?`<p class="marca">⭐ Você acertou ${b} de ${f.rodadas.length}.</p>`:''}
-        </div>
-        <button type="button" class="btn jogar" data-fase="${f.id}">Jogar</button>
-      </article>`}).join('')}
-  </section>
-  <p class="rodape"><a href="../../index.html">← Voltar para o treino</a></p>`;
-  app.querySelectorAll('[data-fase]').forEach(b=>b.onclick=()=>comecar(b.dataset.fase));
-}
+  /* <jogo-topo> e <tela-fim> desenham o título no componente; a tela precisa de 1 <h1>.
+     Troca só a tag, mantendo classe e estilo: a aparência não muda. */
+  function tituloH1() {
+    var el = app.querySelector('.fase-nome');
+    if (!el || el.tagName === 'H1') return;
+    var h1 = document.createElement('h1');
+    h1.className = el.className;
+    if (el.getAttribute('style')) h1.setAttribute('style', el.getAttribute('style'));
+    h1.textContent = el.textContent;
+    el.parentNode.replaceChild(h1, el);
+  }
 
-function comecar(faseId){
-  const fase=FASES.find(f=>f.id===faseId);
-  if(!fase)return;
-  S={fase,i:0,acertos:0};
-  renderRodada();
-}
+  /* ---------- telas ---------- */
+  function montar() {
+    i = 0;
+    acertos = 0;
+    rodada();
+  }
 
-function renderRodada(){
-  const f=S.fase,r=f.rodadas[S.i],n=f.rodadas.length;
-  app.innerHTML=`
-  <header class="top small">
-    <button type="button" class="mini" id="sair">← Fases</button>
-    <span class="cont">${S.i+1}/${n}</span>
-  </header>
-  <div class="bar" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${S.i}">
-    <i style="width:${Math.round(S.i/n*100)}%"></i>
-  </div>
-  <section class="card">
-    <h2 class="fase-nome">${f.icone} ${esc(f.nome)}</h2>
-    ${r.img?`<img class="foto" src="${esc(r.img)}" alt="">`:''}
-    <p class="pergunta">${esc(r.q)}</p>
-    ${audioRow()}
-    <div class="opts">
-      ${r.opts.map((o,k)=>`<button type="button" class="opt" data-k="${k}">${esc(o)}</button>`).join('')}
-    </div>
-    <p class="feed" aria-live="polite"></p>
-    <button type="button" class="btn prox" id="prox" hidden>${S.i+1<n?'Próxima →':'Ver resultado →'}</button>
-  </section>`;
+  function rodada() {
+    var r = RODADAS[i];
 
-  const alvo=r.q+'. '+'Escolha: '+r.opts.join(' ou ')+'.';
-  app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>speak(alvo,+b.dataset.a));
-  document.getElementById('sair').onclick=renderHome;
-  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>responder(+b.dataset.k));
-  document.getElementById('prox').onclick=proxima;
-  window.scrollTo(0,0);
-}
+    app.innerHTML =
+      '<jogo-topo icone="🎯" titulo="Perguntas da pecuária" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
+        '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
+        '<div data-quiz></div>' +
+        '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
+      '</section>' +
+      rodape();
 
-function responder(k){
-  const f=S.fase,r=f.rodadas[S.i];
-  const certa=k===r.ok;
-  if(certa)S.acertos++;
-  app.querySelectorAll('.opt').forEach(b=>{
-    const i=+b.dataset.k;
-    if(i===r.ok)b.classList.add('ok');
-    else if(i===k)b.classList.add('bad');
-    b.disabled=true;
+    montarComponentes();
+    tituloH1();
+
+    /* o quiz em si é o componente do kit; a certa vai pelo TEXTO
+       (embaralhada: a resposta certa não fica sempre no mesmo lugar) */
+    var op = document.createElement('opcoes-resposta');
+    op.montar({
+      pergunta: r.pergunta,
+      opcoes: JogoKit.embaralhar([r.certa, r.errada]),
+      certa: r.certa,
+      msg: r.msg
+    });
+
+    /* apoio visual no enunciado: a foto do livro ou o ícone, antes das opções */
+    var img = document.createElement('img');
+    if (r.foto) {
+      img.className = 'foto-rodada';
+      img.src = r.foto;
+      img.alt = r.alt || '';
+      op.insertBefore(img, op.querySelector('.opcoes'));
+    } else if (r.ico) {
+      img.className = 'ico-rodada';
+      img.src = r.ico;
+      img.alt = r.alt || '';
+      op.insertBefore(img, op.querySelector('.opcoes'));
+    }
+
+    app.querySelector('[data-quiz]').appendChild(op);
+
+    var prox = app.querySelector('[data-prox]');
+    prox.onclick = proxima;
+
+    op.addEventListener('resposta', function (e) {
+      var ok = !!(e.detail && e.detail.ok);
+      if (ok) acertos++;
+      prox.classList.remove('escondido');
+      var barra = app.querySelector('barra-progresso');
+      if (barra) barra.atualizar(i + 1, TOTAL);
+      JogoKit.falar(ok ? ('✓ ' + r.msg) : ('✗ A resposta certa é: ' + r.certa + '. ' + r.msg));
+    });
+
+    subir();
+  }
+
+  function proxima() {
+    if (i + 1 < TOTAL) {
+      i++;
+      rodada();
+    } else {
+      terminar();
+    }
+  }
+
+  function terminar() {
+    JogoKit.progresso.melhor(ID, acertos);      /* melhor = acertos de primeira */
+    var msg = acertos === TOTAL
+      ? 'Muito bem! Você acertou tudo de primeira.'
+      : 'Você acertou ' + acertos + ' de ' + TOTAL + '. Pode jogar de novo.';
+    app.innerHTML =
+      '<tela-fim icone="🎯" titulo="Perguntas da pecuária" estrelas="' + acertos + '" total="' + TOTAL + '"' +
+        ' resumo="Você respondeu tudo!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
+      rodape();
+    montarComponentes();
+    tituloH1();
+    JogoKit.falar('Você acertou ' + acertos + ' de ' + TOTAL + '.');
+    subir();
+  }
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  document.addEventListener('fim', function (e) {
+    var acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') { montar(); }
+    else if (acao === 'outros') { location.href = 'index.html'; }
   });
-  const feed=app.querySelector('.feed');
-  feed.classList.add(certa?'ok':'bad');
-  feed.innerHTML=certa
-    ? '✓ Isso! '+esc(r.exp)
-    : '✗ Quase! A resposta certa é: <b>'+esc(r.opts[r.ok])+'</b>. '+esc(r.exp);
-  const bar=app.querySelector('.bar');
-  bar.querySelector('i').style.width=Math.round((S.i+1)/f.rodadas.length*100)+'%';
-  bar.setAttribute('aria-valuenow',S.i+1);
-  document.getElementById('prox').hidden=false;
-  if(certa)speak('Isso! '+r.exp,0.85);
-  else speak('Quase! A resposta certa é '+r.opts[r.ok]+'. '+r.exp,0.85);
-}
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
 
-function proxima(){
-  if(S.i+1<S.fase.rodadas.length){S.i++;renderRodada();}
-  else renderFim();
-}
-
-function renderFim(){
-  const f=S.fase,n=f.rodadas.length,a=S.acertos;
-  prog[f.id]=Math.max(prog[f.id]||0,a);
-  saveProg();
-  const estrelas='⭐'.repeat(a)+'☆'.repeat(n-a);
-  const msg=a===n?'Você acertou tudo! Muito bem!'
-    :(a===n-1?'Muito bem! Quase tudo certo.'
-    :'Você acertou '+a+' de '+n+'. Pode jogar de novo.');
-  app.innerHTML=`
-  <section class="card fim">
-    <h2 class="fase-nome">${f.icone} ${esc(f.nome)}</h2>
-    <p class="estrelas" aria-hidden="true">${estrelas}</p>
-    <p class="resumo">Você acertou ${a} de ${n}.</p>
-    <p class="msg">${esc(msg)}</p>
-    <div class="acoes">
-      <button type="button" class="btn" id="denovo">Jogar de novo</button>
-      <button type="button" class="btn" id="fases">Outras fases</button>
-    </div>
-  </section>
-  <p class="rodape"><a href="../../index.html">← Voltar para o treino</a></p>`;
-  document.getElementById('denovo').onclick=()=>comecar(f.id);
-  document.getElementById('fases').onclick=renderHome;
-  speak(a===n?'Você acertou tudo. Muito bem!':'Você acertou '+a+' de '+n+'.',0.85);
-  window.scrollTo(0,0);
-}
-
-renderHome();
+  montar();
+})();
 </script>
 </body>
 </html>

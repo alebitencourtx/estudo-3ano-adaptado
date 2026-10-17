@@ -95,7 +95,10 @@
       '</section>' +
       '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
       '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
-        CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>';
+        CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul>' +
+        '<p>Agrotóxicos servem para prevenir ou eliminar pragas. O uso frequente e inadequado pode prejudicar a saúde humana e animal.</p>' +
+        '<p>A agricultura, a pecuária e o extrativismo mineral usam muita água.</p>' +
+        '<p>O desmatamento também empobrece o solo e afeta os rios e as chuvas.</p></details>';
 
     app.querySelectorAll('.opcao.palavra').forEach(el => {
       el.addEventListener('click', () => tocarProblema(el));

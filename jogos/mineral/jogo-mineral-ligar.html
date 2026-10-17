@@ -14,11 +14,12 @@
    Regras TEA: toque grande, apoio visual, sem cronômetro, erro não trava nada. */
 .ligar .opcao{cursor:pointer;min-height:64px;justify-content:center;font-size:1.05rem}
 .ligar .opcao.palavra{padding:18px 12px}
-.ligar .opcao.foto{padding:8px}
+.ligar .opcao.foto{padding:8px;flex-direction:column;gap:6px}
 .ligar .opcao.foto img{width:100%;height:96px;object-fit:cover;border-radius:12px}
+.ligar .opcao.foto .nome{font-weight:800;font-size:.95rem;text-align:center;line-height:1.2}
+.ligar .opcao.foto .nota{font-size:.78rem;color:var(--muted);text-align:center;line-height:1.2}
 .ligar .opcao.pulso{animation:pulso .45s ease 3}
 .ligar .opcao.brilho{animation:brilho .9s ease 2}
-.ligar .opcao.palavra.feito{text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -26,7 +27,8 @@
 <script>
 /* ===== De onde vem? — ligar palavra → foto (extrativismo mineral, p. 90, 91) =====
    Conteúdo do livro (listas fechadas em resumos/min-90-91.md):
-     cobre → fios elétricos · ferro → aço · calcário → cimento · bauxita → alumínio.
+     cobre → fios elétricos · ferro → portões e ferramentas (com altas temperaturas vira aço)
+     calcário → cimento · bauxita → alumínio.
    Regras TEA: 4 pares, uma instrução, feedback imediato com a frase certa,
    erro aponta a foto certa e a criança tenta de novo (nada trava). */
 (function () {
@@ -34,19 +36,33 @@
   const esc = JogoKit.esc;
 
   const MINERAIS = [
-    { id: 'cobre',    palavra: 'Cobre',    foto: '../../img/hga/min/cobre.jpg',    alt: 'Fios elétricos de cobre', msg: 'Do cobre vêm os fios elétricos.' },
-    { id: 'ferro',    palavra: 'Ferro',    foto: '../../img/hga/min/ferro.jpg',    alt: 'Portão de ferro',         msg: 'Do ferro vem o aço.' },
-    { id: 'calcario', palavra: 'Calcário', foto: '../../img/hga/min/cimento.jpg',  alt: 'Sacos de cimento',        msg: 'Do calcário vem o cimento.' },
-    { id: 'bauxita',  palavra: 'Bauxita',  foto: '../../img/hga/min/aluminio.jpg', alt: 'Objeto de alumínio',      msg: 'Da bauxita vem o alumínio.' }
+    { id: 'cobre',    palavra: 'Cobre',    foto: '../../img/hga/min/cobre.jpg',
+      alt: 'Fios de cobre',        nome: 'Fios de cobre',        nota: '',
+      msg: 'Do cobre vêm os fios elétricos.' },
+    { id: 'ferro',    palavra: 'Ferro',    foto: '../../img/hga/min/ferro.jpg',
+      alt: 'Portão de ferro',      nome: 'Portão de ferro',      nota: '',
+      msg: 'Do ferro vêm portões e ferramentas.' },
+    { id: 'calcario', palavra: 'Calcário', foto: '../../img/hga/min/cimento.jpg',
+      alt: 'Sacos de cimento',     nome: 'Sacos de cimento',     nota: '',
+      msg: 'Do calcário vem o cimento.' },
+    { id: 'bauxita',  palavra: 'Bauxita',  foto: '../../img/hga/min/aluminio.jpg',
+      alt: 'Leiteira de alumínio', nome: 'Leiteira de alumínio', nota: 'Objeto de alumínio (vem da bauxita)',
+      msg: 'Da bauxita vem o alumínio.' }
   ];
   const TOTAL = MINERAIS.length;
-  const APOIO = 'Os minerais saem da natureza e viram produtos do nosso dia a dia.';
-  const DICA = 'Toque na palavra e depois na foto.';
+  const APOIO = 'Os minerais saem da natureza e viram produtos.';
+  const FALA = 'Ligue cada mineral ao produto que ele ajuda a fazer.';
+  const DICA = 'Arraste um mineral até o produto. Ou toque no mineral e depois no produto.';
 
   const CREDITOS = [
     'Fotos do livro de História e Geografia do 3º ano, p. 90 e 91 (uso escolar).',
-    'Fios de cobre, portão de ferro, sacos de cimento e objeto de alumínio.'
+    'Fios de cobre, portão de ferro, sacos de cimento e leiteira de alumínio.'
   ];
+
+  const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
+    + '<details class="detalhes"><summary>Créditos das imagens</summary><ul>'
+    + CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('')
+    + '</ul><p>O ferro, com outros elementos e altas temperaturas, vira aço.</p></details>';
 
   const app = document.getElementById('app');
   let sel = null;          /* palavra (.opcao.palavra) selecionada */
@@ -64,9 +80,10 @@
       '<jogo-topo icone="⛏️" titulo="De onde vem?" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<p class="pergunta">De onde vem cada produto?</p>' +
-        '<fala-botoes texto="' + esc(APOIO) + '"></fala-botoes>' +
+        '<p class="pergunta">Ligue cada mineral ao produto que ele ajuda a fazer.</p>' +
+        '<fala-botoes texto="' + esc(FALA) + '"></fala-botoes>' +
         '<p class="hint">' + esc(DICA) + '</p>' +
+        '<p class="hint">' + esc(APOIO) + '</p>' +
         '<div class="ligar">' +
           '<div class="coluna">' +
             MINERAIS.map(m =>
@@ -76,14 +93,16 @@
           '<div class="coluna">' +
             fotos.map(m =>
               '<div class="opcao foto" data-id="' + m.id + '" data-msg="' + esc(m.msg) + '" role="button" tabindex="0" ' +
-                'aria-label="' + esc(m.alt) + '"><img src="' + esc(m.foto) + '" alt=""></div>').join('') +
+                'aria-label="' + esc(m.alt) + '">' +
+                '<img src="' + esc(m.foto) + '" alt="">' +
+                '<span class="nome">' + esc(m.nome) + '</span>' +
+                (m.nota ? '<span class="nota">' + esc(m.nota) + '</span>' : '') +
+              '</div>').join('') +
           '</div>' +
         '</div>' +
         '<p class="feed" id="feed" aria-live="polite"></p>' +
       '</section>' +
-      '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>' +
-      '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
-        CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>';
+      RODAPE;
 
     app.querySelectorAll('.opcao.palavra').forEach(el => {
       el.addEventListener('click', () => tocarPalavra(el));
@@ -111,7 +130,7 @@
 
   function tocarFoto(el) {
     if (el.classList.contains('feito')) return;
-    if (!sel) { diz(DICA, false); return; }
+    if (!sel) { diz(DICA, true); JogoKit.falar(DICA, 0.85); return; }
 
     const idPalavra = sel.dataset.min;
     const d = dado(idPalavra);
@@ -132,7 +151,7 @@
       /* erro: mostra a frase do mineral escolhido e destaca a foto certa.
          A palavra continua selecionada — é só tocar na foto certa. */
       S.errou[idPalavra] = true;
-      diz('✗ Não é essa. ' + d.msg, false);
+      diz('✗ Tente outra foto. ' + d.msg, false);
       JogoKit.falar(d.msg, 0.85);
       const certa = app.querySelector('.opcao.foto[data-id="' + idPalavra + '"]');
       if (certa) {
@@ -168,15 +187,13 @@
     const n = S.primeiras;
     JogoKit.progresso.melhor('ligar-min', n);
     const msg = n === TOTAL ? 'Você acertou tudo de primeira!'
-      : n >= TOTAL - 1 ? 'Muito bem! Quase tudo de primeira.'
-      : 'Você acertou ' + n + ' de ' + TOTAL + ' de primeira. Pode jogar de novo.';
+      : n === TOTAL - 1 ? 'Muito bem! Quase tudo de primeira.'
+      : 'Você acertou ' + n + ' de ' + TOTAL + '. Jogue de novo.';
 
     app.innerHTML =
       '<tela-fim icone="⛏️" titulo="De onde vem?" estrelas="' + n + '" total="' + TOTAL + '" ' +
         'resumo="Você ligou tudo!" msg="' + esc(msg) + '"></tela-fim>' +
-      '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>' +
-      '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
-        CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>';
+      RODAPE;
 
     JogoKit.falar('Você ligou tudo! ' + n + ' de ' + TOTAL + ' de primeira.', 0.85);
     window.scrollTo(0, 0);

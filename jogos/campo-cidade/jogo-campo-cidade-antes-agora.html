@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Antigamente ou hoje? — Jogos do 3º ano</title>
+<title>Em 1895 ou atualmente? — Jogos do 3º ano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,33 +16,44 @@
 <body>
 <main id="app"></main>
 <script>
-/* ===== Antigamente ou hoje? (campo e cidade em diferentes tempos, livro p. 102, 104, 105) =====
-   Classificar 6 cartões em 2 caixas: Antigamente e Hoje.
-   Regras TEA: 1 instrução, 2 destinos, frases curtas, sem cronômetro,
-   erro sem punição (mostra a frase certa e a caixa certa pisca).
-   Ícones: Twemoji, CC-BY 4.0. Texto base: livro do 3º ano, p. 102, 104 e 105. */
+/* ===== Em 1895 ou atualmente? (livro p. 105) =====
+   Classificar os seis itens do quadro do livro em duas caixas — 3 cartões por tela
+   (nunca 6 de uma vez: regra TEA de carga baixa).
+   As respostas reproduzem o quadro: mudo/sonoro, preto e branco/colorido, 3-D.
+   Regras TEA: 1 instrução, 2 destinos, 3 peças por tela, frases curtas, sem cronômetro,
+   aprendizagem sem erro — o erro mostra a frase certa e a caixa certa pisca.
+   Fonte: livro p. 105. Ícones: Twemoji, CC-BY 4.0. */
 
 const ID = 'cc-antes-agora';
-const TOTAL = 6;
+const TOTAL = 6;                 /* 6 cartões no jogo inteiro */
+const POR_TELA = 3;              /* 3 cartões por tela */
+const TELAS = 2;
 
 const ALVOS = [
-  { id: 'antigamente', ico: '../../img/jogo/cc/lampiao.svg', nome: 'Antigamente' },
-  { id: 'hoje',        ico: '../../img/jogo/cc/carro.svg',   nome: 'Hoje' }
+  { id: '1895',      ico: '../../img/jogo/cc/cinema.svg', nome: 'Em 1895' },
+  { id: 'atualmente', ico: '../../img/jogo/cc/camera.svg', nome: 'Atualmente' }
 ];
 
-const PECAS = [
-  { id: 'lampiao', alvo: 'antigamente', ico: '../../img/jogo/cc/lampiao.svg', nome: 'Iluminar a casa com lampião', msg: 'Antigamente, a casa era iluminada por lampião.' },
-  { id: 'carroca', alvo: 'antigamente', ico: '../../img/jogo/cc/cavalo.svg',   nome: 'Viajar de carroça ou a cavalo', msg: 'Antigamente, viajava-se de carroça.' },
-  { id: 'bonde',   alvo: 'antigamente', ico: '../../img/jogo/cc/bonde.svg',    nome: 'Andar a pé ou de bonde',      msg: 'Antigamente, andava-se a pé ou de bonde.' },
-  { id: 'energia', alvo: 'hoje',        ico: '../../img/jogo/imp/lampada.svg', nome: 'Usar energia elétrica',       msg: 'Hoje, as casas usam energia elétrica.' },
-  { id: 'viagem',  alvo: 'hoje',        ico: '../../img/jogo/cc/carro.svg',    nome: 'Viajar de carro, ônibus e avião', msg: 'Hoje, viajamos de carro, ônibus e avião.' },
-  { id: 'metro',   alvo: 'hoje',        ico: '../../img/jogo/cc/metro.svg',    nome: 'Andar de metrô',              msg: 'Hoje, a cidade tem metrô.' }
+const CARTÕES = [
+  /* ----- tela 1: coluna "Em 1895" do quadro ----- */
+  { id: 'mudo', alvo: '1895', ico: '../../img/jogo/cc/cinema.svg',
+    nome: 'Mudo', msg: 'Em 1895, o cinema era mudo.' },
+  { id: 'pb', alvo: '1895', ico: '../../img/jogo/cc/camera.svg',
+    nome: 'Preto e branco', msg: 'Em 1895, o cinema era preto e branco.' },
+  { id: 'sem-3d', alvo: '1895', ico: '../../img/jogo/cc/cinema.svg',
+    nome: '3-D não existia', msg: 'Em 1895, a tecnologia 3-D não existia.' },
+  /* ----- tela 2: coluna "Atualmente" do quadro ----- */
+  { id: 'sonoro', alvo: 'atualmente', ico: '../../img/jogo/cc/cinema.svg',
+    nome: 'Sonoro', msg: 'Atualmente, os filmes são sonoros.' },
+  { id: 'colorido', alvo: 'atualmente', ico: '../../img/jogo/cc/camera.svg',
+    nome: 'Colorido', msg: 'Atualmente, os filmes são coloridos.' },
+  { id: 'com-3d', alvo: 'atualmente', ico: '../../img/jogo/cc/cinema.svg',
+    nome: '3-D existe', msg: 'Atualmente, a tecnologia 3-D existe.' }
 ];
 
 const CREDITOS = [
-  'Ícones de lampião, cavalo, bonde, carro, metrô e lâmpada: Twemoji, CC-BY 4.0.',
-  'Fotos do livro do 3º ano, p. 102, 104 e 105.',
-  'Texto base: livro do 3º ano, p. 102, 104 e 105 (campo e cidade em diferentes tempos).'
+  'Ícones de cinema e câmera: Twemoji, CC-BY 4.0.',
+  'Texto base: quadro do livro do 3º ano, p. 105.'
 ];
 
 const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
@@ -51,7 +62,12 @@ const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tó
   + '</ul></details>';
 
 const app = document.getElementById('app');
-let S = null;                       /* { colocadas, primeiras } */
+let S = null;                       /* { tela, colocadas } */
+
+/* cartões da tela da vez (3 por tela) */
+function cartoesDaTela(tela) {
+  return CARTÕES.slice(tela * POR_TELA, (tela + 1) * POR_TELA);
+}
 
 /* componentes web criados por innerHTML: garante que já renderizaram */
 function montarComponentes() {
@@ -60,9 +76,17 @@ function montarComponentes() {
   });
 }
 
+/* o cartão mostra o ícone e o nome */
+function cartaoHtml(p) {
+  return JogoKit.pecaHtml(p);
+}
+
 function atualizar() {
   const cont = app.querySelector('jogo-topo [data-contador]');
-  if (cont) cont.textContent = S.colocadas + '/' + TOTAL;
+  if (cont) {
+    cont.textContent = S.colocadas + '/' + TOTAL;
+    cont.setAttribute('aria-live', 'polite');
+  }
   const bar = app.querySelector('barra-progresso');
   if (bar) {
     if (!bar.querySelector('.bar') && typeof bar.render === 'function') bar.render();
@@ -82,19 +106,24 @@ function pulso(el) {
   setTimeout(() => el.classList.remove('pulso'), 1400);
 }
 
-/* ---------- tela do jogo ---------- */
+/* ---------- telas ---------- */
 function renderJogo() {
   JogoKit.arrasto.limpar();
-  S = { colocadas: 0, primeiras: 0 };
-  const pecas = JogoKit.embaralhar(PECAS);
+  S = { tela: 0, colocadas: 0 };
+  renderTela();
+}
+
+function renderTela() {
+  JogoKit.arrasto.limpar();
+  const cartoes = JogoKit.embaralhar(cartoesDaTela(S.tela));
 
   app.innerHTML =
-    '<jogo-topo icone="⏳" titulo="Antigamente ou hoje?" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
-    + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
+    '<jogo-topo icone="🎬" titulo="Em 1895 ou atualmente?" contador="' + S.colocadas + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
+    + '<barra-progresso valor="' + S.colocadas + '" total="' + TOTAL + '"></barra-progresso>'
     + '<section class="card">'
-      + '<p class="pergunta">Isso é de antigamente ou de hoje?</p>'
-      + '<fala-botoes texto="Antes, o campo e a cidade eram diferentes. Muitas coisas mudaram."></fala-botoes>'
-      + '<p class="hint">Arraste o cartão para a caixa certa. Ou toque no cartão e depois na caixa.</p>'
+      + '<p class="pergunta">Este cartão é de 1895 ou de hoje?</p>'
+      + '<fala-botoes texto="Ligue cada cartão ao tempo: 1895 ou hoje."></fala-botoes>'
+      + '<p class="hint">Arraste o cartão. Ou toque no cartão e na caixa.</p>'
       + '<div class="alvos" id="alvos" style="margin-top:16px">'
         + ALVOS.map(a =>
             '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="' + JogoKit.esc(a.nome) + '">'
@@ -104,7 +133,7 @@ function renderJogo() {
           + '</div>').join('')
       + '</div>'
       + '<div class="bandeja" id="bandeja">'
-        + pecas.map(p => JogoKit.pecaHtml(p)).join('')
+        + cartoes.map(cartaoHtml).join('')
       + '</div>'
       + '<p class="feed" id="feed" aria-live="polite"></p>'
     + '</section>'
@@ -131,11 +160,9 @@ function falarNome(peca) {
 function soltar(peca, alvo) {
   if (!peca || !alvo || peca.dataset.feita) return;
   const certo = peca.dataset.alvo === alvo.dataset.id;
-  const tent = +peca.dataset.tent || 0;
 
   if (certo) {
     peca.dataset.feita = '1';
-    if (tent === 0) S.primeiras++;
     peca.classList.add('encaixada');
     const caixa = alvo.querySelector('.encaixados');
     if (caixa) caixa.appendChild(peca);
@@ -144,13 +171,16 @@ function soltar(peca, alvo) {
     diz('✓ ' + peca.dataset.msg, true);
     JogoKit.falar(peca.dataset.msg, 0.85);
     atualizar();
-    if (S.colocadas === TOTAL) setTimeout(renderFim, 900);
+    if (telaCheia()) {
+      if (S.tela + 1 < TELAS) setTimeout(proximaTela, 900);
+      else setTimeout(renderFim, 900);
+    }
   } else {
-    peca.dataset.tent = tent + 1;
+    /* o erro mostra a frase certa e pisca a caixa certa; o cartão continua
+       selecionado — é só tocar na caixa certa. */
     diz('✗ ' + peca.dataset.msg, false);
     JogoKit.falar(peca.dataset.msg, 0.85);
     pulso(peca);
-    /* o cartão continua selecionado: é só tocar na caixa certa */
     const bom = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
     if (bom) {
       bom.classList.add('brilho');
@@ -159,18 +189,25 @@ function soltar(peca, alvo) {
   }
 }
 
+/* a tela da vez já está toda no lugar? */
+function telaCheia() {
+  return app.querySelectorAll('.peca.encaixada').length === POR_TELA;
+}
+
+function proximaTela() {
+  S.tela++;
+  renderTela();
+}
+
 /* ---------- tela final ---------- */
 function renderFim() {
   JogoKit.arrasto.limpar();
-  const a = S.primeiras, n = TOTAL;
-  JogoKit.progresso.melhor(ID, a);
-  const msg = a === n ? 'Você acertou tudo de primeira! Muito bem!'
-    : (a === n - 1 ? 'Muito bem! Quase tudo de primeira.'
-    : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
+  /* aprendizagem sem erro: o jogo sempre termina com todas as estrelas */
+  JogoKit.progresso.melhor(ID, 1);
 
   app.innerHTML =
-    '<tela-fim icone="⏳" titulo="Antigamente ou hoje?" estrelas="' + a + '" total="' + n + '"'
-    + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
+    '<tela-fim icone="🎬" titulo="Em 1895 ou atualmente?" estrelas="' + TOTAL + '" total="' + TOTAL + '"'
+    + ' resumo="Você colocou tudo no lugar!"></tela-fim>'
     + RODAPE;
 
   montarComponentes();
@@ -182,7 +219,7 @@ function renderFim() {
     else location.href = 'index.html';
   });
 
-  JogoKit.falar('Tudo no lugar! Você acertou ' + a + ' de ' + n + ' de primeira.', 0.85);
+  JogoKit.falar('Você colocou tudo no lugar!', 0.85);
   window.scrollTo(0, 0);
 }
 

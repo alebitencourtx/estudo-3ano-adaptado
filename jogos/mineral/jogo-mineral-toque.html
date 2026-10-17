@@ -14,6 +14,8 @@
     border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
   .prox{margin-top:16px}
   fichas-toque .feed{text-align:left}
+  .aviso{background:var(--acc-soft);border-radius:12px;padding:10px 12px;margin:12px 0 0;
+    font-weight:800;text-align:left}
 </style>
 </head>
 <body>
@@ -31,10 +33,12 @@
   const app = document.getElementById('app');
   const ID = 'min-toque';
   const TOTAL = 3;
+  const HINT = 'Toque em 2 fichas.';
+  const AVISO_CHEIO = 'Você marcou 3. Toque 1 ficha para tirar.';
 
   const RODADAS = [
     {
-      pergunta: 'Toque nas 2 coisas feitas com cobre.',
+      pergunta: 'Toque nas duas opções feitas com cobre.',
       certas: ['Fios elétricos', 'Utensílios domésticos'],
       distrator: 'Portão de ferro',
       msg: 'O cobre faz fios e utensílios.',
@@ -42,17 +46,17 @@
       alt: 'Fios de cobre'
     },
     {
-      pergunta: 'Toque nas 2 coisas feitas de ferro.',
+      pergunta: 'Toque nas duas opções feitas de ferro.',
       certas: ['Ferramentas', 'Automóveis'],
       distrator: 'Cimento',
       msg: 'Com o ferro fazemos ferramentas e automóveis.',
       img: '../../img/hga/min/ferro.jpg',
-      alt: 'Peça de ferro'
+      alt: 'Portão de ferro'
     },
     {
-      pergunta: 'Toque nos 2 recursos minerais.',
+      pergunta: 'Toque nos dois recursos minerais.',
       certas: ['Areia', 'Calcário'],
-      distrator: 'Leite',
+      distrator: 'Fios elétricos',
       msg: 'Os minerais saem do solo e do subsolo.',
       img: '../../img/hga/min/areia.jpg',
       alt: 'Monte de areia'
@@ -72,6 +76,13 @@
       '</ul></details>';
   }
 
+  /* resumo do fim pelo resultado (não é sempre "acertou tudo") */
+  function resumo(a) {
+    if (a === TOTAL) return 'Você acertou tudo!';
+    if (a === TOTAL - 1) return 'Você acertou quase tudo.';
+    return 'Você acertou ' + a + ' de ' + TOTAL + '.';
+  }
+
   /* ---------- telas ---------- */
   function montar() {
     i = 0;
@@ -87,8 +98,9 @@
       '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
         '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
-        '<p class="hint">Toque em 2 fichas e depois em Conferir.</p>' +
+        '<p class="hint">' + HINT + '</p>' +
         '<div data-toque></div>' +
+        '<p class="aviso escondido" data-aviso aria-live="polite"></p>' +
         '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
       '</section>' +
       rodape();
@@ -111,16 +123,33 @@
 
     app.querySelector('[data-toque]').appendChild(ft);
 
+    /* aviso quando a criança marca mais fichas do que o jogo pede:
+       o "Conferir" do kit só libera com 2 marcadas */
+    const aviso = app.querySelector('[data-aviso]');
+    const contarMarcadas = function () {
+      const n = ft.querySelectorAll('.ficha.sel').length;
+      if (n > 2) {
+        aviso.textContent = AVISO_CHEIO;
+        aviso.classList.remove('escondido');
+      } else {
+        aviso.textContent = '';
+        aviso.classList.add('escondido');
+      }
+    };
+    ft.querySelector('.fichas').addEventListener('click', contarMarcadas);
+
     const prox = app.querySelector('[data-prox]');
     prox.onclick = proxima;
 
     ft.addEventListener('conferido', function (e) {
       const ok = !!(e.detail && e.detail.ok);
       if (ok) acertos++;
+      contarMarcadas();
       prox.classList.remove('escondido');
       const barra = app.querySelector('barra-progresso');
       if (barra) barra.atualizar(i + 1, TOTAL);
-      JogoKit.falar(ok ? ('✓ ' + r.msg) : ('✗ Os certos são: ' + r.certas.join(', ') + '. ' + r.msg));
+      /* um único áudio por conferida (sem repetir o texto do feed) */
+      JogoKit.falar(ok ? r.msg : ('Os certos são ' + r.certas.join(' e ') + '. ' + r.msg), 0.85);
     });
 
     subir();
@@ -139,8 +168,9 @@
     JogoKit.progresso.melhor(ID, acertos);
     app.innerHTML =
       '<tela-fim icone="👆" titulo="Toque nos certos" estrelas="' + acertos + '" total="' + TOTAL + '"' +
-        ' resumo="Você acertou tudo!"></tela-fim>' +
+        ' resumo="' + JogoKit.esc(resumo(acertos)) + '"></tela-fim>' +
       rodape();
+    JogoKit.falar(resumo(acertos), 0.85);
     subir();
   }
 

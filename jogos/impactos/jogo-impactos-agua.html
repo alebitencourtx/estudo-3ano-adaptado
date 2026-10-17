@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A água do rio — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+  jogo-topo,barra-progresso,tela-fim{display:block}
+  /* ordenar 3 passos: o alvo mostra o número grande e, depois do acerto, a frase do passo */
+  .alvo .num{font-family:var(--font-display);font-weight:800;font-size:2.6rem;line-height:1;color:var(--acc)}
+  .alvo .frase{font-weight:800;font-size:.98rem;margin:0}
+  .alvo .frase:empty{display:none}
+  /* toque grande: o alvo e a peça passam dos 44 px exigidos */
+  .alvo{min-height:104px}
+  .peca{min-height:44px}
+  /* o kit só anima .peca.pulso; aqui o passo certo também pulsa depois do erro */
+  .alvo.pulso{animation:pulso .45s ease 3;border-color:var(--acc)}
+  .peca .nome{font-size:.9rem;max-width:11em;text-align:center;line-height:1.2}
+  .bandeja{margin-top:4px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  'use strict';
+
+  /* 💧 A água do rio — ORDENAR os 3 passos do esgoto no rio (1, 2, 3),
+     arrastando a peça ou tocando na peça e no número.
+     Conteúdo fechado: resumos/imp-108-113.md (livro p. 113) — esgoto sem tratamento
+     contamina córregos e rios; o lixo na água causa poluição e aumenta as doenças.
+     Regras TEA: 1 instrução por tela, frases curtas (≤ 10 palavras), sem cronômetro,
+     sem punição — no erro aparecem a resposta certa (1 frase: "No passo N, …") e o
+     passo certo pisca; a peça continua selecionada para a criança só tocar no lugar certo. */
+
+  var app = document.getElementById('app');
+  var ID = 'imp-agua';
+  var TOTAL = 3;
+
+  var INSTRUCAO = 'Ponha as frases na ordem em que acontecem.';
+  var APOIO = 'O esgoto sem tratamento contamina os rios.';
+
+  /* frase = o passo; msg = a mesma resposta com o número do passo (feedback do erro) */
+  var PASSOS = {
+    '1': {
+      foto:  '../../img/hga/imp/esgoto.jpg',
+      alt:   'Esgoto sem tratamento em um bairro',
+      frase: 'O esgoto não é tratado.',
+      msg:   'No passo 1, o esgoto não é tratado.'
+    },
+    '2': {
+      ico:   '../../img/jogo/imp/agua.svg',
+      frase: 'O esgoto contamina os córregos e rios.',
+      msg:   'No passo 2, o esgoto contamina os córregos e rios.'
+    },
+    '3': {
+      ico:   '../../img/jogo/imp/peixe.svg',
+      frase: 'A água suja pode aumentar as doenças.',
+      msg:   'No passo 3, a água suja pode aumentar as doenças.'
+    }
+  };
+
+  var CREDITOS = 'Foto do livro didático, p. 113; ícones Twemoji, CC-BY 4.0.';
+  var FECHAMENTO = 'O lixo na água também causa poluição.';
+
+  var RODAPE =
+    '<p class="rodape">' +
+      '<a href="index.html">← Todos os jogos do tópico</a> · ' +
+      '<a href="../index.html">← Todos os tópicos</a> · ' +
+      '<a href="../../index.html">← Treino</a>' +
+    '</p>' +
+    '<details class="detalhes"><summary>Créditos das imagens</summary>' +
+      '<p>' + JogoKit.esc(CREDITOS) + '</p>' +
+      '<p>' + JogoKit.esc(FECHAMENTO) + '</p>' +
+    '</details>';
+
+  var errados = {};           /* passos que já erraram (não contam como acerto de primeira) */
+  var feitas = 0;             /* passos encaixados */
+  var primeira = 0;           /* acertos de primeira (0 a 3) → estrelas */
+  var brilhoTimer = null;
+  var feed = null, topo = null, barra = null;
+
+  /* ---------- pedaços de tela ---------- */
+  function alvoHtml(id) {
+    return '<div class="alvo" data-id="' + id + '" role="button" tabindex="0" aria-label="Passo ' + id + '">' +
+        '<span class="num" aria-hidden="true">' + id + '</span>' +
+        '<p class="frase" data-frase></p>' +
+        '<div class="encaixados" data-encaixados></div>' +
+      '</div>';
+  }
+
+  function pecaHtml(id) {
+    var p = PASSOS[id];
+    return JogoKit.pecaHtml({ id: id, alvo: id, foto: p.foto, ico: p.ico, nome: p.frase, msg: p.msg, alt: p.alt });
+  }
+
+  /* a foto do passo 1 traz alt (descrição para o leitor de tela) e, nesse caso,
+     o kit não escreve o nome visível na peça: a frase do passo aparece sempre. */
+  function nomeNaPeca(peca) {
+    if (peca.querySelector('.nome')) return;
+    var n = document.createElement('span');
+    n.className = 'nome';
+    n.textContent = PASSOS[peca.dataset.id].frase;
+    peca.appendChild(n);
+  }
+
+  /* componentes web criados por innerHTML: garante que já renderizaram */
+  function montarComponentes() {
+    app.querySelectorAll('jogo-topo,barra-progresso,tela-fim').forEach(function (el) {
+      if (!el.firstElementChild && typeof el.connectedCallback === 'function') el.connectedCallback();
+    });
+  }
+
+  /* <jogo-topo> e <tela-fim> desenham o título no componente; a tela precisa de 1 <h1>.
+     Troca só a tag, mantendo classe e estilo: a aparência não muda. */
+  function tituloH1() {
+    var el = app.querySelector('.fase-nome');
+    if (!el || el.tagName === 'H1') return;
+    var h1 = document.createElement('h1');
+    h1.className = el.className;
+    if (el.getAttribute('style')) h1.setAttribute('style', el.getAttribute('style'));
+    h1.textContent = el.textContent;
+    el.parentNode.replaceChild(h1, el);
+  }
+
+  /* ---------- telas ---------- */
+  function montar() {
+    errados = {};
+    feitas = 0;
+    primeira = 0;
+    if (brilhoTimer) { clearTimeout(brilhoTimer); brilhoTimer = null; }
+    JogoKit.arrasto.limpar();
+
+    var ids = JogoKit.embaralhar(['1', '2', '3']);   /* bandeja embaralhada a cada partida */
+
+    app.innerHTML =
+      '<jogo-topo icone="💧" titulo="A água do rio" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<p class="pergunta">' + JogoKit.esc(INSTRUCAO) + '</p>' +
+        '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>' +
+      '</section>' +
+      '<section class="card">' +
+        '<div class="alvos">' + ['1', '2', '3'].map(alvoHtml).join('') + '</div>' +
+        '<div class="bandeja" data-bandeja aria-label="Passos">' + ids.map(pecaHtml).join('') + '</div>' +
+        '<p class="feed" data-feed aria-live="polite"></p>' +
+      '</section>' +
+      RODAPE;
+
+    montarComponentes();
+    tituloH1();
+
+    feed = app.querySelector('[data-feed]');
+    topo = app.querySelector('jogo-topo');
+    barra = app.querySelector('barra-progresso');
+
+    app.querySelectorAll('.peca').forEach(function (peca) {
+      nomeNaPeca(peca);
+      JogoKit.arrasto.ligar(peca, colocar, aoSelecionar);
+    });
+    app.querySelectorAll('.alvo').forEach(function (alvo) {
+      JogoKit.arrasto.ligarAlvo(alvo, colocar);
+    });
+
+    atualizar();
+    subir();
+  }
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* ---------- ações ---------- */
+  function colocar(peca, alvo) {                 /* usado pelo arrasto e pelo modo toque */
+    if (!peca || !alvo || peca.dataset.feita) return;
+    if (alvo.dataset.id === peca.dataset.alvo) acertar(peca, alvo);
+    else errar(peca);
+  }
+
+  function aoSelecionar(peca) {                  /* a peça selecionada continua valendo depois do erro */
+    if (!peca) return;
+    var p = PASSOS[peca.dataset.id];
+    if (p) JogoKit.falar(p.frase, 0.85);
+  }
+
+  function acertar(peca, alvo) {
+    var p = PASSOS[peca.dataset.id];
+    peca.dataset.feita = '1';
+    peca.classList.remove('sel');
+    peca.classList.add('encaixada');
+    JogoKit.arrasto.limpar();
+
+    var caixa = alvo.querySelector('[data-encaixados]');
+    if (caixa) caixa.appendChild(peca);
+    alvo.classList.remove('brilho');
+    alvo.classList.remove('pulso');
+    alvo.classList.add('feito');
+    var frase = alvo.querySelector('[data-frase]');
+    if (frase) frase.textContent = p.frase;
+    alvo.setAttribute('aria-label', 'Passo ' + alvo.dataset.id + ': ' + p.frase);
+
+    feitas++;
+    if (!errados[peca.dataset.id]) primeira++;
+
+    feed.className = 'feed ok';
+    feed.textContent = '✓ ' + p.frase;
+    JogoKit.falar(p.frase);
+    atualizar();
+
+    if (feitas >= TOTAL) terminar();
+  }
+
+  function errar(peca) {
+    var p = PASSOS[peca.dataset.id];
+    errados[peca.dataset.id] = true;
+    peca.dataset.tent = String((parseInt(peca.dataset.tent, 10) || 0) + 1);
+
+    /* o passo certo pisca (brilho + pulso) para a criança ver onde a peça entra */
+    var certo = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
+    if (certo) {
+      certo.classList.add('brilho');
+      certo.classList.add('pulso');
+      if (brilhoTimer) clearTimeout(brilhoTimer);
+      brilhoTimer = setTimeout(function () {
+        certo.classList.remove('brilho');
+        certo.classList.remove('pulso');
+      }, 2000);
+    }
+
+    feed.className = 'feed bad';
+    feed.textContent = '✗ ' + p.msg;
+    JogoKit.falar(p.msg);
+  }
+
+  function atualizar() {
+    if (topo) topo.contador = feitas + '/' + TOTAL;
+    if (barra) barra.atualizar(feitas, TOTAL);
+  }
+
+  function terminar() {
+    JogoKit.progresso.melhor(ID, primeira);        /* melhor = acertos de primeira */
+    var msg = primeira === TOTAL
+      ? 'Muito bem! Você pôs os 3 passos na ordem certa.'
+      : 'Você pôs os 3 passos na ordem. Pode jogar de novo.';
+    app.innerHTML =
+      '<tela-fim icone="💧" titulo="A água do rio" estrelas="' + primeira + '" total="' + TOTAL + '"' +
+        ' resumo="Tudo na ordem certa!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
+      RODAPE;
+    montarComponentes();
+    tituloH1();
+    subir();
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  document.addEventListener('fim', function (e) {
+    if (e.detail && e.detail.acao === 'denovo') montar();
+    else location.href = 'index.html';
+  });
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
+
+  montar();
+})();
+</script>
+</body>
+</html>

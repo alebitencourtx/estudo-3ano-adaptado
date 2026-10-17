@@ -45,16 +45,16 @@
   const TRABALHADORES = [
     { id: 'adm',          palavra: 'Administrador da propriedade', ico: '../../img/jogo/pec/adm.svg',
       tarefa: 'Organiza as atividades',
-      msg: 'O administrador organiza as atividades.' },
+      msg: 'O administrador organiza os outros trabalhadores. Eles podem ser familiares ou contratados.' },
     { id: 'trabalhador',  palavra: 'Trabalhador fixo',              ico: '../../img/jogo/pec/trabalhador.svg',
       tarefa: 'Recebe um salário',
-      msg: 'O trabalhador fixo recebe um salário.' },
+      msg: 'O trabalhador fixo cuida das plantações ou dos animais. Recebe salário.' },
     { id: 'parceiro',     palavra: 'Parceiro',                      ico: '../../img/jogo/pec/parceiro.svg',
       tarefa: 'Divide parte da produção',
-      msg: 'O parceiro divide parte da produção com o dono.' },
+      msg: 'O parceiro cuida das plantações ou dos animais. Divide parte da produção com o dono da propriedade.' },
     { id: 'arrendatario', palavra: 'Arrendatário',                  ico: '../../img/jogo/pec/arrendatario.svg',
       tarefa: 'Aluga parte da terra',
-      msg: 'O arrendatário aluga parte da terra e escolhe o que vai criar.' }
+      msg: 'O arrendatário aluga parte da terra. Escolhe o que vai plantar ou criar.' }
   ];
   const TOTAL = TRABALHADORES.length;
   const APOIO = 'No campo, cada trabalhador tem uma tarefa.';
@@ -89,7 +89,7 @@
       '<jogo-topo icone="👷" titulo="Trabalhadores do campo" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<p class="pergunta">Qual é a tarefa de cada trabalhador?</p>' +
+        '<p class="pergunta">Qual tarefa combina com cada trabalhador?</p>' +
         '<fala-botoes texto="' + esc(APOIO) + '"></fala-botoes>' +
         '<p class="hint">' + esc(DICA) + '</p>' +
         '<div class="ligar">' +

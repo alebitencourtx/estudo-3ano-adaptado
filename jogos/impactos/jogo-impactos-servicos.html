@@ -11,6 +11,8 @@
 <script src="../jogo-kit.js"></script>
 <style>
 .foto-apoio{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:2px solid var(--line);margin:0 0 10px}
+.prox{margin-top:16px}
+fichas-toque .feed{text-align:left}
 </style>
 </head>
 <body>
@@ -18,61 +20,130 @@
 <script>
 (function () {
   'use strict';
-  const esc = JogoKit.esc;
-  const ID_PROG = 'imp-servicos';
+
+  /* 🏥 Os serviços públicos — 2 rodadas de "toque nos certos".
+     Base: livro p. 112. Vocabulário de resumos/imp-108-113.md.
+     Componente do kit: <fichas-toque> (toca para marcar, "Conferir" revela ✓/✗
+     e a resposta certa sempre aparece em .certa).
+     Regras TEA: frases curtas, sem cronômetro, áudio do enunciado em cada rodada,
+     "Conferir" só libera com o número certo de fichas marcadas. */
+
+  const app = document.getElementById('app');
+  const ID = 'imp-servicos';
+  const TOTAL = 2;
+
   const RODADAS = [
     {
       pergunta: 'Toque nos 4 serviços públicos.',
       fichas: [
-        {nome:'Atendimento de saúde', id:'saude'}, {nome:'Escola (educação)', id:'escola'},
-        {nome:'Coleta de lixo', id:'lixo'}, {nome:'Segurança', id:'seguranca'},
-        {nome:'Plantar árvores', id:'plantar'}, {nome:'Separar o lixo reciclável', id:'reciclar'}
+        {nome:'Atendimento de saúde'}, {nome:'Escola (educação)'},
+        {nome:'Coleta de lixo'}, {nome:'Segurança'},
+        {nome:'Plantar árvores'}, {nome:'Separar o lixo reciclável'}
       ],
       certas: ['Atendimento de saúde', 'Escola (educação)', 'Coleta de lixo', 'Segurança'],
       msg: 'Saúde, educação, coleta de lixo e segurança são serviços públicos.',
       img: '../../img/hga/imp/fila-servicos.jpg'
     },
     {
-      pergunta: 'Toque nos 3 problemas da cidade.',
+      pergunta: 'Toque nos 3 problemas que podem acontecer na cidade.',
       fichas: [
-        {nome:'Esgoto sem tratamento', id:'esgoto'}, {nome:'Moradia em área de risco', id:'moradia'},
-        {nome:'Engarrafamento', id:'engarrafamento'}, {nome:'Coleta seletiva', id:'coleta'},
-        {nome:'Plantar árvores', id:'plantar'}
+        {nome:'Esgoto sem tratamento'}, {nome:'Moradia em área de risco'},
+        {nome:'Engarrafamento'}, {nome:'Coleta seletiva'},
+        {nome:'Plantar árvores'}
       ],
       certas: ['Esgoto sem tratamento', 'Moradia em área de risco', 'Engarrafamento'],
-      msg: 'Esgoto, moradia em área de risco e engarrafamento são problemas da cidade.'
+      msg: 'Esgoto, moradia em área de risco e engarrafamento são problemas da cidade.',
+      img: ''
     }
   ];
-  const FECHAMENTO = 'Quando os serviços públicos são ruins, a vida das pessoas e as atividades econômicas da cidade ficam prejudicadas.';
-  const rodape = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
-                 '<details class="detalhes"><summary>Créditos das imagens</summary><p>' + esc(FECHAMENTO) + '</p></details>';
 
-  const app = document.getElementById('app');
-  let i = 0, acertos = 0;
+  const FECHAMENTO = 'Quando os serviços públicos são ruins, a vida das pessoas e as atividades econômicas da cidade ficam prejudicadas.';
+
+  let i = 0;
+  let acertos = 0;
+
+  function rodape() {
+    return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary><p>' + JogoKit.esc(FECHAMENTO) + '</p>' +
+      '<p>Quem não pode comprar nem alugar moradia digna a preço acessível pode ocupar encostas de morros e margens de rios e córregos.</p>' +
+      '<p>O sistema de transporte coletivo deficiente aumenta o número de automóveis e causa congestionamentos.</p></details>';
+  }
+
+  function montar() {
+    i = 0;
+    acertos = 0;
+    rodada();
+  }
 
   function rodada() {
     const r = RODADAS[i];
-    app.innerHTML = '<jogo-topo icone="🏥" titulo="Os serviços públicos" contador="' + (i + 1) + '/2"></jogo-topo>' +
-                    '<barra-progresso valor="' + i + '" total="2"></barra-progresso>' +
-                    '<section class="card">' +
-                    '<fala-botoes texto="Os serviços públicos são saúde, educação, coleta de lixo e segurança."></fala-botoes>' +
-                    (r.img ? '<img class="foto-apoio" src="' + esc(r.img) + '">' : '') +
-                    '<div data-game></div>' +
-                    '</section>' + rodape;
+
+    app.innerHTML =
+      '<jogo-topo icone="🏥" titulo="Os serviços públicos" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso value="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<fala-botoes texto="' + JogoKit.esc(r.pergunta) + '"></fala-botoes>' +
+        (r.img ? '<img class="foto-apoio" src="' + JogoKit.esc(r.img) + '" alt="">' : '') +
+        '<div data-toque></div>' +
+        '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
+      '</section>' +
+      rodape();
+
     const ft = document.createElement('fichas-toque');
-    ft.montar(r);
-    app.querySelector('[data-game]').appendChild(ft);
-    ft.addEventListener('conferido', function(e) {
-      if (e.detail && e.detail.ok) acertos++;
-      JogoKit.falar(e.detail.ok ? '✓ ' + r.msg : '✗ ' + r.msg, 0.85);
-      setTimeout(() => { i++; i < 2 ? rodada() : terminar(); }, 2000);
+    ft.montar({
+      pergunta: r.pergunta,
+      fichas: r.fichas,
+      certas: r.certas,
+      msg: r.msg
     });
+    app.querySelector('[data-toque]').appendChild(ft);
+
+    const prox = app.querySelector('[data-prox]');
+    prox.onclick = proxima;
+
+    ft.addEventListener('conferido', function (e) {
+      const ok = !!(e.detail && e.detail.ok);
+      if (ok) acertos++;
+      prox.classList.remove('escondido');
+      const barra = app.querySelector('barra-progresso');
+      if (barra) barra.atualizar(i + 1, TOTAL);
+      JogoKit.falar(ok ? ('✓ ' + r.msg) : ('✗ Os certos são: ' + r.certas.join(', ') + '. ' + r.msg));
+    });
+
+    subir();
   }
+
+  function proxima() {
+    if (i + 1 < TOTAL) {
+      i++;
+      rodada();
+    } else {
+      terminar();
+    }
+  }
+
   function terminar() {
-    JogoKit.progresso.melhor(ID_PROG, acertos);
-    app.innerHTML = '<tela-fim icone="🏥" titulo="Os serviços públicos" estrelas="' + acertos + '" total="2" resumo="Você acertou tudo!"></tela-fim>' + rodape;
+    JogoKit.progresso.melhor(ID, acertos);
+    app.innerHTML =
+      '<tela-fim icone="🏥" titulo="Os serviços públicos" estrelas="' + acertos + '" total="' + TOTAL + '"' +
+        ' resumo="Você acertou tudo!"></tela-fim>' +
+      rodape();
+    subir();
   }
-  rodada();
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  document.addEventListener('fim', function (e) {
+    if (e.detail && e.detail.acao === 'denovo') montar();
+    else location.href = 'index.html';
+  });
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
+
+  montar();
 })();
 </script>
 </body>

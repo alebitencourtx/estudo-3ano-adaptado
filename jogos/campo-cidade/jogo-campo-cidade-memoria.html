@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Memória do cinema — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>   <!-- clássico, no head: define os componentes antes do corpo -->
+<style>
+/* ===== Memória do cinema — ajustes locais (o resto vem do jogo-kit.css) =====
+   Regras TEA: 8 cartas, 4 pares iguais, sem cronômetro, sem punição,
+   uma instrução visível, carta grande (≥80 px) e feedback imediato. */
+.tabuleiro{grid-template-columns:repeat(4,minmax(80px,1fr));gap:10px}  /* 8 cartas = 2 linhas de 4 */
+.carta{flex-direction:column;gap:4px;cursor:pointer;min-width:80px;min-height:80px;padding:6px}
+.carta .verso{font-size:2rem;line-height:1}
+.carta.virada img{flex:0 1 auto;min-height:0;width:auto;max-width:100%;max-height:64%;
+  object-fit:contain;border-radius:10px}
+.carta.virada .legenda{flex:0 0 auto;font-size:.72rem;font-weight:800;line-height:1.15;
+  text-align:center;color:var(--ink)}
+.carta.travada{cursor:default}
+.recorde{color:var(--muted);font-size:.9rem;margin:10px 0 0;text-align:center;font-weight:700}
+@media (max-width:520px){ .tabuleiro{grid-template-columns:repeat(2,minmax(80px,1fr))} }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== Memória do cinema — jogo da memória (campo e cidade, p. 102, 104, 105) =====
+   Conteúdo do livro: 1895 mudo (preto e branco) · 1927 filme com falas ·
+   1937 filme colorido (Branca de Neve) · 1953 cinema em 3-D (Museu de cera).
+   4 pares iguais = 8 cartas; cada par é a MESMA foto repetida.
+   Sem cronômetro e sem punição: carta errada desvira sozinha; carta certa fica .travada.
+   Fotos do livro didático; ícones Twemoji, CC-BY 4.0. */
+(function () {
+  'use strict';
+
+  var PARES = [
+    { id: '1895', foto: '../../img/hga/cc/cinema-1895.jpg', legenda: '1895: cinema mudo' },
+    { id: '1927', foto: '../../img/hga/cc/cinema-1927.jpg', legenda: '1927: filme com falas' },
+    { id: '1937', foto: '../../img/hga/cc/branca-neve.jpg', legenda: '1937: filme colorido' },
+    { id: '1953', foto: '../../img/hga/cc/museu-cera.jpg',  legenda: '1953: cinema em 3-D' }
+  ];
+  var TOTAL = PARES.length;          /* 4 pares */
+  var ID = 'mem-cc';                 /* chave do progresso */
+  var APOIO = 'Encontre os dois iguais.';      /* texto do <fala-botoes> */
+  var DICA = 'Ache os 4 pares iguais.';        /* a única instrução visível */
+  var ESPERA = 900;                  /* ms com as 2 cartas diferentes abertas */
+
+  var app = document.getElementById('app');
+  var S = null;                      /* estado da partida */
+  var timer = null;                  /* setTimeout das cartas diferentes */
+
+  var dado = function (id) {
+    return PARES.filter(function (p) { return p.id === id; })[0];
+  };
+
+  /* ---------- progresso: pares achados (JogoKit.progresso.melhor) ---------- */
+  function lerRecorde() {
+    var r = JogoKit.progresso.ler()[ID];
+    return (typeof r === 'number' && isFinite(r)) ? r : null;
+  }
+  function recado() {
+    var r = lerRecorde();
+    if (r == null) return 'Cada foto aparece em duas cartas.';
+    return 'Você já achou ' + r + ' de ' + TOTAL + ' pares.';
+  }
+
+  /* ---------- pedaços de tela ---------- */
+  function h1Html() {
+    return '<h1 class="sr-only">Memória do cinema: ache os 4 pares iguais.</h1>';
+  }
+
+  function rodapeHtml() {
+    return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · ' +
+        '<a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary>' +
+        '<p>1895: mudo e preto e branco. Hoje: sonoro e colorido.</p>' +
+        '<ul><li>Fotos do livro didático, p. 102, 104 e 105; ícones Twemoji, CC-BY 4.0.</li></ul>' +
+      '</details>';
+  }
+
+  function cartaHtml(p) {
+    return '<div class="carta" data-par="' + JogoKit.esc(p.id) + '" role="button" tabindex="0" ' +
+      'aria-label="Carta fechada"><span class="verso">?</span></div>';
+  }
+
+  /* ---------- telas ---------- */
+  function comecar() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    S = { pares: 0, tentativas: 0, primeiras: 0, errou: {}, primeira: null, trava: false };
+    renderJogo();
+  }
+
+  function renderJogo() {
+    var cartas = JogoKit.embaralhar(PARES.concat(PARES));     /* 8 cartas embaralhadas */
+
+    app.innerHTML = h1Html() +
+      '<jogo-topo icone="🎬" titulo="Memória do cinema" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>' +
+        '<p class="hint" id="instrucao">' + JogoKit.esc(DICA) + '</p>' +
+        '<div class="tabuleiro" id="tabuleiro" aria-label="Cartas do jogo" style="margin-top:14px">' +
+          cartas.map(cartaHtml).join('') +
+        '</div>' +
+        '<p class="feed" id="feed" aria-live="polite"></p>' +
+        '<p class="recorde" id="recorde">' + JogoKit.esc(recado()) + '</p>' +
+      '</section>' +
+      rodapeHtml();
+
+    app.querySelectorAll('.carta').forEach(ligarCarta);
+    atualizar();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- virar / fechar uma carta ---------- */
+  function virar(carta) {
+    var p = dado(carta.dataset.par);
+    if (!p) return;
+    carta.classList.add('virada');
+    carta.innerHTML = '<img src="' + JogoKit.esc(p.foto) + '" alt="' + JogoKit.esc(p.legenda) + '">' +
+      '<span class="legenda" aria-hidden="true">' + JogoKit.esc(p.legenda) + '</span>';
+    carta.setAttribute('aria-label', p.legenda);
+    JogoKit.falar(p.legenda, 0.85);                 /* ao virar, fala a legenda */
+  }
+
+  function fechar(carta) {
+    carta.classList.remove('virada');
+    carta.innerHTML = '<span class="verso">?</span>';
+    carta.setAttribute('aria-label', 'Carta fechada');
+  }
+
+  function ligarCarta(carta) {
+    carta.addEventListener('click', function () { tocar(carta); });
+    carta.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocar(carta); }
+    });
+  }
+
+  /* ---------- ação principal: tocar numa carta ---------- */
+  function tocar(carta) {
+    if (S.trava) return;
+    if (carta.classList.contains('travada') || carta.classList.contains('virada')) return;
+
+    virar(carta);
+    if (!S.primeira) { S.primeira = carta; return; }        /* primeira carta: só abre */
+
+    var a = S.primeira, b = carta;
+    S.primeira = null;
+    S.tentativas++;
+
+    if (a.dataset.par === b.dataset.par) {                  /* iguais: as duas ficam travadas */
+      var p = dado(a.dataset.par);
+      [a, b].forEach(function (c) {
+        c.classList.add('travada');
+        c.setAttribute('aria-label', p.legenda + ', igual');
+      });
+      S.pares++;
+      if (!S.errou[p.id]) S.primeiras++;                    /* par achado de primeira */
+      diz('✓ ' + p.legenda, 'ok');
+      JogoKit.falar(p.legenda, 0.85);
+      atualizar();
+      if (S.pares === TOTAL) {
+        S.trava = true;
+        timer = setTimeout(function () { timer = null; renderFim(); }, ESPERA);
+      }
+    } else {                                                /* diferentes: nunca punir */
+      S.errou[a.dataset.par] = true;
+      S.errou[b.dataset.par] = true;
+      S.trava = true;
+      diz('Essas duas não são iguais. Tente de novo.', '');  /* feedback neutro: sem cor de erro */
+      timer = setTimeout(function () {
+        timer = null;
+        fechar(a); fechar(b);
+        S.trava = false;
+      }, ESPERA);
+    }
+  }
+
+  /* ---------- apoio de tela ---------- */
+  function atualizar() {
+    var topo = app.querySelector('jogo-topo');
+    if (topo) {
+      var txt = S.pares + '/' + TOTAL;
+      topo.contador = txt;                  /* componente troca o texto visível */
+      topo.setAttribute('contador', txt);   /* e o atributo acompanha o estado */
+    }
+    var barra = app.querySelector('barra-progresso');
+    if (barra && barra.atualizar) barra.atualizar(S.pares, TOTAL);
+  }
+
+  function diz(txt, tipo) {
+    var f = document.getElementById('feed');
+    if (!f) return;
+    f.textContent = txt;
+    f.className = 'feed' + (tipo ? ' ' + tipo : '');
+  }
+
+  function ir(url) { try { location.href = url; } catch (e) {} }
+
+  /* ---------- tela final ---------- */
+  function renderFim() {
+    var pares = S.pares;                               /* 4 pares achados */
+    JogoKit.progresso.melhor(ID, pares);               /* guarda o melhor (quanto mais, melhor) */
+    var msg = 'Você fez os 4 pares em ' + S.tentativas + (S.tentativas === 1 ? ' tentativa. ' : ' tentativas. ') +
+      (S.primeiras === TOTAL ? 'Todos de primeira!' : S.primeiras + ' pares de primeira.');
+
+    app.innerHTML = h1Html() +
+      '<tela-fim icone="🎬" titulo="Memória do cinema" estrelas="' + pares + '" total="' + TOTAL + '" ' +
+        'resumo="Você achou todos os pares!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
+      rodapeHtml();
+    JogoKit.falar('Você achou todos os pares!', 0.85);
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- eventos dos componentes do kit ---------- */
+  document.addEventListener('voltar', function () { ir('index.html'); });
+  document.addEventListener('fim', function (e) {
+    var acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') comecar();          /* reinicia embaralhando as cartas */
+    else ir('index.html');                     /* outras fases: volta ao menu do tópico */
+  });
+
+  comecar();
+})();
+</script>
+</body>
+</html>

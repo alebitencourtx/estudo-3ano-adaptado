@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Toque nos certos — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+  /* ajustes locais (não altera o jogo-kit.css) */
+  .titulo-tela{font-family:var(--font-display);color:var(--acc);font-size:1.1rem;margin:0 0 8px}
+  .apoio{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:16px;
+    border:2px solid var(--line);background:var(--acc-soft);margin:12px 0 0}
+  .prox{margin-top:16px}
+  fichas-toque .feed{text-align:left}
+  /* toque grande: a ficha passa dos 44 px exigidos */
+  .ficha{min-height:52px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  'use strict';
+
+  /* 👆 Toque nos certos — pecuária extensiva × intensiva, 2 telas.
+     Conteúdo fechado: resumos/pec-86-87.md (livro p. 86 e 87).
+     Componente do kit: <fichas-toque> (toca para marcar as 3 certas, "Conferir"
+     revela ✓/✗ e a resposta certa sempre aparece).
+     Regras TEA: 1 instrução por tela, frases curtas, 6 fichas (3 certas + 3 do
+     livro), sem cronômetro, áudio do enunciado e do acerto, foto do livro. */
+
+  var app = document.getElementById('app');
+  var ID = 'pec-toque';
+  var TOTAL = 2;
+
+  /* as mesmas 6 fichas nas 2 telas: 3 são da extensiva, 3 são da intensiva */
+  var FICHAS = [
+    'Solto em grandes áreas',
+    'Come nas pastagens',
+    'Poucos trabalhadores',
+    'Confinado',
+    'Come no estábulo',
+    'Mais trabalhadores'
+  ];
+
+  var TELAS = [
+    {
+      titulo: 'Pecuária extensiva',
+      pergunta: 'Toque nas 3 frases que combinam com a pecuária extensiva.',
+      certas: ['Solto em grandes áreas', 'Come nas pastagens', 'Poucos trabalhadores'],
+      msg: 'Na extensiva, o gado fica solto e come nas pastagens.',
+      img: '../../img/hga/pec/pasto.jpg',
+      alt: 'Gado solto no pasto'
+    },
+    {
+      titulo: 'Pecuária intensiva',
+      pergunta: 'Toque nas 3 frases que combinam com a pecuária intensiva.',
+      certas: ['Confinado', 'Come no estábulo', 'Mais trabalhadores'],
+      msg: 'Na intensiva, o gado fica confinado e come no estábulo.',
+      img: '../../img/hga/pec/curral.jpg',
+      alt: 'Gado confinado no curral'
+    }
+  ];
+
+  var HINT = 'Toque em 3 fichas e depois em Conferir.';
+  var LEMBRETE = 'Na extensiva o gado fica solto. Na intensiva o gado fica confinado.';
+  var CREDITOS = [
+    'Fotos do livro do 3º ano, p. 86 e 87 (gado solto no pasto e gado confinado no curral).',
+    'Ícones de emoji: Twemoji, CC-BY 4.0.'
+  ];
+
+  var i = 0;          /* tela da vez (0 a 1) */
+  var acertos = 0;    /* telas acertadas de primeira (0 a 2) → estrelas */
+
+  /* ---------- pedaços de tela ---------- */
+  function rodape() {
+    return '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary>' +
+      '<p>' + JogoKit.esc(LEMBRETE) + '</p><ul>' +
+      CREDITOS.map(function (c) { return '<li>' + JogoKit.esc(c) + '</li>'; }).join('') +
+      '</ul></details>';
+  }
+
+  /* componentes web criados por innerHTML: garante que já renderizaram */
+  function montarComponentes() {
+    app.querySelectorAll('jogo-topo,barra-progresso,tela-fim').forEach(function (el) {
+      if (!el.firstElementChild && typeof el.connectedCallback === 'function') el.connectedCallback();
+    });
+  }
+
+  /* <jogo-topo> e <tela-fim> desenham o título no componente; a tela precisa de 1 <h1>.
+     Troca só a tag, mantendo classe e estilo: a aparência não muda. */
+  function tituloH1() {
+    var el = app.querySelector('.fase-nome');
+    if (!el || el.tagName === 'H1') return;
+    var h1 = document.createElement('h1');
+    h1.className = el.className;
+    if (el.getAttribute('style')) h1.setAttribute('style', el.getAttribute('style'));
+    h1.textContent = el.textContent;
+    el.parentNode.replaceChild(h1, el);
+  }
+
+  /* ---------- telas ---------- */
+  function montar() {
+    i = 0;
+    acertos = 0;
+    tela();
+  }
+
+  function tela() {
+    var t = TELAS[i];
+
+    app.innerHTML =
+      '<jogo-topo icone="👆" titulo="Toque nos certos" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<h2 class="titulo-tela">' + JogoKit.esc(t.titulo) + '</h2>' +
+        '<fala-botoes texto="' + JogoKit.esc(t.pergunta) + '"></fala-botoes>' +
+        '<p class="hint">' + JogoKit.esc(HINT) + '</p>' +
+        '<div data-toque></div>' +
+        '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
+      '</section>' +
+      rodape();
+
+    montarComponentes();
+    tituloH1();
+
+    /* o "toque nos certos" é o componente do kit */
+    var ft = document.createElement('fichas-toque');
+    ft.montar({
+      pergunta: t.pergunta,
+      fichas: JogoKit.embaralhar(FICHAS),
+      certas: t.certas,
+      msg: t.msg
+    });
+
+    /* foto do livro: logo abaixo do enunciado e acima das fichas */
+    var foto = document.createElement('img');
+    foto.className = 'apoio';
+    foto.src = t.img;
+    foto.alt = t.alt;
+    ft.insertBefore(foto, ft.querySelector('.fichas'));
+
+    app.querySelector('[data-toque]').appendChild(ft);
+
+    var prox = app.querySelector('[data-prox]');
+    prox.onclick = proxima;
+
+    ft.addEventListener('conferido', function (e) {
+      var ok = !!(e.detail && e.detail.ok);
+      if (ok) acertos++;
+      prox.classList.remove('escondido');
+      var barra = app.querySelector('barra-progresso');
+      if (barra) barra.atualizar(i + 1, TOTAL);
+      JogoKit.falar(ok ? ('✓ ' + t.msg) : ('✗ Os certos são: ' + t.certas.join(', ') + '. ' + t.msg));
+    });
+
+    subir();
+  }
+
+  function proxima() {
+    if (i + 1 < TOTAL) {
+      i++;
+      tela();
+    } else {
+      terminar();
+    }
+  }
+
+  function terminar() {
+    JogoKit.progresso.melhor(ID, acertos);      /* melhor = telas certas de primeira */
+    var msg = acertos === TOTAL
+      ? 'Muito bem! Você acertou as 2 telas de primeira.'
+      : 'Você acertou ' + acertos + ' de ' + TOTAL + '. Pode jogar de novo.';
+    app.innerHTML =
+      '<tela-fim icone="👆" titulo="Toque nos certos" estrelas="' + acertos + '" total="' + TOTAL + '"' +
+        ' resumo="Você tocou nos certos!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
+      rodape();
+    montarComponentes();
+    tituloH1();
+    JogoKit.falar('Você acertou ' + acertos + ' de ' + TOTAL + '.');
+    subir();
+  }
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  document.addEventListener('fim', function (e) {
+    var acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') { montar(); }
+    else if (acao === 'outros') { location.href = 'index.html'; }
+  });
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
+
+  montar();
+})();
+</script>
+</body>
+</html>

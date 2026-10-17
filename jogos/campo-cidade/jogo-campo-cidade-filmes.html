@@ -12,6 +12,11 @@
 <style>
 .foto-apoio{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:2px solid var(--line);margin:0 0 10px}
 .prox{margin-top:16px}
+.apoio{margin:10px 0 0;padding:10px 12px;border:2px solid var(--line);border-radius:12px;
+  background:var(--acc-soft);font-weight:700;font-size:.95rem}
+.quadro{margin:8px 0 0;padding:0;list-style:none;font-size:1rem;color:var(--text)}
+.quadro li{margin:6px 0;padding:8px 12px;border:2px solid var(--line);border-radius:12px;background:var(--acc-soft)}
+.quadro b{color:var(--acc)}
 opcoes-resposta .feed{text-align:left}
 </style>
 </head>
@@ -23,34 +28,40 @@ opcoes-resposta .feed{text-align:left}
   const esc = JogoKit.esc;
 
   const ID_PROG = 'cc-filmes';
-  const TOTAL = 5;
+  const TOTAL = 7;
 
-  const APOIO = 'Os primeiros filmes eram mudos e em preto e branco.';
-  const DICA = 'Leia a pergunta e toque na resposta. Ou ouça com 🔊.';
+  const APOIO = 'O filme A saída dos trabalhadores da fábrica era mudo e em preto e branco.';
+  const DICA = 'Toque na resposta. Ou ouça com 🔊.';
 
   const RODADAS = [
     {
-      pergunta: 'Onde foi a primeira exibição de cinema?',
+      pergunta: 'Que diversão se tornou popular nas cidades brasileiras há cerca de 100 anos?',
+      certa: 'O cinema',
+      erradas: ['O passeio no Jardim da Luz', 'Os piqueniques'],
+      msg: 'O cinema ficou popular nas cidades brasileiras há cerca de 100 anos.'
+    },
+    {
+      pergunta: 'Em que país aconteceu a primeira exibição de cinema?',
       certa: 'Na França',
-      erradas: ['No Brasil', 'Nos Estados Unidos'],
+      erradas: ['No Jardim da Luz', 'No Parque Antártica'],
       msg: 'A primeira exibição foi na França, em 1895.',
       img: '../../img/hga/cc/cinema-1895.jpg',
-      alt: 'Primeira exibição de cinema em 1895'
+      alt: 'Cena do filme A saída dos trabalhadores da fábrica, de 1895'
     },
     {
       pergunta: 'Quem fez a primeira exibição de cinema?',
       certa: 'Os irmãos Lumière',
-      erradas: ['Os irmãos Grimm', 'Os agricultores'],
+      erradas: ['Os trabalhadores da fábrica', 'O cantor de jazz'],
       msg: 'Os irmãos Lumière fizeram a primeira exibição.'
     },
     {
-      pergunta: 'Qual filme de 1895 era mudo e em preto e branco?',
+      pergunta: 'Qual filme de 1895 era mudo e preto e branco?',
       certa: 'A saída dos trabalhadores da fábrica',
       erradas: ['Branca de Neve e os Sete Anões', 'Museu de cera'],
-      msg: 'A saída dos trabalhadores da fábrica era mudo e em preto e branco.'
+      msg: 'O filme A saída dos trabalhadores da fábrica era mudo e em preto e branco.'
     },
     {
-      pergunta: 'Qual foi o primeiro filme com falas?',
+      pergunta: 'Qual filme de 1927 teve os primeiros diálogos falados?',
       certa: 'O cantor de jazz',
       erradas: ['Museu de cera', 'A saída dos trabalhadores da fábrica'],
       msg: 'Em 1927, O cantor de jazz foi o primeiro filme com falas.',
@@ -61,9 +72,17 @@ opcoes-resposta .feed{text-align:left}
       pergunta: 'Qual desenho ganhou cor em 1937?',
       certa: 'Branca de Neve e os Sete Anões',
       erradas: ['O cantor de jazz', 'Museu de cera'],
-      msg: 'Em 1937, Branca de Neve e os Sete Anões ganhou cor.',
+      msg: 'Em 1937, uma técnica de colorização mais eficiente foi aplicada à animação Branca de Neve e os Sete Anões, lançada nos Estados Unidos.',
       img: '../../img/hga/cc/branca-neve.jpg',
       alt: 'Branca de Neve em 1937'
+    },
+    {
+      pergunta: 'Em 1953, qual grande produção usou a tecnologia 3-D?',
+      certa: 'Museu de cera',
+      erradas: ['Em um filme mudo', 'Em um desenho animado'],
+      msg: 'Antes usada em filmes curtos, a tecnologia 3-D foi aplicada à grande produção Museu de cera, lançada em 1953.',
+      img: '../../img/hga/cc/museu-cera.jpg',
+      alt: 'Cena do filme Museu de cera, de 1953'
     }
   ];
 
@@ -71,13 +90,22 @@ opcoes-resposta .feed{text-align:left}
     'Ícones de emoji: Twemoji (CC BY 4.0).',
     'Fotos do livro didático de História do 3º ano, páginas 104 e 105 (uso escolar).'
   ];
-  const FECHAMENTO = 'Em 1953, o filme Museu de cera foi feito em 3-D.';
+
+  /* o quadro do livro (p. 105) fica num <details> próprio, separado dos créditos */
+  function quadro () {
+    return '<details class="detalhes"><summary>O que mudou no cinema</summary>' +
+      '<ul class="quadro">' +
+      '<li><b>mudo</b> → <b>sonoro</b></li>' +
+      '<li><b>preto e branco</b> → <b>colorido</b></li>' +
+      '<li><b>3-D não existia</b> → <b>existe</b></li>' +
+      '</ul></details>';
+  }
 
   const rodape =
     '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
     '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
       CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') +
-    '</ul><p>' + esc(FECHAMENTO) + '</p></details>';
+    '</ul></details>';
 
   const app = document.getElementById('app');
   let i = 0;
@@ -96,15 +124,17 @@ opcoes-resposta .feed{text-align:left}
     if (r.img) {
       imgHtml = '<img class="foto-apoio" src="' + esc(r.img) + '" alt="' + esc(r.alt || '') + '">';
     }
+    /* o apoio com o fato de 1895 aparece só na primeira rodada */
+    const apoioHtml = i === 0 ? '<p class="apoio">' + esc(APOIO) + '</p>' : '';
 
     app.innerHTML =
       '<jogo-topo icone="🎥" titulo="Os primeiros filmes" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
       '<section class="card">' +
-        '<fala-botoes texto="' + esc(APOIO) + '"></fala-botoes>' +
-        '<p class="hint">' + esc(DICA) + '</p>' +
-        imgHtml +
         '<fala-botoes texto="' + esc(r.pergunta) + '"></fala-botoes>' +
+        '<p class="hint">' + esc(DICA) + '</p>' +
+        apoioHtml +
+        imgHtml +
         '<div data-quiz></div>' +
         '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
       '</section>' +
@@ -149,7 +179,9 @@ opcoes-resposta .feed{text-align:left}
     app.innerHTML =
       '<tela-fim icone="🎥" titulo="Os primeiros filmes" estrelas="' + acertos + '" total="' + TOTAL + '"' +
         ' resumo="Você respondeu tudo!"></tela-fim>' +
+      quadro() +
       rodape;
+    JogoKit.falar('Você respondeu tudo!', 0.85);
     subir();
   }
 

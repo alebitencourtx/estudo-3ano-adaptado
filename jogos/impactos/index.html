@@ -23,6 +23,7 @@ const JOGOS = [
   {arquivo:'jogo-impactos-servicos.html', icone:'🏥', nome:'Os serviços públicos', como:'Toque nos certos', oque:'Saúde, educação, coleta de lixo e segurança.', id:'imp-servicos'},
   {arquivo:'jogo-impactos-paisagem.html', icone:'🏞️', nome:'O que se vê na paisagem', como:'Responda e veja a resposta', oque:'Pastagem e soja, campo e cidade.', id:'imp-paisagem'},
   {arquivo:'jogo-impactos-consequencias.html', icone:'🐟', nome:'O que isso pode causar?', como:'Responda sim ou não', oque:'Extinção, doenças, saúde, água.', id:'imp-consequencias'},
+  {arquivo:'jogo-impactos-agua.html', icone:'💧', nome:'O esgoto no rio', como:'Ponha na ordem certa', oque:'Esgoto sem tratamento, água contaminada e doenças.', id:'imp-agua'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -38,7 +39,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🚚 Impactos ambientais</h1>
-  <p class="sub">p. 108 a 113 · 8 jogos · base do livro</p>
+  <p class="sub">p. 108 a 113 · 9 jogos · base do livro</p>
   <p class="sub">O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.</p>
 </header>
 <section class="cards">

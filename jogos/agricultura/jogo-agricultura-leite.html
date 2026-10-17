@@ -31,33 +31,39 @@
 <body>
 <main id="app"></main>
 <script>
-/* ===== O leite no tempo — p. 84 e 95 =====
+/* ===== O leite no tempo — p. 94 e 95 =====
    A ordenha (retirada do leite das vacas e das cabras) mudou: há cem anos era
-   só manual; hoje, cresceu a ordenha mecânica; em 2013 chegou ao Brasil a
-   ordenha com robôs (a vaca vai sozinha até a sala de ordenha, atraída pela
-   ração no cocho; um braço robótico tira o leite, que vai direto ao tanque).
+   só manual; em 2013 chegou ao Brasil a ordenha com robôs (a vaca vai sozinha
+   até a sala de ordenha, atraída pela ração no cocho; um braço robótico tira o
+   leite, que vai direto ao tanque); hoje, cresceu a ordenha mecânica.
+   Fotos do acervo: ordenha.jpg é a ilustração da ordenha MANUAL (p. 94) e
+   chip.jpg é a vaca com chip no pescoço (p. 95) — não há foto de ordenha
+   mecânica, então a parada "Hoje" fica sem foto.
    Regras TEA: 1 instrução por tela, sem cronômetro, aprendizagem sem erro —
    só a parada destacada avança; tocar fora de ordem só explica qual é a vez. */
 
 const PARADAS = [
-  { ano: 'Há cem anos', foto: '../../img/hga/agr/gado.jpg',
-    alt: 'Foto antiga: o gado sendo juntado para a ordenha manual',
+  /* ordenha.jpg é a ilustração da ordenha MANUAL (p. 94) — não é foto de robô */
+  { ano: 'Há cem anos', foto: '../../img/hga/agr/ordenha.jpg',
+    alt: 'Ilustração do livro: ordenhar as vacas à mão',
     frase: 'Há cem anos, a ordenha era só manual.',
-    completo: 'O senhor Alfredo acordava muito cedo, juntava o gado, ordenhava as vacas e fazia os queijos.' },
-  { ano: 'Hoje', foto: '../../img/hga/agr/ordenha.jpg',
-    alt: 'Foto de hoje: vacas na sala de ordenha',
+    completo: 'O senhor Alfredo acordava muito cedo. Depois, juntava o gado e ordenhava as vacas.' },
+  /* Hoje fica SEM foto: o acervo não tem imagem da ordenha mecânica */
+  { ano: 'Hoje', foto: '',
+    alt: '',
     frase: 'Hoje, cresceu a ordenha mecânica.',
-    completo: 'A retirada do leite das vacas e das cabras é a ordenha.' },
-  { ano: '2013', foto: '../../img/jogo/agr/robo.svg',
-    alt: 'Desenho de um robô de ordenha',
+    completo: 'Algumas fazendas ainda usam ordenha manual. Mas cresceu a ordenha mecânica.' },
+  /* chip.jpg é a p. 95: vaca com chip no pescoço (não há foto de ordenha mecânica no acervo) */
+  { ano: '2013', foto: '../../img/hga/agr/chip.jpg',
+    alt: 'Vaca com um chip no pescoço',
     frase: 'Em 2013, chegou a ordenha com robôs.',
-    completo: 'A vaca vai sozinha até a sala de ordenha, atraída pela ração no cocho. Um braço robótico tira o leite, que vai direto ao tanque.' }
+    completo: 'A vaca vai sozinha até a sala de ordenha. Ela é atraída pela ração no cocho. Um braço robótico tira o leite. O leite vai direto ao tanque.' }
 ];
 const ID = 'tempo-leite';
-const INSTRUCAO = 'Passeie pelo leite no tempo. Toque na parada que está brilhando.';
-const DICA = 'Toque na parada que está brilhando.';
+const INSTRUCAO = 'Toque na parada destacada.';
+const DICA = 'Toque na parada destacada.';
 const CREDITOS = [
-  'Fotos da ordenha (gado e sala de ordenha): livro do 3º ano, História e Geografia — p. 84 e 95 (uso escolar).',
+  'Ilustração da ordenha manual e foto da vaca com chip: livro do 3º ano, História e Geografia — p. 94 e 95 (uso escolar).',
   'Ícones: Twemoji, CC-BY 4.0.'
 ];
 
@@ -84,22 +90,24 @@ function boot () {
       '" data-i="' + k + '" role="button" tabindex="0" aria-label="' +
       esc(atual ? 'Parada de ' + p.ano + '. Toque aqui.' : 'Parada de ' + p.ano) + '">' +
       '<span class="ano">' + esc(p.ano) + '</span>' +
-      (vista ? '<img src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">'
-             : '<span class="oculta" aria-hidden="true">?</span>') +
+      (vista && p.foto ? '<img src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">'
+             : (p.foto ? '<span class="oculta" aria-hidden="true">?</span>' : '')) +
       (feita ? '<span class="marca" aria-hidden="true">✓</span>' : '') +
       (feita ? '<p class="frase">' + esc(p.frase) + '</p>' : '') +
       '</div>';
   }
 
-  /* painel: a foto grande e o texto completo da parada da vez */
+  /* painel: a foto grande (quando há) e o texto completo da parada da vez — com áudio */
   function painelHtml () {
     const p = PARADAS[Math.min(S.i, PARADAS.length - 1)];
+    const texto = p.ano + '. ' + p.frase + ' ' + p.completo;
     return '<section class="card painel" aria-live="polite">' +
-      '<img class="foto painel-foto" src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">' +
+      (p.foto ? '<img class="foto painel-foto" src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">' : '') +
       '<div class="texto">' +
         '<p class="ano">' + esc(p.ano) + '</p>' +
         '<p class="frase">' + esc(p.frase) + '</p>' +
         '<p class="completo">' + esc(p.completo) + '</p>' +
+        '<fala-botoes texto="' + esc(texto) + '"></fala-botoes>' +
       '</div>' +
     '</section>';
   }
@@ -108,6 +116,7 @@ function boot () {
   function render () {
     const n = PARADAS.length, i = S.i;
     app.innerHTML =
+      '<h1 class="sr-only">O leite no tempo</h1>' +
       '<jogo-topo icone="🥛" titulo="O leite no tempo" contador="' + i + '/' + n +
         '" rotulo-voltar="← Fases"></jogo-topo>' +
       '<barra-progresso valor="' + i + '" total="' + n + '"></barra-progresso>' +
@@ -133,6 +142,7 @@ function boot () {
   function renderFim () {
     K.progresso.melhor(ID, PARADAS.length);
     app.innerHTML =
+      '<h1 class="sr-only">O leite no tempo</h1>' +
       '<tela-fim icone="🥛" titulo="O leite no tempo" estrelas="3" total="3" ' +
         'resumo="Você visitou todas as paradas!" ' +
         'msg="Muito bem! Você viu a ordenha mudar no tempo."></tela-fim>' +

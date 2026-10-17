@@ -11,7 +11,7 @@
 <script src="../jogo-kit.js"></script>
 <style>
   /* ===== ajustes locais (o resto vem do jogo-kit.css) =====
-     TEA: 1 instrução, 2 destinos, sem cronômetro, erro não pune. */
+     TEA: 1 instrução, 2 destinos, 3 cartões por tela, sem cronômetro, erro não pune. */
   jogo-topo,barra-progresso,tela-fim{display:block}
   .alvo{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:150px;cursor:pointer}
   .alvo .ico{width:74px;height:74px;margin-top:4px}
@@ -30,48 +30,70 @@
 <script>
 /* ===== Subsistência ou comercial? (agricultura, livro p. 84, 85) =====
    Classificar 6 cartões em 2 caixas: arrastar OU tocar no cartão e na caixa.
+   2 rodadas de 3 cartões (carga por tela do LEIA-ME):
+     rodada A: propriedades pequenas, mão de obra familiar, instrumentos simples
+     rodada B: média/grande extensão, máquinas, assalariados ou meeiros
    Regras TEA: 1 instrução, 2 destinos, frases curtas, sem cronômetro,
    erro sem punição (mostra a frase certa e a caixa certa brilha; o cartão
    continua selecionado). Conteúdo só com as palavras do livro.
    Fotos do livro didático; ícones Twemoji, CC-BY 4.0. */
 
 const ID = 'agr-subsistencia';       /* chave do progresso */
-const TOTAL = 6;
+const POR_RODADA = 3;                /* cartões por tela */
+const TOTAL_RODADAS = 2;
+const TOTAL = POR_RODADA * TOTAL_RODADAS;   /* 6 cartões na partida */
 
 const ALVOS = [
   { id: 'subsistencia', ico: '../../img/jogo/agr/plantacao.svg', nome: 'Subsistência' },
   { id: 'comercial',    ico: '../../img/jogo/agr/trator.svg',    nome: 'Comercial' }
 ];
 
-/* Sem ícone exato para "assalariados/meeiros": esse cartão fica só com o texto. */
+/* Só entra ícone quando existe imagem do conceito: "propriedades pequenas" e
+   "média e grande extensão" ficam só com o texto. */
 const PECAS = [
-  { id: 'pequenas',      alvo: 'subsistencia', ico: '../../img/jogo/agr/semente.svg',
+  { id: 'pequenas',      alvo: 'subsistencia',
     nome: 'Propriedades pequenas', msg: 'Na subsistência, as propriedades são pequenas.' },
   { id: 'familiar',      alvo: 'subsistencia', ico: '../../img/jogo/agr/agricultor.svg',
     nome: 'Mão de obra familiar', msg: 'Na subsistência, a mão de obra é da família.' },
-  { id: 'instrumentos',  alvo: 'subsistencia', ico: '../../img/jogo/agr/facao.svg',
-    nome: 'Instrumentos simples: enxada, foice e arado', msg: 'Na subsistência, usamos instrumentos simples.' },
-  { id: 'extensao',      alvo: 'comercial',    ico: '../../img/jogo/agr/plantacao.svg',
-    nome: 'Média e grande extensão', msg: 'Na comercial, as propriedades são grandes.' },
-  { id: 'maquinas',      alvo: 'comercial',    foto: '../../img/hga/agr/colheitadeira.jpg',
+  { id: 'instrumentos',  alvo: 'subsistencia', foto: '../../img/hga/agr/arado.jpg',
+    nome: 'Instrumentos simples: enxada, foice e arado', msg: 'Na subsistência, são usados instrumentos simples.' },
+  { id: 'extensao',      alvo: 'comercial',
+    nome: 'Média e grande extensão', msg: 'Na comercial, as propriedades são de média e grande extensão.' },
+  { id: 'maquinas',      alvo: 'comercial', foto: '../../img/hga/agr/colheitadeira.jpg',
     nome: 'Máquinas: trator e colheitadeira', msg: 'Na comercial, usamos máquinas.' },
-  { id: 'trabalhadores', alvo: 'comercial',
+  { id: 'trabalhadores', alvo: 'comercial', ico: '../../img/jogo/agr/agricultor.svg',
     nome: 'Assalariados ou meeiros', msg: 'Na comercial, os trabalhadores são assalariados ou meeiros.' }
 ];
 
+/* os cartões de cada rodada (a ordem dentro da rodada é embaralhada na tela) */
+const RODADAS = [
+  ['pequenas', 'familiar', 'instrumentos'],
+  ['extensao', 'maquinas', 'trabalhadores']
+];
+
+const CONTEUDO = [
+  'Na subsistência, quem cuida da plantação come o que produz.',
+  'O que sobra é vendido em mercados próximos.',
+  'Na comercial, os produtos são destinados à venda.',
+  'A produção comercial é vendida dentro do país e para outros países.'
+];
+
 const CREDITOS = [
-  'Foto da colheitadeira: livro didático (uso escolar).',
-  'Ícones de plantação, semente, agricultor, facão e trator: Twemoji, CC-BY 4.0.',
+  'Fotos do livro didático, p. 84: o arado (instrumento simples) e a colheita mecanizada (máquina) — uso escolar.',
+  'Ícones de plantação, trator e agricultor: Twemoji, CC-BY 4.0.',
   'Texto base: livro do 3º ano, p. 84 e 85 (subsistência e comercial).'
 ];
 
 const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
+  + '<details class="detalhes"><summary>O que é cada agricultura</summary><ul>'
+  + CONTEUDO.map(c => '<li>' + JogoKit.esc(c) + '</li>').join('')
+  + '</ul></details>'
   + '<details class="detalhes"><summary>Créditos das imagens</summary><ul>'
   + CREDITOS.map(c => '<li>' + JogoKit.esc(c) + '</li>').join('')
   + '</ul></details>';
 
 const app = document.getElementById('app');
-let S = null;                        /* { colocadas, primeiras } */
+let S = null;                        /* { rodada, colocadas, total, primeiras } */
 
 /* componentes web criados por innerHTML: garante que já renderizaram */
 function montarComponentes() {
@@ -89,11 +111,11 @@ function tirarImagensVazias() {
 
 function atualizar() {
   const cont = app.querySelector('jogo-topo [data-contador]');
-  if (cont) cont.textContent = S.colocadas + '/' + TOTAL;
+  if (cont) cont.textContent = S.total + '/' + TOTAL;
   const bar = app.querySelector('barra-progresso');
   if (bar) {
     if (!bar.querySelector('.bar') && typeof bar.render === 'function') bar.render();
-    if (typeof bar.atualizar === 'function') bar.atualizar(S.colocadas, TOTAL);
+    if (typeof bar.atualizar === 'function') bar.atualizar(S.total, TOTAL);
   }
 }
 
@@ -109,19 +131,25 @@ function pulso(el) {
   setTimeout(() => el.classList.remove('pulso'), 1400);
 }
 
-/* ---------- tela do jogo ---------- */
+/* ---------- tela do jogo (uma rodada por tela, 3 cartões) ---------- */
 function renderJogo() {
   JogoKit.arrasto.limpar();
-  S = { colocadas: 0, primeiras: 0 };
-  const pecas = JogoKit.embaralhar(PECAS);
+  S = { rodada: 0, colocadas: 0, total: 0, primeiras: 0 };
+  desenharRodada();
+}
+
+function desenharRodada() {
+  JogoKit.arrasto.limpar();
+  const ids = RODADAS[S.rodada];
+  const pecas = JogoKit.embaralhar(PECAS.filter(p => ids.indexOf(p.id) >= 0));
 
   app.innerHTML =
-    '<jogo-topo icone="🌱" titulo="Subsistência ou comercial?" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
-    + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
+    '<h1 class="sr-only">Subsistência ou comercial?</h1>'
+    + '<jogo-topo icone="🌱" titulo="Subsistência ou comercial?" contador="' + S.total + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
+    + '<barra-progresso valor="' + S.total + '" total="' + TOTAL + '"></barra-progresso>'
     + '<section class="card">'
-      + '<p class="pergunta">Onde fica cada cartão?</p>'
-      + '<fala-botoes texto="Na subsistência, a família come o que planta. Na comercial, a produção é para vender."></fala-botoes>'
-      + '<p class="hint">Arraste o cartão para a caixa certa. Ou toque no cartão e depois na caixa.</p>'
+      + '<fala-botoes texto="Leia o cartão. Leve-o até Subsistência ou Comercial."></fala-botoes>'
+      + '<p class="hint">Leia o cartão. Leve-o até Subsistência ou Comercial.</p>'
       + '<div class="alvos" id="alvos" style="margin-top:16px">'
         + ALVOS.map(a =>
             '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="Caixa ' + JogoKit.esc(a.nome) + '">'
@@ -152,6 +180,13 @@ function falarNome(peca) {
   if (n) JogoKit.falar(n.textContent, 0.85);
 }
 
+/* ---------- próxima rodada (mesma partida: os acertos de primeira somam) ---------- */
+function proximaRodada() {
+  S.rodada++;
+  S.colocadas = 0;
+  desenharRodada();
+}
+
 /* ---------- soltar o cartão: certo ou errado ---------- */
 function soltar(peca, alvo) {
   if (!peca || !alvo || peca.dataset.feita) return;
@@ -166,10 +201,12 @@ function soltar(peca, alvo) {
     if (caixa) caixa.appendChild(peca);
     JogoKit.arrasto.limpar();
     S.colocadas++;
+    S.total++;
     diz('✓ ' + peca.dataset.msg, true);
     JogoKit.falar(peca.dataset.msg, 0.85);
     atualizar();
-    if (S.colocadas === TOTAL) setTimeout(renderFim, 900);
+    if (S.total === TOTAL) setTimeout(renderFim, 900);
+    else if (S.colocadas === POR_RODADA) setTimeout(proximaRodada, 900);
   } else {
     peca.dataset.tent = tent + 1;
     diz('✗ ' + peca.dataset.msg, false);
@@ -190,11 +227,12 @@ function renderFim() {
   const a = S.primeiras, n = TOTAL;
   JogoKit.progresso.melhor(ID, a);
   const msg = a === n ? 'Você acertou tudo de primeira! Muito bem!'
-    : (a === n - 1 ? 'Muito bem! Quase tudo de primeira.'
+    : (a >= n - 2 ? 'Muito bem! Quase tudo de primeira.'
     : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
 
   app.innerHTML =
-    '<tela-fim icone="🌱" titulo="Subsistência ou comercial?" estrelas="' + a + '" total="' + n + '"'
+    '<h1 class="sr-only">Subsistência ou comercial?</h1>'
+    + '<tela-fim icone="🌱" titulo="Subsistência ou comercial?" estrelas="' + a + '" total="' + n + '"'
     + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
     + RODAPE;
 

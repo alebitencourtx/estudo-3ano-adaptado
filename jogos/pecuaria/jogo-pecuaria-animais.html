@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Do animal ao produto — Jogos do 3º ano</title>
+<title>Produtos da pecuária — Jogos do 3º ano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 <script src="../jogo-kit.js"></script>
 <style>
   jogo-topo,barra-progresso,tela-fim{display:block}
-  /* 4 caixas de animais com ícone grande */
+  /* Duas caixas para classificar as informações do livro. */
   .alvos{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
   .alvo .ico{width:82px;height:82px}
 </style>
@@ -19,39 +19,39 @@
 <body>
 <main id="app"></main>
 <script>
-/* ===== Do animal ao produto (pecuária, livro p. 86, 87) =====
-   Classificar 5 cartões de produto em 4 caixas de animais: vaca, boi,
-   galinha e ovelha. Dois modos: arrastar (dedo e mouse) e tocar (toque no
-   cartão e depois na caixa). Regras TEA: 1 instrução, frases curtas,
-   4 destinos, sem cronômetro, erro sem punição — mostra a frase certa e
+/* ===== Produtos da pecuária (livro p. 86) =====
+   Classificar os quatro produtos explicitamente listados no livro. Dois
+   modos: arrastar (dedo e mouse) e tocar (toque no cartão e depois na caixa).
+   Regras TEA: 1 instrução, frases curtas, sem cronômetro, erro sem punição — mostra a frase certa e
    destaca a caixa certa; o cartão continua selecionado.
    Ícones: Twemoji, CC-BY 4.0. Texto base: livro do 3º ano, p. 86 e 87. */
 
 const ID = 'pec-animais';
-const TOTAL = 5;
+const TOTAL = 8;
 
 const ALVOS = [
-  { id: 'vaca',    nome: 'Vaca',    ico: '../../img/jogo/pec/emoji/vaca.svg' },
-  { id: 'boi',     nome: 'Boi',     ico: '../../img/jogo/pec/boi.svg' },
-  { id: 'galinha', nome: 'Galinha', ico: '../../img/jogo/pec/emoji/galinha.svg' },
-  { id: 'ovelha',  nome: 'Ovelha',  ico: '../../img/jogo/pec/emoji/ovelha.svg' }
+  { id: 'produtos', nome: 'Produtos citados', ico: '../../img/jogo/pec/emoji/leite.svg' },
+  { id: 'outras', nome: 'Outras informações', ico: '../../img/jogo/pec/trabalhador.svg' }
 ];
 
 const PECAS = [
-  { id: 'leite', alvo: 'vaca',    ico: '../../img/jogo/pec/emoji/leite.svg', nome: 'Leite', msg: 'O leite vem da vaca.' },
-  { id: 'carne', alvo: 'boi',     ico: '../../img/jogo/pec/carne.svg',       nome: 'Carne', msg: 'A carne vem do boi.' },
-  { id: 'couro', alvo: 'boi',     ico: '../../img/jogo/pec/couro.svg',       nome: 'Couro', msg: 'O couro vem do boi.' },
-  { id: 'ovos',  alvo: 'galinha', ico: '../../img/jogo/pec/emoji/ovos.svg',  nome: 'Ovos',  msg: 'Os ovos vêm da galinha.' },
-  { id: 'la',    alvo: 'ovelha',  ico: '../../img/jogo/pec/emoji/la.svg',    nome: 'Lã',    msg: 'A lã vem da ovelha.' }
+  { id: 'leite', alvo: 'produtos', ico: '../../img/jogo/pec/emoji/leite.svg', nome: 'Leite', msg: 'Leite é um dos produtos citados no texto.' },
+  { id: 'carnes', alvo: 'produtos', ico: '../../img/jogo/pec/carne.svg', nome: 'Carnes', msg: 'Carnes são produtos citados no texto.' },
+  { id: 'ovos', alvo: 'produtos', ico: '../../img/jogo/pec/emoji/ovos.svg', nome: 'Ovos', msg: 'Ovos são produtos citados no texto.' },
+  { id: 'couro', alvo: 'produtos', ico: '../../img/jogo/pec/couro.svg', nome: 'Couro', msg: 'Couro é um dos produtos citados no texto.' },
+  { id: 'pastagens', alvo: 'outras', ico: '../../img/jogo/pec/emoji/vaca.svg', nome: 'Pastagens', msg: 'Pastagens aparecem na descrição da pecuária extensiva.' },
+  { id: 'estabulo', alvo: 'outras', ico: '../../img/jogo/pec/emoji/vaca.svg', nome: 'Estábulo', msg: 'Estábulo aparece na descrição da pecuária intensiva.' },
+  { id: 'ordenha', alvo: 'outras', ico: '../../img/jogo/pec/emoji/leite.svg', nome: 'Ordenha mecânica', msg: 'Ordenha mecânica aparece na descrição da pecuária intensiva.' },
+  { id: 'volante', alvo: 'outras', ico: '../../img/jogo/pec/trabalhador.svg', nome: 'Trabalhador volante', msg: 'Trabalhador volante é um tipo de trabalhador rural descrito no texto.' }
 ];
 
 const APOIO = 'A pecuária é a criação e a reprodução de animais.';
-const HINT = 'Arraste o produto para o animal certo. Ou toque no produto e depois no animal.';
+const HINT = 'Arraste cada cartão para o grupo certo. Ou toque no cartão e depois no grupo.';
 const FECHAMENTO = 'Por meio da pecuária obtemos alimentos e matérias-primas, como leite, carnes, ovos e couro, que depois podem ser transformados em outros produtos nas indústrias.';
 
 const CREDITOS = [
-  'Ícones de vaca, boi, galinha, ovelha, leite, carne, couro, ovos e lã: Twemoji, CC-BY 4.0.',
-  'Texto base e fotos: livro do 3º ano, p. 86 e 87 (do animal ao produto).'
+  'Ícones ilustrativos: Twemoji, CC-BY 4.0.',
+  'Texto base: livro do 3º ano, p. 86 e 87.'
 ];
 
 const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
@@ -99,15 +99,15 @@ function renderJogo() {
   const pecas = JogoKit.embaralhar(PECAS);
 
   app.innerHTML =
-    '<jogo-topo icone="🧵" titulo="Do animal ao produto" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
+    '<jogo-topo icone="🧵" titulo="Produtos da pecuária" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
     + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
     + '<section class="card">'
-      + '<p class="pergunta">Coloque cada produto no animal certo.</p>'
+      + '<p class="pergunta">Coloque os produtos citados em “Produtos citados”. Ponha os outros cartões em “Outras informações”.</p>'
       + '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>'
       + '<p class="hint">' + JogoKit.esc(HINT) + '</p>'
       + '<div class="alvos" id="alvos" style="margin-top:16px">'
         + ALVOS.map(a =>
-            '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="Caixa do animal ' + JogoKit.esc(a.nome) + '">'
+            '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="Grupo: ' + JogoKit.esc(a.nome) + '">'
             + '<img class="ico" src="' + JogoKit.esc(a.ico) + '" alt="">'
             + '<span class="nome">' + JogoKit.esc(a.nome) + '</span>'
             + '<span class="encaixados"></span>'
@@ -137,7 +137,7 @@ function falarNome(peca) {
   if (n) JogoKit.falar(n.textContent, 0.85);
 }
 
-/* ---------- soltar o produto: certo ou errado ---------- */
+/* ---------- classificar o cartão: certo ou errado ---------- */
 function soltar(peca, alvo) {
   if (!peca || !alvo || peca.dataset.feita) return;
   const certo = peca.dataset.alvo === alvo.dataset.id;
@@ -180,7 +180,7 @@ function renderFim() {
     : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
 
   app.innerHTML =
-    '<tela-fim icone="🧵" titulo="Do animal ao produto" estrelas="' + a + '" total="' + n + '"'
+    '<tela-fim icone="🧵" titulo="Produtos da pecuária" estrelas="' + a + '" total="' + n + '"'
     + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
     + RODAPE;
 

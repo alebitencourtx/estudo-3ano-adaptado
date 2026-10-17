@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sim ou não? — Agricultura — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+.foto-apoio{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:2px solid var(--line);margin:0 0 10px}
+.prox{margin-top:16px}
+opcoes-resposta .feed{text-align:left}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  'use strict';
+  const esc = JogoKit.esc;
+  const ID_PROG = 'agr-simnao';
+  const TITULO = 'Sim ou não? — Agricultura';
+  const TOTAL = 5;
+  const RODADAS = [
+    {
+      pergunta: 'Na agricultura de subsistência, as pessoas que cuidam da plantação comem o que plantam?',
+      certa: 'Sim',
+      msg: 'Na subsistência, os alimentos são consumidos pelas pessoas que cuidam das plantações.',
+      img: '../../img/hga/agr/arado.jpg',
+      alt: 'Instrumento simples: o arado.'
+    },
+    {
+      pergunta: 'Na agricultura comercial, os produtos são feitos para vender?',
+      certa: 'Sim',
+      msg: 'Na comercial, os produtos são destinados à venda.',
+      img: '../../img/hga/agr/colheitadeira.jpg',
+      alt: 'Máquina: a colheitadeira.'
+    },
+    {
+      pergunta: 'O facão é uma máquina usada para colher cana?',
+      certa: 'Não',
+      msg: 'O facão é um instrumento simples.',
+      img: '../../img/hga/agr/cana-facao.jpg',
+      alt: 'Trabalhador colhendo cana com facão.'
+    },
+    {
+      pergunta: 'Hoje, a cana é colhida somente à mão?',
+      certa: 'Não',
+      msg: 'Em 2020, a colheita da cana é com máquinas.',
+      img: '../../img/hga/agr/harvester.jpg',
+      alt: 'Colheitadeira de cana na lavoura.'
+    },
+    {
+      pergunta: 'O braço robótico tira o leite da vaca?',
+      certa: 'Sim',
+      msg: 'Em 2013 chegou a ordenha com robôs: o braço robótico tira o leite.',
+      img: '../../img/hga/agr/chip.jpg',
+      alt: 'Vaca com chip no pescoço.'
+    }
+  ];
+  const rodape = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+                 '<details class="detalhes"><summary>Créditos das imagens</summary><p>' +
+                 esc('Fotos do livro didático (p. 84, 92 e 95); ícones Twemoji, CC-BY 4.0.') +
+                 '</p></details>';
+
+  const app = document.getElementById('app');
+  let i = 0, acertos = 0;
+
+  function rodada() {
+    const r = RODADAS[i];
+    app.innerHTML = '<jogo-topo icone="🌾" titulo="' + esc(TITULO) + '" contador="' + (i + 1) + '/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+                    '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+                    '<section class="card">' +
+                    '<fala-botoes texto="Responda sim ou não."></fala-botoes>' +
+                    '<img class="foto-apoio" src="' + esc(r.img) + '" alt="' + esc(r.alt) + '">' +
+                    '<div data-quiz></div>' +
+                    '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
+                    '</section>' + rodape;
+
+    /* o quiz Sim/Não é o componente do kit */
+    const op = document.createElement('opcoes-resposta');
+    op.montar({ pergunta: r.pergunta, opcoes: ['Sim', 'Não'], certa: r.certa, msg: r.msg });
+    app.querySelector('[data-quiz]').appendChild(op);
+
+    const prox = app.querySelector('[data-prox]');
+    prox.onclick = proxima;
+
+    op.addEventListener('resposta', function (e) {
+      const ok = !!(e.detail && e.detail.ok);
+      if (ok) acertos++;
+      prox.classList.remove('escondido');
+      const barra = app.querySelector('barra-progresso');
+      if (barra) barra.atualizar(i + 1, TOTAL);
+      JogoKit.falar((ok ? '✓ ' : '✗ ') + r.msg, 0.85);
+    });
+
+    subir();
+  }
+
+  function proxima() {
+    if (i + 1 < TOTAL) { i++; rodada(); }
+    else terminar();
+  }
+
+  function terminar() {
+    JogoKit.progresso.melhor(ID_PROG, acertos);
+    app.innerHTML = '<tela-fim icone="🌾" titulo="' + esc(TITULO) + '" estrelas="' + acertos + '" total="' + TOTAL + '"' +
+                    ' resumo="Você respondeu tudo!" msg="Muito bem! Você terminou o jogo."></tela-fim>' + rodape;
+    subir();
+  }
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  document.addEventListener('fim', function (e) {
+    if (e.detail && e.detail.acao === 'denovo') {
+      i = 0; acertos = 0;
+      rodada();
+    } else {
+      location.href = 'index.html';
+    }
+  });
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
+
+  rodada();
+})();
+</script>
+</body>
+</html>

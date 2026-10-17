@@ -12,15 +12,19 @@
 <style>
   /* ===== ajustes locais do jogo "Do metal ao objeto" (não altera o jogo-kit.css) ===== */
   jogo-topo,barra-progresso,tela-fim{display:block}
-  .alvo .encaixados{min-height:60px;margin-top:6px}
+  .alvo .encaixados{min-height:60px;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .alvo .foto{width:100%;max-height:130px;object-fit:cover;border-radius:14px;border:2px solid var(--line)}
   .peca .nome{max-width:170px;line-height:1.2}
+  .peca.texto{min-height:96px;justify-content:center;text-align:center}
+  .dica{margin-top:14px}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script>
 /* ===== Do metal ao objeto (extrativismo mineral, livro p. 90, 91) =====
-   Classificar 7 objetos em 3 caixas de metal: cobre, ferro e alumínio.
+   Classificar os objetos em caixas de metal: cobre, ferro e alumínio.
+   Duas rodadas de 4 e 3 cartões (poucos cartões por tela), contador X/7.
    Dois modos: arrastar (dedo/mouse) e tocar (toca no cartão e depois na caixa).
    Regras TEA: 1 instrução, frases curtas, sem cronômetro, erro sem punição
    (mostra a frase certa e destaca a caixa certa; o cartão continua selecionado).
@@ -28,64 +32,69 @@
      cobre → fios elétricos e utensílios domésticos;
      ferro → ferramentas e automóveis;
      bauxita → alumínio → utensílios de cozinha, bicicletas, partes de aviões.
-   Ícones: Twemoji (CC-BY 4.0). Texto base: livro do 3º ano, p. 90 e 91. */
+   Caixas: fotos do livro (cobre, ferro e alumínio). Ícones: Twemoji (CC-BY 4.0). */
 
 const ID = 'min-objetos';
 const TOTAL = 7;
 
-/* caixas (.alvo): ícone grande + nome do metal */
+/* caixas (.alvo): a foto do livro do metal + nome */
 const ALVOS = [
-  { id: 'cobre',    ico: '../../img/jogo/min/energia.svg',    nome: 'Cobre' },
-  { id: 'ferro',    ico: '../../img/jogo/min/ferramentas.svg', nome: 'Ferro' },
-  { id: 'aluminio', ico: '../../img/jogo/min/aviao.svg',      nome: 'Alumínio' }
+  { id: 'cobre',    foto: '../../img/hga/min/cobre.jpg',    nome: 'Cobre' },
+  { id: 'ferro',    foto: '../../img/hga/min/ferro.jpg',    nome: 'Ferro' },
+  { id: 'aluminio', foto: '../../img/hga/min/aluminio.jpg', nome: 'Alumínio (da bauxita)' }
 ];
 
-/* cartões (.peca): icone + nome, com o alvo certo e a frase certa */
+/* cartões (.peca): ícone quando existe um que represente o objeto;
+   sem ícone (= texto puro) nos outros, para o desenho não entregar a resposta de outra caixa */
 const PECAS = [
-  { id: 'fios',      alvo: 'cobre',    ico: '../../img/jogo/min/energia.svg',     nome: 'Fios elétricos',      msg: 'O cobre faz fios elétricos.' },
-  { id: 'domesticos',alvo: 'cobre',    ico: '../../img/jogo/min/energia.svg',     nome: 'Utensílios domésticos', msg: 'O cobre faz utensílios domésticos.' },
-  { id: 'ferramentas', alvo: 'ferro',  ico: '../../img/jogo/min/ferramentas.svg', nome: 'Ferramentas',         msg: 'O ferro faz ferramentas.' },
-  { id: 'automoveis',alvo: 'ferro',    ico: '../../img/jogo/min/ferramentas.svg', nome: 'Automóveis',          msg: 'O ferro faz automóveis.' },
-  { id: 'cozinha',   alvo: 'aluminio', ico: '../../img/jogo/min/cozinha.svg',     nome: 'Utensílios de cozinha', msg: 'O alumínio faz utensílios de cozinha.' },
-  { id: 'bicicletas',alvo: 'aluminio', ico: '../../img/jogo/min/bicicleta.svg',   nome: 'Bicicletas',          msg: 'O alumínio faz bicicletas.' },
-  { id: 'avioes',    alvo: 'aluminio', ico: '../../img/jogo/min/aviao.svg',       nome: 'Partes de aviões',    msg: 'O alumínio faz partes de aviões.' }
+  { id: 'fios',       alvo: 'cobre',    ico: '../../img/jogo/min/energia.svg',     nome: 'Fios elétricos',        msg: 'O cobre faz fios elétricos.' },
+  { id: 'domesticos', alvo: 'cobre',    ico: '',                                   nome: 'Utensílios domésticos', msg: 'O cobre faz utensílios domésticos.' },
+  { id: 'ferramentas', alvo: 'ferro',   ico: '../../img/jogo/min/ferramentas.svg', nome: 'Ferramentas',           msg: 'O ferro faz ferramentas.' },
+  { id: 'automoveis', alvo: 'ferro',    ico: '',                                   nome: 'Automóveis',            msg: 'O ferro faz automóveis.' },
+  { id: 'cozinha',    alvo: 'aluminio', ico: '../../img/jogo/min/cozinha.svg',     nome: 'Utensílios de cozinha', msg: 'O alumínio faz utensílios de cozinha.' },
+  { id: 'bicicletas', alvo: 'aluminio', ico: '../../img/jogo/min/bicicleta.svg',   nome: 'Bicicletas',            msg: 'O alumínio faz bicicletas.' },
+  { id: 'avioes',     alvo: 'aluminio', ico: '../../img/jogo/min/aviao.svg',       nome: 'Partes de aviões',      msg: 'O alumínio faz partes de aviões.' }
 ];
 
-const PERGUNTA = 'De qual metal é feito cada objeto?';
-const APOIO = 'Cada metal vira objetos diferentes.';
-const HINT = 'Arraste o objeto para o metal certo. Ou toque no objeto e depois no metal.';
-const LEMBRETE = 'O alumínio vem da bauxita. O ferro, com outros elementos e altas temperaturas, vira aço.';
+/* 2 rodadas: cobre + ferro e, depois, o alumínio (as duas famílias de utensílios não se misturam) */
+const RODADAS = [
+  { nome: 'Rodada 1', pecas: ['fios', 'domesticos', 'ferramentas', 'automoveis'] },
+  { nome: 'Rodada 2', pecas: ['cozinha', 'bicicletas', 'avioes'] }
+];
+
+const PERGUNTA = 'Qual metal é usado para fazer cada objeto?';
+const HINT = 'Arraste um objeto até o metal. Ou toque no objeto e depois no metal.';
+const LEMBRETE = 'O alumínio vem da bauxita. O ferro, com outros elementos e altas temperaturas, vira aço. O ferro também é usado em máquinas e eletrodomésticos.';
 
 const CREDITOS = [
   'Fotos do livro didático, p. 90 e 91 (uso escolar): cobre, ferro e alumínio.',
-  'Ícones de energia, ferramentas, avião, cozinha e bicicleta: Twemoji, CC-BY 4.0.',
+  'Ícones: Twemoji, CC-BY 4.0.',
   'Texto base: livro do 3º ano, p. 90 e 91 (os minerais viram produtos de uso cotidiano).'
 ];
 
 const RODAPE = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
   + '<details class="detalhes"><summary>Créditos das imagens</summary>'
-  + '<p>' + JogoKit.esc(LEMBRETE) + '</p>'
   + '<ul>' + CREDITOS.map(c => '<li>' + JogoKit.esc(c) + '</li>').join('') + '</ul>'
   + '</details>';
 
 const app = document.getElementById('app');
-let S = null;                       /* { colocadas, primeiras } */
+let S = null;                       /* { colocadas, primeiras, rodada } */
 
-/* componentes web criados por innerHTML: garante que já renderizaram */
-function montarComponentes() {
-  app.querySelectorAll('jogo-topo,barra-progresso,tela-fim').forEach(el => {
-    if (!el.firstElementChild && typeof el.connectedCallback === 'function') el.connectedCallback();
-  });
+const pecaDe = id => PECAS.filter(p => p.id === id)[0];
+
+/* cartão do objeto: com ícone (pecaHtml do kit) ou texto puro */
+function cardHtml(p) {
+  if (p.ico) return JogoKit.pecaHtml({ id: p.id, alvo: p.alvo, ico: p.ico, nome: p.nome, msg: p.msg });
+  return '<div class="peca texto" data-id="' + JogoKit.esc(p.id) + '" data-alvo="' + JogoKit.esc(p.alvo) + '"' +
+    ' data-msg="' + JogoKit.esc(p.msg) + '" data-tent="0" role="button" tabindex="0"' +
+    ' aria-label="' + JogoKit.esc(p.nome) + '"><span class="nome">' + JogoKit.esc(p.nome) + '</span></div>';
 }
 
 function atualizar() {
-  const cont = app.querySelector('jogo-topo [data-contador]');
-  if (cont) cont.textContent = S.colocadas + '/' + TOTAL;
+  const topo = app.querySelector('jogo-topo');
+  if (topo) topo.contador = S.colocadas + '/' + TOTAL;
   const bar = app.querySelector('barra-progresso');
-  if (bar) {
-    if (!bar.querySelector('.bar') && typeof bar.render === 'function') bar.render();
-    if (typeof bar.atualizar === 'function') bar.atualizar(S.colocadas, TOTAL);
-  }
+  if (bar && bar.atualizar) bar.atualizar(S.colocadas, TOTAL);
 }
 
 function diz(texto, ok) {
@@ -100,42 +109,60 @@ function pulso(el) {
   setTimeout(() => el.classList.remove('pulso'), 1400);
 }
 
-/* ---------- tela do jogo ---------- */
+function ligarCartoes() {
+  app.querySelectorAll('#bandeja .peca').forEach(peca => JogoKit.arrasto.ligar(peca, soltar, falarNome));
+}
+
+/* ---------- tela do jogo (rodada 1) ---------- */
 function renderJogo() {
   JogoKit.arrasto.limpar();
-  S = { colocadas: 0, primeiras: 0 };
-  const pecas = JogoKit.embaralhar(PECAS);
+  S = { colocadas: 0, primeiras: 0, rodada: 0 };
 
   app.innerHTML =
     '<jogo-topo icone="🍳" titulo="Do metal ao objeto" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
     + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
     + '<section class="card">'
       + '<p class="pergunta">' + JogoKit.esc(PERGUNTA) + '</p>'
-      + '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>'
+      + '<fala-botoes texto="' + JogoKit.esc(PERGUNTA) + '"></fala-botoes>'
       + '<p class="hint">' + JogoKit.esc(HINT) + '</p>'
       + '<div class="alvos" id="alvos" style="margin-top:16px">'
         + ALVOS.map(a =>
             '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="Metal ' + JogoKit.esc(a.nome) + '">'
-            + '<img class="ico" src="' + JogoKit.esc(a.ico) + '" alt="">'
+            + '<img class="foto" src="' + JogoKit.esc(a.foto) + '" alt="">'
             + '<span class="nome">' + JogoKit.esc(a.nome) + '</span>'
             + '<span class="encaixados"></span>'
           + '</div>').join('')
       + '</div>'
       + '<div class="bandeja" id="bandeja">'
-        + pecas.map(p => JogoKit.pecaHtml(p)).join('')
+        + RODADAS[0].pecas.map(id => cardHtml(pecaDe(id))).join('')
       + '</div>'
       + '<p class="feed" id="feed" aria-live="polite"></p>'
+      + '<details class="detalhes dica"><summary>Ver dica</summary><p>' + JogoKit.esc(LEMBRETE) + '</p></details>'
     + '</section>'
     + RODAPE;
 
-  montarComponentes();
   atualizar();
 
   const topo = app.querySelector('jogo-topo');
   if (topo) topo.addEventListener('voltar', () => { location.href = 'index.html'; });
 
-  app.querySelectorAll('.peca').forEach(peca => JogoKit.arrasto.ligar(peca, soltar, falarNome));
+  ligarCartoes();
   app.querySelectorAll('.alvo').forEach(alvo => JogoKit.arrasto.ligarAlvo(alvo, soltar));
+  window.scrollTo(0, 0);
+}
+
+/* ---------- troca de rodada: as caixas ficam, os cartões mudam ---------- */
+function proximaRodada() {
+  S.rodada++;
+  const r = RODADAS[S.rodada];
+  if (!r) { renderFim(); return; }
+  JogoKit.arrasto.limpar();
+  const bandeja = app.querySelector('#bandeja');
+  if (bandeja) bandeja.innerHTML = r.pecas.map(id => cardHtml(pecaDe(id))).join('');
+  const f = app.querySelector('#feed');
+  if (f) { f.textContent = ''; f.className = 'feed'; }
+  ligarCartoes();
+  atualizar();
   window.scrollTo(0, 0);
 }
 
@@ -162,7 +189,8 @@ function soltar(peca, alvo) {
     diz('✓ ' + peca.dataset.msg, true);
     JogoKit.falar(peca.dataset.msg, 0.85);
     atualizar();
-    if (S.colocadas === TOTAL) setTimeout(renderFim, 900);
+    if (S.colocadas >= TOTAL) setTimeout(renderFim, 900);
+    else if (!app.querySelector('#bandeja .peca')) setTimeout(proximaRodada, 900);
   } else {
     peca.dataset.tent = tent + 1;
     diz('✗ ' + peca.dataset.msg, false);
@@ -179,19 +207,19 @@ function soltar(peca, alvo) {
 
 /* ---------- tela final ---------- */
 function renderFim() {
+  if (!S) return;
+  if (app.querySelector('tela-fim')) return;      /* já está na tela final */
   JogoKit.arrasto.limpar();
   const a = S.primeiras, n = TOTAL;
   JogoKit.progresso.melhor(ID, a);
-  const msg = a === n ? 'Você acertou tudo de primeira! Muito bem!'
+  const msg = a === n ? 'Você acertou tudo de primeira!'
     : (a === n - 1 ? 'Muito bem! Quase tudo de primeira.'
-    : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
+    : 'Você acertou ' + a + ' de ' + n + '. Jogue de novo.');
 
   app.innerHTML =
     '<tela-fim icone="🍳" titulo="Do metal ao objeto" estrelas="' + a + '" total="' + n + '"'
     + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
     + RODAPE;
-
-  montarComponentes();
 
   const tf = app.querySelector('tela-fim');
   if (tf) tf.addEventListener('fim', e => {
