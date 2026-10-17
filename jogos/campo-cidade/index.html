@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Campo e cidade em diferentes tempos — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* Pagina do topico "Campo e cidade em diferentes tempos" — gerada por _espec/gerar_menus.py. 5 jogos. */
+const JOGOS = [
+  {arquivo:'jogo-campo-cidade-tempo.html', icone:'🎬', nome:'Linha do tempo do cinema', como:'Passeie pelas paradas', oque:'Do cinema mudo, em 1895, ao cinema em 3-D.', id:'tempo-cc'},
+  {arquivo:'jogo-campo-cidade-lazer.html', icone:'🧺', nome:'O passeio de dona Alice', como:'Responda e veja a resposta', oque:'Piquenique, Jardim da Luz, famílias amigas.', id:'cc-lazer'},
+  {arquivo:'jogo-campo-cidade-antes-agora.html', icone:'⏳', nome:'Antigamente ou hoje?', como:'Leve o cartão à caixa certa', oque:'Lampião e carroça × energia elétrica e metrô.', id:'cc-antes-agora'},
+  {arquivo:'jogo-campo-cidade-cinema.html', icone:'🎥', nome:'O ano e o fato', como:'Ligue o ano ao fato', oque:'Mudo, com falas, colorido e 3-D.', id:'cc-cinema'},
+  {arquivo:'jogo-campo-cidade-filme.html', icone:'❓', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Como era o cinema em 1895 e como é hoje.', id:'cc-filme'},
+];
+const app = document.getElementById('app');
+const prog = JogoKit.progresso.ler();
+const legados = {};
+['treino3ano.jogo.pec.v1', 'treino3ano.jogo.peca.v1'].forEach(function (k) {
+  try { Object.keys(JSON.parse(localStorage.getItem(k) || '{}')).forEach(function (x) { legados[k + ':' + x] = 1; }); } catch (e) {}
+});
+function jogou(j) {
+  if (j.id) return prog[j.id] !== undefined;
+  if (j.legado) return Object.keys(legados).some(function (k) { return k.indexOf(j.legado + ':') === 0; });
+  return false;
+}
+app.innerHTML = `
+<header class="top">
+  <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🎬 Campo e cidade em diferentes tempos</h1>
+  <p class="sub">p. 102, 104, 105 · 5 jogos · base do livro</p>
+  <p class="sub">O passeio de dona Alice, o cinema em 1895, 1927, 1937 e 1953, e o que mudou nas cidades.</p>
+</header>
+<section class="cards">
+  ${JOGOS.map(j => `
+  <article class="card fase">
+    <span class="ico" aria-hidden="true">${j.icone}</span>
+    <div class="txt">
+      <h2>${JogoKit.esc(j.nome)}</h2>
+      <p class="sub">${JogoKit.esc(j.como)}</p>
+      <p class="sub">${JogoKit.esc(j.oque)}</p>
+      ${jogou(j) ? '<p class="marca">✓ Você já jogou este.</p>' : ''}
+    </div>
+    <button type="button" class="btn jogar" data-ir="${JogoKit.esc(j.arquivo)}">Jogar</button>
+  </article>`).join('')}
+</section>
+<p class="hint" style="text-align:center">Funciona no dedo (celular e tablet) e no mouse. Nenhum jogo tem cronômetro.</p>
+<p class="rodape"><a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>
+<details class="detalhes">
+  <summary>Sobre estes jogos</summary>
+  <ul>
+    <li>Palavras e fatos só do livro (p. 102, 104, 105).</li>
+    <li>Sem cronômetro. Se errar, a resposta certa aparece e você pode tentar de novo.</li>
+    <li>Use 🔊 Ouvir e 🐢 Devagar para ouvir. Sem voz no aparelho, peça a um adulto para ler.</li>
+  </ul>
+</details>`;
+app.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { location.href = b.dataset.ir; });
+
+</script>
+</body>
+</html>

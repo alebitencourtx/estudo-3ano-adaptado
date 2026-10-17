@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trabalhadores do campo — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>   <!-- clássico, no head: define os componentes antes do corpo -->
+<style>
+/* ===== ajustes locais do jogo "Trabalhadores do campo" (não altera o jogo-kit.css) =====
+   Regras TEA: toque grande (≥ 44 px), apoio visual (ícone + palavra), sem cronômetro,
+   erro mostra a frase certa e destaca a tarefa certa — nada trava. */
+.ligar{grid-template-columns:1fr 1.05fr;gap:10px}
+.ligar .opcao{cursor:pointer;min-height:64px;padding:12px;display:flex;align-items:center;gap:10px;text-align:left}
+.ligar .opcao img{width:46px;height:46px;max-height:46px;flex:none;object-fit:contain;border-radius:0;background:transparent}
+.ligar .opcao.palavra{font-weight:700;font-size:1rem;line-height:1.2}
+.ligar .opcao.palavra.feito{text-decoration:line-through}
+.ligar .opcao.tarefa{font-weight:600;font-size:1rem;line-height:1.25}
+.ligar .opcao.brilho{animation:brilho .9s ease 2}
+.ligar .opcao.pulso{animation:pulso .45s ease 3}
+@media (max-width:430px){
+  .ligar .opcao img{width:34px;height:34px;max-height:34px}
+  .ligar .opcao{font-size:.92rem;padding:10px;gap:7px}
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== Trabalhadores do campo — ligar palavra → tarefa (pecuária, p. 86, 87) =====
+   Conteúdo do livro (lista fechada em resumos/pec-86-87.md):
+     administrador da propriedade → organiza as atividades;
+     trabalhador fixo → recebe um salário;
+     parceiro → divide parte da produção com o dono;
+     arrendatário → aluga parte da terra e escolhe o que vai criar.
+   Regras TEA: 4 pares, uma instrução, frases curtas, feedback imediato com a frase certa,
+   erro aponta a tarefa certa e a criança tenta de novo (a palavra continua selecionada). */
+(function () {
+  'use strict';
+  const esc = JogoKit.esc;
+
+  const TRABALHADORES = [
+    { id: 'adm',          palavra: 'Administrador da propriedade', ico: '../../img/jogo/pec/adm.svg',
+      tarefa: 'Organiza as atividades',
+      msg: 'O administrador organiza as atividades.' },
+    { id: 'trabalhador',  palavra: 'Trabalhador fixo',              ico: '../../img/jogo/pec/trabalhador.svg',
+      tarefa: 'Recebe um salário',
+      msg: 'O trabalhador fixo recebe um salário.' },
+    { id: 'parceiro',     palavra: 'Parceiro',                      ico: '../../img/jogo/pec/parceiro.svg',
+      tarefa: 'Divide parte da produção',
+      msg: 'O parceiro divide parte da produção com o dono.' },
+    { id: 'arrendatario', palavra: 'Arrendatário',                  ico: '../../img/jogo/pec/arrendatario.svg',
+      tarefa: 'Aluga parte da terra',
+      msg: 'O arrendatário aluga parte da terra e escolhe o que vai criar.' }
+  ];
+  const TOTAL = TRABALHADORES.length;
+  const APOIO = 'No campo, cada trabalhador tem uma tarefa.';
+  const DICA = 'Toque na palavra e depois na tarefa.';
+  const ID_PROG = 'pec-trabalhadores';
+
+  const CREDITOS = [
+    'Ícones dos trabalhadores: Twemoji, CC-BY 4.0.',
+    'Conteúdo (trabalhadores do campo): livro do 3º ano, páginas 86 e 87.'
+  ];
+  const FECHAMENTO = 'Nem todos os trabalhadores do campo têm boas condições de trabalho.';
+
+  const rodape =
+    '<p class="rodape"><a href="index.html">← Os 5 jogos</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+    '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
+      CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') +
+    '</ul><p>' + esc(FECHAMENTO) + '</p></details>';
+
+  const app = document.getElementById('app');
+  let sel = null;          /* palavra (.opcao.palavra) selecionada */
+  let S = null;            /* { feitos, primeiras, errou } */
+
+  const dado = id => TRABALHADORES.filter(t => t.id === id)[0];
+
+  /* ---------- telas ---------- */
+  function renderJogo() {
+    sel = null;
+    S = { feitos: 0, primeiras: 0, errou: {} };
+    const tarefas = JogoKit.embaralhar(TRABALHADORES);   /* tarefas embaralhadas a cada rodada */
+
+    app.innerHTML =
+      '<jogo-topo icone="👷" titulo="Trabalhadores do campo" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<p class="pergunta">Qual é a tarefa de cada trabalhador?</p>' +
+        '<fala-botoes texto="' + esc(APOIO) + '"></fala-botoes>' +
+        '<p class="hint">' + esc(DICA) + '</p>' +
+        '<div class="ligar">' +
+          '<div class="coluna">' +
+            TRABALHADORES.map(t =>
+              '<div class="opcao palavra" data-id="' + t.id + '" role="button" tabindex="0" ' +
+                'aria-label="' + esc(t.palavra) + '">' +
+                '<img src="' + esc(t.ico) + '" alt=""><span class="nome">' + esc(t.palavra) + '</span>' +
+              '</div>').join('') +
+          '</div>' +
+          '<div class="coluna">' +
+            tarefas.map(t =>
+              '<div class="opcao tarefa" data-id="' + t.id + '" data-msg="' + esc(t.msg) + '" ' +
+                'role="button" tabindex="0" aria-label="' + esc(t.tarefa) + '">' + esc(t.tarefa) + '</div>').join('') +
+          '</div>' +
+        '</div>' +
+        '<p class="feed" id="feed" aria-live="polite"></p>' +
+      '</section>' +
+      rodape;
+
+    app.querySelectorAll('.opcao.palavra').forEach(el => {
+      el.addEventListener('click', () => tocarPalavra(el));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocarPalavra(el); } });
+    });
+    app.querySelectorAll('.opcao.tarefa').forEach(el => {
+      el.addEventListener('click', () => tocarTarefa(el));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocarTarefa(el); } });
+    });
+
+    atualizar();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- toques ---------- */
+  function tocarPalavra(el) {
+    if (el.classList.contains('feito')) return;
+    if (sel === el) { el.classList.remove('sel'); sel = null; return; }
+    if (sel) sel.classList.remove('sel');
+    sel = el;
+    el.classList.add('sel');
+    const d = dado(el.dataset.id);
+    JogoKit.falar(d.palavra, 0.85);
+  }
+
+  function tocarTarefa(el) {
+    if (el.classList.contains('feito')) return;
+    if (!sel) { diz(DICA, ''); return; }                 /* ainda não escolheu a palavra */
+
+    const idPalavra = sel.dataset.id;
+    const d = dado(idPalavra);
+
+    if (idPalavra === el.dataset.id) {
+      /* acerto: as duas opções ficam .feito (✓) e aparece a frase */
+      el.classList.add('feito');
+      sel.classList.add('feito');
+      sel.classList.remove('sel');
+      sel = null;
+      S.feitos++;
+      if (!S.errou[idPalavra]) S.primeiras++;
+      diz('✓ ' + d.msg, 'ok');
+      JogoKit.falar(d.msg, 0.85);
+      atualizar();
+      if (S.feitos === TOTAL) setTimeout(renderFim, 900);
+    } else {
+      /* erro: mostra a frase do trabalhador escolhido e destaca a tarefa certa.
+         A palavra continua selecionada — é só tocar na tarefa certa. */
+      S.errou[idPalavra] = true;
+      diz('✗ Não é essa. ' + d.msg, 'bad');
+      JogoKit.falar(d.msg, 0.85);
+      const certa = app.querySelector('.opcao.tarefa[data-id="' + idPalavra + '"]');
+      if (certa) {
+        certa.classList.add('brilho');
+        setTimeout(() => certa.classList.remove('brilho'), 1900);
+      }
+    }
+  }
+
+  /* ---------- apoio ---------- */
+  function atualizar() {
+    const bar = app.querySelector('barra-progresso');
+    if (bar && bar.atualizar) bar.atualizar(S.feitos, TOTAL);
+    const topo = app.querySelector('jogo-topo');
+    if (topo) {
+      const txt = S.feitos + '/' + TOTAL;
+      topo.contador = txt;                 /* o componente troca o texto visível */
+      topo.setAttribute('contador', txt);  /* e o atributo acompanha o estado */
+    }
+  }
+
+  function diz(txt, tipo) {
+    const f = document.getElementById('feed');
+    if (!f) return;
+    f.textContent = txt;
+    f.className = 'feed' + (tipo ? ' ' + tipo : '');
+  }
+
+  function ir(url) { try { location.href = url; } catch (e) {} }
+
+  /* ---------- fim ---------- */
+  function renderFim() {
+    const n = S.primeiras;
+    JogoKit.progresso.melhor(ID_PROG, n);          /* recorde = pares certos de primeira */
+    const msg = n === TOTAL ? 'Você acertou tudo de primeira!'
+      : n >= TOTAL - 1 ? 'Muito bem! Quase tudo de primeira.'
+      : 'Você acertou ' + n + ' de ' + TOTAL + ' de primeira. Pode jogar de novo.';
+
+    app.innerHTML =
+      '<tela-fim icone="👷" titulo="Trabalhadores do campo" estrelas="' + n + '" total="' + TOTAL + '" ' +
+        'resumo="Você ligou tudo!" msg="' + esc(msg) + '"></tela-fim>' +
+      rodape;
+
+    JogoKit.falar('Você ligou tudo! ' + n + ' de ' + TOTAL + ' de primeira.', 0.85);
+    window.scrollTo(0, 0);
+  }
+
+  /* eventos dos componentes (valem para todas as telas) */
+  document.addEventListener('voltar', () => ir('index.html'));
+  document.addEventListener('fim', e => {
+    const acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') renderJogo();   /* reinicia embaralhando as tarefas */
+    else ir('index.html');
+  });
+
+  renderJogo();
+})();
+</script>
+</body>
+</html>

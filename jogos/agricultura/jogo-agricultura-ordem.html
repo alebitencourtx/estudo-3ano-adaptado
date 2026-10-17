@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Do leite ao queijo — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+  .alvo .num{font-family:var(--font-display);font-weight:800;font-size:2.6rem;line-height:1;color:var(--acc)}
+  .alvo .frase{font-weight:800;font-size:.98rem;margin:0}
+  .alvo .frase:empty{display:none}
+  .bandeja{margin-top:4px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  'use strict';
+
+  /* 🌾 Do leite ao queijo — ordem: 1 juntar o gado · 2 ordenhar as vacas · 3 fazer os queijos
+     Base: livro p. 94 e 95 (depoimento do senhor Alfredo). Vocabulário de resumos/agr-84-85-92-95.md. */
+
+  const app = document.getElementById('app');
+  const ID = 'ordem-agr';
+  const TOTAL = 3;
+
+  const PASSOS = {
+    '1': { foto: '../../img/hga/agr/gado.jpg', nome: 'Juntar o gado', msg: 'Primeiro, juntar o gado.' },
+    '2': { foto: '../../img/hga/agr/ordenha.jpg', nome: 'Ordenhar as vacas', msg: 'Depois, ordenhar as vacas.' },
+    '3': { foto: '../../img/hga/agr/queijo.jpg', nome: 'Fazer os queijos', msg: 'Por último, fazer os queijos.' }
+  };
+
+  const INSTRUCAO = 'O senhor Alfredo acordava muito cedo: juntava o gado, ordenhava as vacas e fazia os queijos.';
+  const DICA = 'Ponha as fotos na ordem: 1, 2, 3.';
+
+  let errados = {};          // passos que já erraram (não contam como acerto de primeira)
+  let feitas = 0;            // peças encaixadas
+  let primeira = 0;          // acertos de primeira (0 a 3) → estrelas
+  let brilhoTimer = null;
+  let feed = null, topo = null, barra = null;
+
+  /* ---------- pedaços de tela ---------- */
+  function rodape() {
+    return '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
+      '<li>Fotos do livro didático, p. 94 e 95 (uso escolar).</li>' +
+      '<li>Depoimento do senhor Alfredo (livro, p. 94 e 95).</li>' +
+      '</ul></details>';
+  }
+
+  function alvoHtml(id) {
+    return '<div class="alvo" data-id="' + id + '" role="button" tabindex="0" aria-label="Passo ' + id + '">' +
+        '<span class="num" aria-hidden="true">' + id + '</span>' +
+        '<p class="frase" data-frase></p>' +
+        '<div class="encaixados" data-encaixados></div>' +
+      '</div>';
+  }
+
+  function pecaHtml(id) {
+    const p = PASSOS[id];
+    return JogoKit.pecaHtml({ id: id, alvo: id, foto: p.foto, nome: p.nome, msg: p.msg });
+  }
+
+  /* ---------- telas ---------- */
+  function montar() {
+    errados = {};
+    feitas = 0;
+    primeira = 0;
+
+    const ids = JogoKit.embaralhar(['1', '2', '3']);   // bandeja embaralhada a cada partida
+
+    app.innerHTML =
+      '<jogo-topo icone="🌾" titulo="Do leite ao queijo" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<fala-botoes texto="' + JogoKit.esc(INSTRUCAO) + '"></fala-botoes>' +
+        '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
+      '</section>' +
+      '<section class="card">' +
+        '<div class="alvos">' + ['1', '2', '3'].map(alvoHtml).join('') + '</div>' +
+        '<div class="bandeja" data-bandeja aria-label="Fotos">' + ids.map(pecaHtml).join('') + '</div>' +
+        '<p class="feed" data-feed aria-live="polite"></p>' +
+      '</section>' +
+      rodape();
+
+    feed = app.querySelector('[data-feed]');
+    topo = app.querySelector('jogo-topo');
+    barra = app.querySelector('barra-progresso');
+
+    app.querySelectorAll('.peca').forEach(function (peca) {
+      JogoKit.arrasto.ligar(peca, colocar, aoSelecionar);
+    });
+    app.querySelectorAll('.alvo').forEach(function (alvo) {
+      JogoKit.arrasto.ligarAlvo(alvo, colocar);
+    });
+
+    subir();
+  }
+
+  function reiniciar() { montar(); }   // montar() já volta ao topo
+
+  function subir() {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* ---------- ações ---------- */
+  function colocar(peca, alvo) {                 // usado pelo arrasto e pelo modo toque
+    if (!peca || !alvo || peca.dataset.feita) return;
+    if (alvo.dataset.id === peca.dataset.alvo) acertar(peca, alvo);
+    else errar(peca);
+  }
+
+  function aoSelecionar() { /* nada: a peça selecionada continua valendo depois do erro */ }
+
+  function acertar(peca, alvo) {
+    const p = PASSOS[peca.dataset.id];
+    peca.dataset.feita = '1';
+    peca.classList.remove('sel');
+    peca.classList.add('encaixada');
+    JogoKit.arrasto.limpar();
+
+    const caixa = alvo.querySelector('[data-encaixados]');
+    if (caixa) caixa.appendChild(peca);
+    alvo.classList.remove('brilho');
+    alvo.classList.add('feito');
+    const frase = alvo.querySelector('[data-frase]');
+    if (frase) frase.textContent = p.msg;
+    alvo.setAttribute('aria-label', 'Passo ' + alvo.dataset.id + ': ' + p.msg);
+
+    feitas++;
+    if (!errados[peca.dataset.id]) primeira++;
+
+    feed.className = 'feed ok';
+    feed.textContent = '✓ ' + p.msg;
+    JogoKit.falar(p.msg);
+    atualizar();
+
+    if (feitas >= TOTAL) terminar();
+  }
+
+  function errar(peca) {
+    const p = PASSOS[peca.dataset.id];
+    errados[peca.dataset.id] = true;
+    peca.dataset.tent = String((parseInt(peca.dataset.tent, 10) || 0) + 1);
+
+    const certo = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
+    if (certo) {
+      certo.classList.add('brilho');
+      if (brilhoTimer) clearTimeout(brilhoTimer);
+      brilhoTimer = setTimeout(function () { certo.classList.remove('brilho'); }, 2000);
+    }
+
+    feed.className = 'feed bad';
+    feed.textContent = '✗ ' + p.msg;
+    JogoKit.falar(p.msg);
+  }
+
+  function atualizar() {
+    if (topo) topo.contador = feitas + '/' + TOTAL;
+    if (barra) barra.atualizar(feitas, TOTAL);
+  }
+
+  function terminar() {
+    JogoKit.progresso.melhor(ID, primeira);      // melhor = acertos de primeira
+    const msg = primeira === TOTAL
+      ? 'Muito bem! Você pôs as fotos na ordem do senhor Alfredo.'
+      : 'Você pôs as fotos na ordem: juntar o gado, ordenhar as vacas e fazer os queijos.';
+    app.innerHTML =
+      '<tela-fim icone="🌾" titulo="Do leite ao queijo" estrelas="' + primeira + '" total="' + TOTAL + '"' +
+        ' resumo="Tudo na ordem certa!" msg="' + JogoKit.esc(msg) + '"></tela-fim>' +
+      rodape();
+    subir();
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  document.addEventListener('fim', function (e) {
+    if (e.detail && e.detail.acao === 'denovo') reiniciar();
+    else location.href = 'index.html';
+  });
+  document.addEventListener('voltar', function () {
+    location.href = 'index.html';
+  });
+
+  montar();
+})();
+</script>
+</body>
+</html>

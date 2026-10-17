@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="jogo-kit.css">
+<script src="jogo-kit.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* Menu por topico — gerado por _espec/gerar_menus.py. */
+const TOPICOS = [
+  {dir:'pecuaria', icone:'🐄', nome:'Pecuária', paginas:'p. 86, 87', resumo:'A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.', jogos:5},
+  {dir:'agricultura', icone:'🌾', nome:'Agricultura', paginas:'p. 84, 85, 92, 95', resumo:'Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.', jogos:5},
+  {dir:'mineral', icone:'⛏️', nome:'Extrativismo mineral', paginas:'p. 90, 91', resumo:'Os minerais saem da natureza e viram produtos: cobre, ferro, bauxita, areia e calcário.', jogos:5},
+  {dir:'campo-cidade', icone:'🎬', nome:'Campo e cidade em diferentes tempos', paginas:'p. 102, 104, 105', resumo:'O passeio de dona Alice, o cinema em 1895, 1927, 1937 e 1953, e o que mudou nas cidades.', jogos:5},
+  {dir:'impactos', icone:'🚚', nome:'Impactos ambientais', paginas:'p. 108 a 113', resumo:'O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.', jogos:5},
+];
+const app = document.getElementById('app');
+const prog = JogoKit.progresso.ler();
+const legados = {};
+['treino3ano.jogo.pec.v1', 'treino3ano.jogo.peca.v1'].forEach(function (k) {
+  try { Object.keys(JSON.parse(localStorage.getItem(k) || '{}')).forEach(function (x) { legados[k + ':' + x] = 1; }); } catch (e) {}
+});
+const CHAVES = {"pecuaria": ["mem-pec", "treino3ano.jogo.pec.v1", "treino3ano.jogo.peca.v1", "pec-trabalhadores", "pec-criacao"], "agricultura": ["ordem-agr", "agr-subsistencia", "tempo-cana", "agr-perguntas", "mem-agr"], "mineral": ["ligar-min", "mem-min", "min-perguntas", "min-natureza", "min-toque"], "campo-cidade": ["tempo-cc", "cc-lazer", "cc-antes-agora", "cc-cinema", "cc-filme"], "impactos": ["campo-cidade-imp", "imp-causas", "imp-reciclagem", "imp-ajudar", "imp-perguntas"]};
+function quantos(t) {
+  const ids = CHAVES[t.dir] || [];
+  return ids.filter(function (id) { return prog[id] !== undefined || Object.keys(legados).some(function (k) { return k.indexOf(id + ':') === 0; }); }).length;
+}
+app.innerHTML = `
+<header class="top">
+  <h1><img class="fita" src="../img/fita-autismo.png" alt=""> Jogos do 3º ano</h1>
+  <p class="sub">História e Geografia · base do livro · escolha um tópico</p>
+</header>
+<section class="cards">
+  ${TOPICOS.map(t => `
+  <article class="card fase">
+    <span class="ico" aria-hidden="true">${t.icone}</span>
+    <div class="txt">
+      <h2>${JogoKit.esc(t.nome)}</h2>
+      <p class="sub">${JogoKit.esc(t.paginas)} · ${t.jogos} jogos</p>
+      <p class="sub">${JogoKit.esc(t.resumo)}</p>
+      ${quantos(t) ? '<p class="marca">✓ ' + quantos(t) + ' de ' + t.jogos + ' já jogados.</p>' : ''}
+    </div>
+    <button type="button" class="btn jogar" data-ir="${t.dir}/index.html">Ver os jogos</button>
+  </article>`).join('')}
+</section>
+<p class="hint" style="text-align:center">Cada tópico tem 5 jogos curtos, com as palavras do livro. Nenhum tem cronômetro.</p>
+<p class="rodape"><a href="../index.html">← Voltar para o treino</a></p>
+<details class="detalhes">
+  <summary>Como estes jogos foram feitos</summary>
+  <ul>
+    <li>30 jogos: 5 para cada tópico (Pecuária, Agricultura, Extrativismo mineral, Campo e cidade, Impactos ambientais).</li>
+    <li>Conteúdo só com as palavras e fatos do livro (listas fechadas em <code>resumos/</code>).</li>
+    <li>Cada jogo é um arquivo HTML estático, com componentes web nativos (sem build e sem biblioteca).</li>
+    <li>Sem cronômetro. Se errar, a resposta certa aparece e a criança pode tentar de novo.</li>
+  </ul>
+</details>`;
+app.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { location.href = b.dataset.ir; });
+
+</script>
+</body>
+</html>

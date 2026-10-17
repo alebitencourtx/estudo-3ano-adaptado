@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Subsistência ou comercial? — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+  /* ===== ajustes locais (o resto vem do jogo-kit.css) =====
+     TEA: 1 instrução, 2 destinos, sem cronômetro, erro não pune. */
+  jogo-topo,barra-progresso,tela-fim{display:block}
+  .alvo{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:150px;cursor:pointer}
+  .alvo .ico{width:74px;height:74px;margin-top:4px}
+  .peca{max-width:230px}
+  .peca .nome{font-size:1rem;line-height:1.25}
+  .peca.foto{max-width:210px}
+  .peca.foto .nome{font-size:.95rem}
+  @media (max-width:420px){
+    .alvos{grid-template-columns:1fr 1fr}
+    .alvo .ico{width:56px;height:56px}
+  }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== Subsistência ou comercial? (agricultura, livro p. 84, 85) =====
+   Classificar 6 cartões em 2 caixas: arrastar OU tocar no cartão e na caixa.
+   Regras TEA: 1 instrução, 2 destinos, frases curtas, sem cronômetro,
+   erro sem punição (mostra a frase certa e a caixa certa brilha; o cartão
+   continua selecionado). Conteúdo só com as palavras do livro.
+   Fotos do livro didático; ícones Twemoji, CC-BY 4.0. */
+
+const ID = 'agr-subsistencia';       /* chave do progresso */
+const TOTAL = 6;
+
+const ALVOS = [
+  { id: 'subsistencia', ico: '../../img/jogo/agr/plantacao.svg', nome: 'Subsistência' },
+  { id: 'comercial',    ico: '../../img/jogo/agr/trator.svg',    nome: 'Comercial' }
+];
+
+/* Sem ícone exato para "assalariados/meeiros": esse cartão fica só com o texto. */
+const PECAS = [
+  { id: 'pequenas',      alvo: 'subsistencia', ico: '../../img/jogo/agr/semente.svg',
+    nome: 'Propriedades pequenas', msg: 'Na subsistência, as propriedades são pequenas.' },
+  { id: 'familiar',      alvo: 'subsistencia', ico: '../../img/jogo/agr/agricultor.svg',
+    nome: 'Mão de obra familiar', msg: 'Na subsistência, a mão de obra é da família.' },
+  { id: 'instrumentos',  alvo: 'subsistencia', ico: '../../img/jogo/agr/facao.svg',
+    nome: 'Instrumentos simples: enxada, foice e arado', msg: 'Na subsistência, usamos instrumentos simples.' },
+  { id: 'extensao',      alvo: 'comercial',    ico: '../../img/jogo/agr/plantacao.svg',
+    nome: 'Média e grande extensão', msg: 'Na comercial, as propriedades são grandes.' },
+  { id: 'maquinas',      alvo: 'comercial',    foto: '../../img/hga/agr/colheitadeira.jpg',
+    nome: 'Máquinas: trator e colheitadeira', msg: 'Na comercial, usamos máquinas.' },
+  { id: 'trabalhadores', alvo: 'comercial',
+    nome: 'Assalariados ou meeiros', msg: 'Na comercial, os trabalhadores são assalariados ou meeiros.' }
+];
+
+const CREDITOS = [
+  'Foto da colheitadeira: livro didático (uso escolar).',
+  'Ícones de plantação, semente, agricultor, facão e trator: Twemoji, CC-BY 4.0.',
+  'Texto base: livro do 3º ano, p. 84 e 85 (subsistência e comercial).'
+];
+
+const RODAPE = '<p class="rodape"><a href="index.html">← Os 5 jogos</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>'
+  + '<details class="detalhes"><summary>Créditos das imagens</summary><ul>'
+  + CREDITOS.map(c => '<li>' + JogoKit.esc(c) + '</li>').join('')
+  + '</ul></details>';
+
+const app = document.getElementById('app');
+let S = null;                        /* { colocadas, primeiras } */
+
+/* componentes web criados por innerHTML: garante que já renderizaram */
+function montarComponentes() {
+  app.querySelectorAll('jogo-topo,barra-progresso,tela-fim').forEach(el => {
+    if (!el.firstElementChild && typeof el.connectedCallback === 'function') el.connectedCallback();
+  });
+}
+
+/* cartões sem ícone não ficam com um <img src=""> vazio na frente do texto */
+function tirarImagensVazias() {
+  app.querySelectorAll('.peca img').forEach(img => {
+    if (!img.getAttribute('src')) img.remove();
+  });
+}
+
+function atualizar() {
+  const cont = app.querySelector('jogo-topo [data-contador]');
+  if (cont) cont.textContent = S.colocadas + '/' + TOTAL;
+  const bar = app.querySelector('barra-progresso');
+  if (bar) {
+    if (!bar.querySelector('.bar') && typeof bar.render === 'function') bar.render();
+    if (typeof bar.atualizar === 'function') bar.atualizar(S.colocadas, TOTAL);
+  }
+}
+
+function diz(texto, ok) {
+  const f = app.querySelector('#feed');
+  if (!f) return;
+  f.textContent = texto;
+  f.className = 'feed ' + (ok ? 'ok' : 'bad');
+}
+
+function pulso(el) {
+  el.classList.add('pulso');
+  setTimeout(() => el.classList.remove('pulso'), 1400);
+}
+
+/* ---------- tela do jogo ---------- */
+function renderJogo() {
+  JogoKit.arrasto.limpar();
+  S = { colocadas: 0, primeiras: 0 };
+  const pecas = JogoKit.embaralhar(PECAS);
+
+  app.innerHTML =
+    '<jogo-topo icone="🌱" titulo="Subsistência ou comercial?" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>'
+    + '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>'
+    + '<section class="card">'
+      + '<p class="pergunta">Onde fica cada cartão?</p>'
+      + '<fala-botoes texto="Na subsistência, a família come o que planta. Na comercial, a produção é para vender."></fala-botoes>'
+      + '<p class="hint">Arraste o cartão para a caixa certa. Ou toque no cartão e depois na caixa.</p>'
+      + '<div class="alvos" id="alvos" style="margin-top:16px">'
+        + ALVOS.map(a =>
+            '<div class="alvo" data-id="' + a.id + '" role="button" tabindex="0" aria-label="Caixa ' + JogoKit.esc(a.nome) + '">'
+            + '<img class="ico" src="' + JogoKit.esc(a.ico) + '" alt="">'
+            + '<span class="nome">' + JogoKit.esc(a.nome) + '</span>'
+            + '<span class="encaixados"></span>'
+          + '</div>').join('')
+      + '</div>'
+      + '<div class="bandeja" id="bandeja">'
+        + pecas.map(p => JogoKit.pecaHtml(p)).join('')
+      + '</div>'
+      + '<p class="feed" id="feed" aria-live="polite"></p>'
+    + '</section>'
+    + RODAPE;
+
+  montarComponentes();
+  tirarImagensVazias();
+  atualizar();
+
+  app.querySelectorAll('.peca').forEach(peca => JogoKit.arrasto.ligar(peca, soltar, falarNome));
+  app.querySelectorAll('.alvo').forEach(alvo => JogoKit.arrasto.ligarAlvo(alvo, soltar));
+  window.scrollTo(0, 0);
+}
+
+function falarNome(peca) {
+  if (!peca) return;
+  const n = peca.querySelector('.nome');
+  if (n) JogoKit.falar(n.textContent, 0.85);
+}
+
+/* ---------- soltar o cartão: certo ou errado ---------- */
+function soltar(peca, alvo) {
+  if (!peca || !alvo || peca.dataset.feita) return;
+  const certo = peca.dataset.alvo === alvo.dataset.id;
+  const tent = +peca.dataset.tent || 0;
+
+  if (certo) {
+    peca.dataset.feita = '1';
+    if (tent === 0) S.primeiras++;
+    peca.classList.add('encaixada');
+    const caixa = alvo.querySelector('.encaixados');
+    if (caixa) caixa.appendChild(peca);
+    JogoKit.arrasto.limpar();
+    S.colocadas++;
+    diz('✓ ' + peca.dataset.msg, true);
+    JogoKit.falar(peca.dataset.msg, 0.85);
+    atualizar();
+    if (S.colocadas === TOTAL) setTimeout(renderFim, 900);
+  } else {
+    peca.dataset.tent = tent + 1;
+    diz('✗ ' + peca.dataset.msg, false);
+    JogoKit.falar(peca.dataset.msg, 0.85);
+    pulso(peca);
+    /* o cartão continua selecionado: é só tocar na caixa certa */
+    const bom = app.querySelector('.alvo[data-id="' + peca.dataset.alvo + '"]');
+    if (bom) {
+      bom.classList.add('brilho');
+      setTimeout(() => bom.classList.remove('brilho'), 2200);
+    }
+  }
+}
+
+/* ---------- tela final ---------- */
+function renderFim() {
+  JogoKit.arrasto.limpar();
+  const a = S.primeiras, n = TOTAL;
+  JogoKit.progresso.melhor(ID, a);
+  const msg = a === n ? 'Você acertou tudo de primeira! Muito bem!'
+    : (a === n - 1 ? 'Muito bem! Quase tudo de primeira.'
+    : 'Você acertou ' + a + ' de ' + n + ' de primeira. Pode jogar de novo.');
+
+  app.innerHTML =
+    '<tela-fim icone="🌱" titulo="Subsistência ou comercial?" estrelas="' + a + '" total="' + n + '"'
+    + ' resumo="Tudo no lugar!" msg="' + JogoKit.esc(msg) + '"></tela-fim>'
+    + RODAPE;
+
+  montarComponentes();
+
+  JogoKit.falar('Tudo no lugar! Você acertou ' + a + ' de ' + n + ' de primeira.', 0.85);
+  window.scrollTo(0, 0);
+}
+
+/* ---------- eventos dos componentes do kit ---------- */
+app.addEventListener('voltar', () => { location.href = 'index.html'; });
+app.addEventListener('fim', e => {
+  if (e.detail && e.detail.acao === 'denovo') renderJogo();
+  else location.href = 'index.html';
+});
+
+renderJogo();
+</script>
+</body>
+</html>

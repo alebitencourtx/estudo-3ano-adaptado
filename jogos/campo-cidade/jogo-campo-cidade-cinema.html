@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>O ano e o fato — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>   <!-- clássico, no head: define os componentes antes do corpo -->
+<style>
+/* ===== ajustes locais do jogo "O ano e o fato" (não altera o jogo-kit.css) =====
+   Regras TEA: toque grande, apoio visual, sem cronômetro, erro não trava nada. */
+.ligar .opcao{cursor:pointer;min-height:64px;justify-content:center}
+.ligar .opcao.palavra{padding:18px 12px;font-family:var(--font-display);font-weight:800;font-size:1.5rem}
+.ligar .opcao.foto{padding:8px}
+.ligar .opcao.foto img{width:100%;height:88px;object-fit:cover;border-radius:12px}
+.ligar .opcao.foto .fato{font-size:.95rem;font-weight:700;line-height:1.2}
+.ligar .opcao.pulso{animation:pulso .45s ease 3}
+.ligar .opcao.brilho{animation:brilho .9s ease 2}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== O ano e o fato — ligar o ano ao fato do cinema (p. 102, 104, 105) =====
+   Vocabulário fechado de _espec/campo-cidade.md:
+     1895 → mudo e preto e branco · 1927 → primeiro filme com falas
+     1937 → cor nos desenhos (Branca de Neve) · 1953 → cinema em 3-D (Museu de cera).
+   Regras TEA: 4 pares, uma instrução, feedback imediato com a frase do ano,
+   erro aponta a foto certa e o ano continua selecionado (nada trava). */
+(function () {
+  'use strict';
+
+  var FATOS = [
+    { ano: '1895', fato: 'Mudo e preto e branco', foto: '../../img/hga/cc/cinema-1895.jpg',
+      alt: 'Foto antiga da primeira exibição de cinema, em 1895',
+      msg: '1895: o cinema era mudo e preto e branco.' },
+    { ano: '1927', fato: 'Primeiro filme com falas', foto: '../../img/hga/cc/cinema-1927.jpg',
+      alt: 'Foto do filme de 1927, o primeiro com falas',
+      msg: '1927: o primeiro filme com falas.' },
+    { ano: '1937', fato: 'Cor nos desenhos', foto: '../../img/hga/cc/branca-neve.jpg',
+      alt: 'Foto do desenho de 1937, Branca de Neve, já colorido',
+      msg: '1937: os desenhos ganharam cor.' },
+    { ano: '1953', fato: 'Cinema em 3-D', foto: '../../img/hga/cc/museu-cera.jpg',
+      alt: 'Foto do filme de 1953, em 3-D',
+      msg: '1953: o cinema em 3-D.' }
+  ];
+  var TOTAL = FATOS.length;
+  var ID = 'cc-cinema';
+  var APOIO = 'Ligue o ano ao fato do cinema.';
+  var DICA = 'Toque no ano e depois na foto.';
+
+  var CREDITOS = [
+    'Fotos do livro de História e Geografia do 3º ano, p. 102, 104 e 105 (uso escolar).',
+    'Cinema mudo (1895), filme com falas (1927), Branca de Neve (1937) e Museu de cera em 3-D (1953).',
+    'Ícones de emoji: Twemoji (CC BY 4.0).'
+  ];
+
+  var app = document.getElementById('app');
+  var sel = null;          /* ano (.opcao.palavra) selecionado */
+  var S = null;            /* { feitos, primeiras, errou } */
+
+  var dado = function (ano) { return FATOS.filter(function (f) { return f.ano === ano; })[0]; };
+
+  /* ---------- pedaços de tela ---------- */
+  function rodapeHtml() {
+    return '<p class="rodape"><a href="index.html">← Os 5 jogos</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+      '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
+      CREDITOS.map(function (c) { return '<li>' + JogoKit.esc(c) + '</li>'; }).join('') +
+      '</ul></details>';
+  }
+
+  /* ---------- telas ---------- */
+  function renderJogo() {
+    sel = null;
+    S = { feitos: 0, primeiras: 0, errou: {} };
+    var fotos = JogoKit.embaralhar(FATOS);   /* fotos embaralhadas a cada rodada */
+
+    app.innerHTML =
+      '<jogo-topo icone="🎬" titulo="O ano e o fato" contador="0/' + TOTAL + '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="0" total="' + TOTAL + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<p class="pergunta">Qual fato é de cada ano?</p>' +
+        '<fala-botoes texto="' + JogoKit.esc(APOIO) + '"></fala-botoes>' +
+        '<p class="hint">' + JogoKit.esc(DICA) + '</p>' +
+        '<div class="ligar">' +
+          '<div class="coluna">' +
+            FATOS.map(function (f) {
+              return '<div class="opcao palavra" data-ano="' + f.ano + '" role="button" tabindex="0" ' +
+                'aria-label="Ano ' + f.ano + '">' + f.ano + '</div>';
+            }).join('') +
+          '</div>' +
+          '<div class="coluna">' +
+            fotos.map(function (f) {
+              return '<div class="opcao foto" data-ano="' + f.ano + '" data-msg="' + JogoKit.esc(f.msg) + '" ' +
+                'role="button" tabindex="0" aria-label="' + JogoKit.esc(f.fato + ' — ' + f.alt) + '">' +
+                '<img src="' + JogoKit.esc(f.foto) + '" alt="">' +
+                '<span class="fato">' + JogoKit.esc(f.fato) + '</span></div>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        '<p class="feed" id="feed" aria-live="polite"></p>' +
+      '</section>' +
+      rodapeHtml();
+
+    app.querySelectorAll('.opcao.palavra').forEach(function (el) {
+      el.addEventListener('click', function () { tocarAno(el); });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocarAno(el); }
+      });
+    });
+    app.querySelectorAll('.opcao.foto').forEach(function (el) {
+      el.addEventListener('click', function () { tocarFoto(el); });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocarFoto(el); }
+      });
+    });
+
+    var topo = app.querySelector('jogo-topo');
+    if (topo) topo.contador = '0/' + TOTAL;
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- toques ---------- */
+  function tocarAno(el) {
+    if (el.classList.contains('feito')) return;
+    if (sel === el) { el.classList.remove('sel'); sel = null; return; }
+    if (sel) sel.classList.remove('sel');
+    sel = el;
+    el.classList.add('sel');
+    JogoKit.falar(el.textContent.trim(), 0.85);
+  }
+
+  function tocarFoto(el) {
+    if (el.classList.contains('feito')) return;
+    if (!sel) { diz(DICA, false); return; }
+
+    var ano = sel.dataset.ano;
+    var d = dado(ano);
+
+    if (ano === el.dataset.ano) {
+      /* acerto: as duas opções ficam .feito (✓) e aparece a frase */
+      el.classList.add('feito');
+      sel.classList.add('feito');
+      sel.classList.remove('sel');
+      sel = null;
+      S.feitos++;
+      if (!S.errou[ano]) S.primeiras++;
+      diz('✓ ' + d.msg, true);
+      JogoKit.falar(d.msg, 0.85);
+      atualizar();
+      if (S.feitos === TOTAL) setTimeout(renderFim, 900);
+    } else {
+      /* erro: mostra a frase do ano escolhido e destaca a foto certa.
+         O ano continua selecionado — é só tocar na foto certa. */
+      S.errou[ano] = true;
+      diz('✗ Não é essa. ' + d.msg, false);
+      JogoKit.falar(d.msg, 0.85);
+      var certa = app.querySelector('.opcao.foto[data-ano="' + ano + '"]');
+      if (certa) {
+        certa.classList.add('brilho');
+        setTimeout(function () { certa.classList.remove('brilho'); }, 1900);
+      }
+    }
+  }
+
+  /* ---------- apoio ---------- */
+  function atualizar() {
+    var bar = app.querySelector('barra-progresso');
+    if (bar && bar.atualizar) bar.atualizar(S.feitos, TOTAL);
+    var topo = app.querySelector('jogo-topo');
+    if (topo) {
+      var txt = S.feitos + '/' + TOTAL;
+      topo.contador = txt;                 /* o componente troca o texto visível */
+      topo.setAttribute('contador', txt);  /* e o atributo acompanha o estado */
+    }
+  }
+
+  function diz(txt, ok) {
+    var f = document.getElementById('feed');
+    if (!f) return;
+    f.textContent = txt;
+    f.className = 'feed ' + (ok ? 'ok' : 'bad');
+  }
+
+  function ir(url) { try { location.href = url; } catch (e) {} }
+
+  /* ---------- fim ---------- */
+  function renderFim() {
+    var n = S.primeiras;
+    JogoKit.progresso.melhor(ID, n);
+
+    app.innerHTML =
+      '<tela-fim icone="🎬" titulo="O ano e o fato" estrelas="' + n + '" total="' + TOTAL + '" ' +
+        'resumo="Você ligou tudo!"></tela-fim>' +
+      rodapeHtml();
+
+    JogoKit.falar('Você ligou tudo!', 0.85);
+    window.scrollTo(0, 0);
+  }
+
+  /* eventos dos componentes (valem para todas as telas) */
+  document.addEventListener('voltar', function () { ir('index.html'); });
+  document.addEventListener('fim', function (e) {
+    var acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') renderJogo();   /* reinicia embaralhando as fotos */
+    else ir('index.html');
+  });
+
+  renderJogo();
+})();
+</script>
+</body>
+</html>

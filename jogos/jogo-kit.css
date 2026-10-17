@@ -1,0 +1,203 @@
+/* ===== Jogo Kit — design system dos jogos (estático, sem build) =====
+   Usado por: jogos/jogo-*.html (basta <link rel="stylesheet" href="jogo-kit.css">).
+   Mesma linguagem visual do treino (index.html) e dos jogos antigos:
+   fundo quadriculado, cards com borda, fontes Baloo 2 + Nunito.
+   Regras TEA: sem cronômetro, feedback imediato com a resposta certa, poucas opções. */
+
+:root{
+  --font-display:'Baloo 2','Nunito',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --paper:#EEF3FB; --grid:#DCE5F4; --card:#FFFFFF; --ink:#18264A; --muted:#55628A; --line:#CBD6EC;
+  --ok:#16794F; --ok-soft:#DDF4E8; --bad:#B63030; --bad-soft:#FBE4E4; --focus:#2A55C4; --star:#E09A00;
+  --on-acc:#FFFFFF;
+  --hg:#965F10; --hg-soft:#FBEED2;
+  --acc:var(--hg); --acc-soft:var(--hg-soft);
+  --raio:20px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1730; --grid:#17213F; --card:#18223F; --ink:#E9EEFB; --muted:#A5B1D2; --line:#2B3963;
+  --ok:#58D39B; --ok-soft:#153A2B; --bad:#FF8F8F; --bad-soft:#44202A; --focus:#8FB0FF; --star:#FFC83D; --on-acc:#0E1530;
+  --hg:#F2B650; --hg-soft:#3B2F14; color-scheme:dark}}
+:root[data-skin="rosa"]{
+  --paper:#FFF4F8; --grid:#FBE1EB; --card:#FFFFFF; --ink:#4A1D3A; --muted:#85556F; --line:#F2C9DA;
+  --focus:#C2255C; --star:#F7BC1D; --on-acc:#FFFFFF;
+  --hg:#A56A00; --hg-soft:#FFF0C2}
+@media (prefers-color-scheme:dark){:root[data-skin="rosa"]:not([data-theme="light"]){
+  --paper:#261424; --grid:#331B30; --card:#36202F; --ink:#FFEAF2; --muted:#D9B0C7; --line:#5C3553;
+  --focus:#FF9CC4; --star:#FFD43B;
+  --hg:#FFD95A; --hg-soft:#4A3A14}}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--font-body); color:var(--ink); background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px; -webkit-text-size-adjust:100%;
+}
+main{max-width:760px;margin:0 auto;padding:18px 16px 48px}
+h1,h2,h3{font-family:var(--font-display);margin:0}
+button{font-family:inherit;cursor:pointer}
+a{color:var(--focus)}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.escondido{display:none!important}
+
+/* ---------- cabeçalho e textos ---------- */
+.top{text-align:center;margin-bottom:18px}
+.top h1{font-size:1.7rem;line-height:1.15}
+.top .sub{color:var(--muted);margin:6px 0 0;font-size:.95rem}
+.fita{width:26px;height:26px;object-fit:contain;vertical-align:middle;background:transparent;border:0}
+.card{background:var(--card);border:2px solid var(--line);border-radius:var(--raio);padding:18px;margin-bottom:14px}
+.cards{display:flex;flex-direction:column;gap:12px}
+.fase{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fase .ico{font-size:2rem;line-height:1}
+.fase .txt{flex:1 1 200px}
+.fase h2{font-size:1.2rem}
+.fase .sub{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+.fase .marca{margin:6px 0 0;color:var(--acc);font-weight:800;font-size:.95rem}
+.pergunta{font-family:var(--font-display);font-size:1.3rem;margin:0}
+.hint{color:var(--muted);font-size:.9rem;margin:6px 0 0}
+.fase-nome{color:var(--acc);font-size:1rem;margin-bottom:10px;font-family:var(--font-display)}
+.rodape{margin:22px 0 0;text-align:center;font-size:.95rem}
+.rodape a{margin:0 8px}
+.cont{font-weight:800;color:var(--muted)}
+
+/* ---------- botões ---------- */
+.mini{min-height:44px;padding:8px 14px;border-radius:12px;border:2px solid var(--line);
+  background:var(--card);color:var(--ink);font-weight:800;font-size:.95rem}
+.btn{display:block;width:100%;min-height:56px;padding:14px 18px;border-radius:16px;
+  border:2px solid var(--acc);background:var(--acc-soft);color:var(--ink);font-weight:800;font-size:1.1rem;
+  font-family:var(--font-display)}
+.btn.jogar{width:auto;flex:none}
+.btn.principal{border-color:var(--focus);background:var(--card)}
+.say{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.fala-botoes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+
+/* ---------- progresso ---------- */
+.bar{height:14px;background:var(--card);border:2px solid var(--line);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .25s ease}
+
+/* ---------- feedback ---------- */
+.feed{font-weight:700;margin:14px 0 0;min-height:1.4em;text-align:center}
+.feed.ok{color:var(--ok)}
+.feed.bad{color:var(--bad)}
+
+/* ---------- arrastar e soltar (peças / alvos) ---------- */
+.alvos{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:16px}
+.alvo{background:var(--card);border:3px dashed var(--line);border-radius:var(--raio);padding:12px;text-align:center;
+  transition:border-color .15s,box-shadow .15s,background .15s;min-height:150px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.alvo .foto{width:100%;max-height:150px;object-fit:cover;border-radius:14px;border:2px solid var(--line)}
+.alvo .ico{width:74px;height:74px;object-fit:contain}
+.alvo .nome{font-family:var(--font-display);font-weight:800;font-size:1.05rem}
+.alvo.quase{border-color:var(--acc);background:var(--acc-soft)}
+.alvo.brilho{animation:brilho .9s ease 2}
+.alvo.feito{border-style:solid;border-color:var(--ok)}
+@keyframes brilho{50%{box-shadow:0 0 0 8px var(--acc-soft);border-color:var(--acc)}}
+.encaixados{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;margin-top:auto}
+.bandeja{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;min-height:120px;
+  border:2px solid var(--line);border-radius:var(--raio);background:var(--card);padding:14px}
+.peca{touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab;
+  background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;min-width:104px;
+  transition:transform .15s ease,box-shadow .15s ease,border-color .15s}
+.peca img{width:64px;height:64px;object-fit:contain;pointer-events:none}
+.peca.foto img{width:150px;height:100px;object-fit:cover;border-radius:12px}
+.peca .nome{font-weight:800;font-size:.95rem;pointer-events:none}
+.peca.sel{border-color:var(--focus);box-shadow:0 0 0 5px var(--focus-soft,rgba(42,85,196,.25));transform:scale(1.06)}
+.peca.arrastando{pointer-events:none;z-index:60;position:relative;box-shadow:0 14px 28px rgba(0,0,0,.35);cursor:grabbing}
+.peca.pulso{animation:pulso .45s ease 3}
+@keyframes pulso{50%{transform:scale(1.09);border-color:var(--focus)}}
+.peca.encaixada{min-width:0;padding:6px;border-color:var(--ok);background:var(--ok-soft);cursor:default}
+.peca.encaixada img{width:54px;height:54px}
+.peca.encaixada.foto img{width:110px;height:74px}
+.peca.encaixada .nome{display:none}
+.peca.encaixada::after{content:'✓';color:var(--ok);font-weight:900}
+
+/* ---------- memória (cartas que viram) ---------- */
+.tabuleiro{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:14px}
+.carta{aspect-ratio:3/4;border:3px solid var(--line);border-radius:16px;background:var(--card);
+  display:flex;align-items:center;justify-content:center;padding:8px;font-size:2rem;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.carta .verso{font-family:var(--font-display);font-weight:800;color:var(--acc);font-size:1.6rem}
+.carta.virada{border-color:var(--acc);background:var(--acc-soft)}
+.carta.virada img{width:72%;height:72%;object-fit:contain}
+.carta.virada .nome{font-weight:800;font-size:.95rem}
+.carta.travada{border-color:var(--ok);background:var(--ok-soft)}
+.carta.travada::after{content:'✓';color:var(--ok);font-weight:900;margin-left:6px}
+
+/* ---------- ligar (clique em par: palavra → foto) ---------- */
+.ligar{display:grid;gap:12px;grid-template-columns:1fr 1fr;align-items:start}
+.coluna{display:flex;flex-direction:column;gap:10px}
+.opcao{padding:12px;border:3px solid var(--line);border-radius:16px;background:var(--card);
+  display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;text-align:center}
+.opcao img{width:100%;max-height:110px;object-fit:cover;border-radius:12px}
+.opcao.sel{border-color:var(--focus);box-shadow:0 0 0 5px rgba(42,85,196,.2)}
+.opcao.feito{border-color:var(--ok);background:var(--ok-soft);cursor:default}
+.opcao.feito::after{content:'✓';color:var(--ok);font-weight:900}
+
+/* ---------- linha do tempo / trilha ---------- */
+.trilha{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;justify-content:center;margin-bottom:14px}
+.parada{flex:1 1 140px;border:3px solid var(--line);border-radius:16px;background:var(--card);padding:12px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.parada .ano{font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--acc)}
+.parada.feita{border-color:var(--ok);background:var(--ok-soft)}
+.parada.atual{border-color:var(--focus);animation:pulso 1.2s ease 2}
+.parada img{width:100%;max-height:120px;object-fit:cover;border-radius:12px}
+
+/* ---------- fichas e caixas (classificar) ---------- */
+.fichas{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;border:2px solid var(--line);
+  border-radius:var(--raio);background:var(--card);padding:14px;min-height:110px}
+
+/* ---------- tela final ---------- */
+.fim{text-align:center}
+.fim .estrelas{font-size:2rem;letter-spacing:4px;margin:10px 0}
+.fim .resumo{font-family:var(--font-display);font-size:1.5rem;margin:8px 0 0}
+.fim .msg{color:var(--muted);margin:8px 0 0}
+.fim .acoes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.fim .acoes .btn{width:auto}
+.detalhes{margin-top:22px;color:var(--muted);font-size:.85rem}
+.detalhes summary{font-weight:800;cursor:pointer}
+.detalhes li{margin:3px 0}
+
+/* ---------- opções de resposta (<opcoes-resposta>) ---------- */
+.opcoes{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.opcao-btn{display:flex;align-items:center;gap:10px;text-align:left}
+.opcao-btn img.ico-b{width:46px;height:46px;object-fit:contain;flex:none}
+.opcao-btn.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opcao-btn.bad{border-color:var(--bad);background:var(--bad-soft)}
+.opcao-btn.ok::after{content:'✓';color:var(--ok);font-weight:900;margin-left:auto}
+.opcao-btn.bad::after{content:'✗';color:var(--bad);font-weight:900;margin-left:auto}
+.opcao-btn:disabled{cursor:default;opacity:.95}
+
+/* ---------- fichas para tocar (<fichas-toque>) ---------- */
+.fichas{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.ficha{min-height:52px;padding:10px 14px;border:3px solid var(--line);border-radius:14px;background:var(--card);
+  font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px;text-align:left}
+.ficha img{width:42px;height:42px;object-fit:contain}
+.ficha.sel{border-color:var(--focus);box-shadow:0 0 0 4px rgba(42,85,196,.2)}
+.ficha.certa{border-color:var(--ok);background:var(--ok-soft)}
+.ficha.errada{border-color:var(--bad);background:var(--bad-soft)}
+.ficha.certa::after{content:'✓';color:var(--ok);font-weight:900;margin-left:auto}
+.ficha.errada::after{content:'✗';color:var(--bad);font-weight:900;margin-left:auto}
+
+/* ---------- lixeiras da coleta seletiva ---------- */
+.lixeiras{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.lixeira{border-radius:16px;border:3px solid var(--line);background:var(--card);padding:12px;text-align:center}
+.lixeira .tampa{height:14px;border-radius:99px;margin:-4px auto 8px;width:70%;background:var(--line)}
+.lixeira .nome{font-family:var(--font-display);font-weight:800}
+.lixeira.azul .tampa{background:#2A55C4} .lixeira.azul{border-color:#2A55C4}
+.lixeira.vermelha .tampa{background:#C2252C} .lixeira.vermelha{border-color:#C2252C}
+.lixeira.verde .tampa{background:#1E7A46} .lixeira.verde{border-color:#1E7A46}
+.lixeira.amarela .tampa{background:#D8A200} .lixeira.amarela{border-color:#D8A200}
+.lixeira.quase{background:var(--acc-soft)}
+.lixeira.brilho{animation:brilho .9s ease 2}
+.lixeira.feita{border-style:solid;background:var(--ok-soft)}
+.lixeira .encaixados{min-height:44px}
+
+/* celulares pequenos */
+@media (max-width:420px){
+  .top h1{font-size:1.4rem}
+  .peca{min-width:88px;padding:8px}
+  .peca img{width:54px;height:54px}
+  .ligar{gap:8px}
+}

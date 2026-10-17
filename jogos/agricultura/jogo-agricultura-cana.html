@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A cana no tempo — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+/* ===== extras só desta página (o resto vem de jogo-kit.css) ===== */
+.parada{cursor:pointer;justify-content:flex-start}
+.parada.atual{background:var(--acc-soft)}
+.parada.feita{cursor:default}
+.parada .oculta{display:flex;align-items:center;justify-content:center;width:100%;height:110px;
+  border:2px dashed var(--line);border-radius:12px;background:var(--paper);
+  color:var(--muted);font-family:var(--font-display);font-weight:800;font-size:2rem}
+.parada .marca{color:var(--ok);font-weight:900;font-size:1.3rem;line-height:1}
+.parada .frase{margin:0;font-size:.95rem;font-weight:700}
+.parada img{max-height:110px}
+.painel{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.painel .foto{width:min(240px,100%);max-height:180px;object-fit:cover;border-radius:14px;border:2px solid var(--line)}
+.painel .texto{flex:1 1 240px;min-width:200px}
+.painel .ano{font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--acc);margin:0}
+.painel .frase{font-weight:800;font-size:1.02rem;margin:4px 0 6px;color:var(--ink)}
+.painel .completo{margin:0;color:var(--muted);font-size:.92rem}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== A cana no tempo — p. 92 e 93 =====
+   A colheita da cana-de-açúcar mudou: em 1996 era manual, com facão; em 2020
+   passou a ser feita com máquinas (colheitadeira e caminhão); hoje, 9 em cada 10
+   propriedades usam só colheita mecanizada.
+   Regras TEA: 1 instrução por tela, sem cronômetro, aprendizagem sem erro —
+   só a parada destacada avança; tocar fora de ordem só explica qual é a vez. */
+
+const PARADAS = [
+  { ano: '1996', foto: '../../img/hga/agr/cana-facao.jpg',
+    alt: 'Foto de 1996: trabalhador colhendo cana com facão',
+    frase: '1996: a colheita era manual, com facão.',
+    completo: 'Em Pitangueiras (SP), a colheita era manual, com facão.' },
+  { ano: '2020', foto: '../../img/hga/agr/harvester.jpg',
+    alt: 'Foto de 2020: máquina colhendo cana',
+    frase: '2020: a colheita é com máquinas.',
+    completo: 'Em Potirendaba (SP), a colheita é com colheitadeira e caminhão.' },
+  { ano: 'Hoje', foto: '../../img/hga/agr/colheitadeira.jpg',
+    alt: 'Foto de hoje: colheitadeira na plantação de cana',
+    frase: 'Hoje, 9 em cada 10 usam só colheitadeira.',
+    completo: 'Hoje, 9 em cada 10 propriedades usam só colheita mecanizada.' }
+];
+const ID = 'tempo-cana';
+const INSTRUCAO = 'Passeie pela colheita da cana. Toque na parada que está brilhando.';
+const DICA = 'Toque na parada que está brilhando.';
+const CREDITOS = [
+  'Fotos da colheita da cana: livro do 3º ano, História e Geografia — p. 92 e 93 (uso escolar).',
+  'Conteúdo conforme a linha do tempo da cana-de-açúcar (livro, p. 92 e 93).'
+];
+
+function boot () {
+  'use strict';
+  const K = window.JogoKit;
+  const esc = K.esc;
+  const app = document.getElementById('app');
+  let S = { i: 0 };                       /* i = parada da vez (0..3) */
+
+  /* ---------- pedaços de tela ---------- */
+  function rodapeHtml () {
+    return '<p class="rodape"><a href="index.html">← Os 5 jogos</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>';
+  }
+
+  function creditosHtml () {
+    return '<details class="detalhes"><summary>Créditos das imagens</summary><ul>' +
+      CREDITOS.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></details>';
+  }
+
+  function paradaHtml (p, k) {
+    const feita = k < S.i, atual = k === S.i, vista = k <= S.i;
+    return '<div class="parada' + (feita ? ' feita' : '') + (atual ? ' atual' : '') +
+      '" data-i="' + k + '" role="button" tabindex="0" aria-label="' +
+      esc(atual ? 'Parada de ' + p.ano + '. Toque aqui.' : 'Parada de ' + p.ano) + '">' +
+      '<span class="ano">' + esc(p.ano) + '</span>' +
+      (vista ? '<img src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">'
+             : '<span class="oculta" aria-hidden="true">?</span>') +
+      (feita ? '<span class="marca" aria-hidden="true">✓</span>' : '') +
+      (feita ? '<p class="frase">' + esc(p.frase) + '</p>' : '') +
+      '</div>';
+  }
+
+  /* painel: a foto grande e o texto completo da parada da vez */
+  function painelHtml () {
+    const p = PARADAS[Math.min(S.i, PARADAS.length - 1)];
+    return '<section class="card painel" aria-live="polite">' +
+      '<img class="foto painel-foto" src="' + esc(p.foto) + '" alt="' + esc(p.alt) + '">' +
+      '<div class="texto">' +
+        '<p class="ano">' + esc(p.ano) + '</p>' +
+        '<p class="frase">' + esc(p.frase) + '</p>' +
+        '<p class="completo">' + esc(p.completo) + '</p>' +
+      '</div>' +
+    '</section>';
+  }
+
+  /* ---------- telas ---------- */
+  function render () {
+    const n = PARADAS.length, i = S.i;
+    app.innerHTML =
+      '<jogo-topo icone="🌾" titulo="A cana no tempo" contador="' + i + '/' + n +
+        '" rotulo-voltar="← Fases"></jogo-topo>' +
+      '<barra-progresso valor="' + i + '" total="' + n + '"></barra-progresso>' +
+      '<section class="card">' +
+        '<fala-botoes texto="' + esc(INSTRUCAO) + '"></fala-botoes>' +
+        '<p class="hint">' + esc(DICA) + '</p>' +
+        '<div class="trilha">' + PARADAS.map(paradaHtml).join('') + '</div>' +
+        '<p class="feed" id="feed" aria-live="polite"></p>' +
+      '</section>' +
+      painelHtml() +
+      rodapeHtml() + creditosHtml();
+
+    app.querySelectorAll('.parada').forEach(el => {
+      const k = +el.dataset.i;
+      el.addEventListener('click', () => tocar(k));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tocar(k); }
+      });
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function renderFim () {
+    K.progresso.melhor(ID, PARADAS.length);
+    app.innerHTML =
+      '<tela-fim icone="🌾" titulo="A cana no tempo" estrelas="3" total="3" ' +
+        'resumo="Você visitou todas as paradas!" ' +
+        'msg="Muito bem! Você viu a colheita da cana mudar no tempo."></tela-fim>' +
+      '<section class="card">' +
+        '<details class="detalhes" open><summary>O que a cana vira</summary><ul>' +
+          '<li>A cana vira açúcar e álcool.</li>' +
+          '<li>Mesmo com máquinas, há trabalhadores: quem conduz a colheitadeira e o caminhão.</li>' +
+        '</ul></details>' +
+      '</section>' +
+      rodapeHtml() + creditosHtml();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- aviso curto na tela ---------- */
+  function diz (txt, ok) {
+    const f = app.querySelector('#feed');
+    if (!f) return;
+    f.textContent = txt;
+    f.className = 'feed ' + (ok ? 'ok' : 'bad');
+  }
+
+  /* ---------- ação principal: tocar numa parada ---------- */
+  function tocar (k) {
+    if (k !== S.i) {                       /* fora de ordem: só explica qual é a vez */
+      const ano = PARADAS[S.i].ano;
+      diz('✗ Agora é a parada de ' + ano + '.', false);
+      K.falar('Agora é a parada de ' + ano + '.', 0.85);
+      return;
+    }
+    const p = PARADAS[S.i];
+    S.i++;
+    render();                              /* marca .feita, revela a próxima, tira o .atual */
+    diz('✓ ' + p.frase, true);
+    K.falar(p.frase, 0.85);
+    if (S.i === PARADAS.length) setTimeout(renderFim, 700);
+  }
+
+  /* ---------- eventos dos componentes ---------- */
+  app.addEventListener('fim', e => {
+    const acao = e.detail && e.detail.acao;
+    if (acao === 'denovo') { S = { i: 0 }; render(); }
+    else if (acao === 'outros') { try { window.location.href = 'index.html'; } catch (err) {} }
+  });
+  app.addEventListener('voltar', () => { try { window.location.href = 'index.html'; } catch (err) {} });
+
+  render();
+}
+
+/* Espera o kit e o <main> ficarem prontos (no navegador o kit já vem do <head>). */
+(function espera (t) {
+  if (window.JogoKit && document.getElementById('app')) { boot(); return; }
+  if (t < 5000) setTimeout(() => espera(t + 25), 25);
+})(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pecuária — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* Pagina do topico "Pecuária" — gerada por _espec/gerar_menus.py. 5 jogos. */
+const JOGOS = [
+  {arquivo:'jogo-pecuaria-memoria.html', icone:'🐄', nome:'Memória dos bichos', como:'Encontre os dois iguais', oque:'Ache os 3 pares: vaca, galinha e ovelha.', id:'mem-pec'},
+  {arquivo:'jogo-pecuaria-perguntas.html', icone:'🎯', nome:'Perguntas da pecuária', como:'Responda e veja a resposta', oque:'Três fases de perguntas do livro.', legado:'treino3ano.jogo.pec.v1'},
+  {arquivo:'jogo-pecuaria-arrasta.html', icone:'🧺', nome:'Produtos e o lugar do gado', como:'Arraste e solte', oque:'Leite, ovos e lã; solto no pasto ou confinado.', legado:'treino3ano.jogo.peca.v1'},
+  {arquivo:'jogo-pecuaria-trabalhadores.html', icone:'👷', nome:'Trabalhadores do campo', como:'Ligue a palavra à tarefa', oque:'O administrador, o fixo, o parceiro e o arrendatário.', id:'pec-trabalhadores'},
+  {arquivo:'jogo-pecuaria-criacao.html', icone:'🐄', nome:'Solto ou confinado?', como:'Leve o cartão à caixa certa', oque:'Pecuária extensiva e intensiva, com as palavras do livro.', id:'pec-criacao'},
+];
+const app = document.getElementById('app');
+const prog = JogoKit.progresso.ler();
+const legados = {};
+['treino3ano.jogo.pec.v1', 'treino3ano.jogo.peca.v1'].forEach(function (k) {
+  try { Object.keys(JSON.parse(localStorage.getItem(k) || '{}')).forEach(function (x) { legados[k + ':' + x] = 1; }); } catch (e) {}
+});
+function jogou(j) {
+  if (j.id) return prog[j.id] !== undefined;
+  if (j.legado) return Object.keys(legados).some(function (k) { return k.indexOf(j.legado + ':') === 0; });
+  return false;
+}
+app.innerHTML = `
+<header class="top">
+  <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🐄 Pecuária</h1>
+  <p class="sub">p. 86, 87 · 5 jogos · base do livro</p>
+  <p class="sub">A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.</p>
+</header>
+<section class="cards">
+  ${JOGOS.map(j => `
+  <article class="card fase">
+    <span class="ico" aria-hidden="true">${j.icone}</span>
+    <div class="txt">
+      <h2>${JogoKit.esc(j.nome)}</h2>
+      <p class="sub">${JogoKit.esc(j.como)}</p>
+      <p class="sub">${JogoKit.esc(j.oque)}</p>
+      ${jogou(j) ? '<p class="marca">✓ Você já jogou este.</p>' : ''}
+    </div>
+    <button type="button" class="btn jogar" data-ir="${JogoKit.esc(j.arquivo)}">Jogar</button>
+  </article>`).join('')}
+</section>
+<p class="hint" style="text-align:center">Funciona no dedo (celular e tablet) e no mouse. Nenhum jogo tem cronômetro.</p>
+<p class="rodape"><a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>
+<details class="detalhes">
+  <summary>Sobre estes jogos</summary>
+  <ul>
+    <li>Palavras e fatos só do livro (p. 86, 87).</li>
+    <li>Sem cronômetro. Se errar, a resposta certa aparece e você pode tentar de novo.</li>
+    <li>Use 🔊 Ouvir e 🐢 Devagar para ouvir. Sem voz no aparelho, peça a um adulto para ler.</li>
+  </ul>
+</details>`;
+app.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { location.href = b.dataset.ir; });
+
+</script>
+</body>
+</html>
