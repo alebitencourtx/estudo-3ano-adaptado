@@ -1,0 +1,6 @@
+# este repositorio so publica o site: index.html + img/
+# nada de revisoes, logs ou anotacoes do modo admin aqui
+revisoes/
+anotacoes/
+*.tmp
+*.log

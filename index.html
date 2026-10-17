@@ -114,6 +114,7 @@ input:focus{border-color:var(--acc,var(--ma))}
 .qcard{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .qrow{display:flex;gap:12px;align-items:flex-start}
 .qimg{width:84px;height:84px;object-fit:cover;border-radius:14px;border:2px solid var(--line);flex:none;background:var(--acc-soft)}
+.qimgs{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
 .qrow .qtext{flex:1;min-width:0}
 .fita{width:26px;height:26px;object-fit:contain;vertical-align:middle;background:transparent;border:0}
 .adm{border-style:dashed;border-color:var(--focus)}
@@ -310,7 +311,7 @@ R.choice=(q,host,ch)=>{
 };
 R.pick=(q,host,ch)=>{
   const opts=shuffle(q.opts),sel=new Set();let locked=false;
-  host.innerHTML=`<p class="hint">Toque em todas as respostas certas.</p><div class="chipbox">${opts.map(o=>`<button type="button" class="chip" aria-pressed="false">${esc(o)}</button>`).join('')}</div>`;
+  host.innerHTML=`<p class="hint">Toque nas ${q.ans.length} respostas certas.</p><div class="chipbox">${opts.map(o=>`<button type="button" class="chip" aria-pressed="false">${esc(o)}</button>`).join('')}</div>`;
   const b=[...host.querySelectorAll('.chip')];
   b.forEach((x,i)=>x.onclick=()=>{if(locked)return;sel.has(i)?sel.delete(i):sel.add(i);x.classList.toggle('sel',sel.has(i));x.setAttribute('aria-pressed',sel.has(i));ch()});
   const good=i=>q.ans.includes(opts[i]);
@@ -656,135 +657,135 @@ const HG_TOPICS=[
 /* =============== HISTÓRIA E GEOGRAFIA ADAPTADA (p. 86-87) =============== */
 const HG_ADAPTADA_TOPICS=[
  {id:'agr-base',name:'Agricultura',pages:'p. 84, 85, 92, 95',pool:()=>[
-   C('Na subsistência, quem come os alimentos?', ['As pessoas que cuidam das plantações','Só outros países','Só as máquinas'],'As pessoas que cuidam das plantações','Quem planta come; a sobra vende perto.'),
-   TF('Na agricultura comercial, os produtos são destinados à venda.',true),
-   P('Toque nos 2 da subsistência.',['propriedades pequenas','mão de obra familiar','máquinas grandes','venda para outros países'],['propriedades pequenas','mão de obra familiar']),
-   S('Subsistência ou comercial?',['Subsistência','Comercial'],[['instrumentos simples como enxada',0],['máquinas como tratores',1],['vende em mercados próximos',0],['vende no país e outros países',1]]),
-   O('A manhã do Sr. Alfredo. Coloque em ordem.',['Acordava cedo e juntava o gado.','Ordenhava as vacas.','Fazia o queijo.']),
-   W('A máquina colhe a cana.'),
-   M('Ligue cada um ao seu par.',[['Subsistência','propriedades pequenas'],['Comercial','máquinas'],['Meeiro','reparte a produção']]),
-   Z('Complete.','Na cana, antes a colheita era {}. Hoje é com {}.',['manual','máquinas'],['manual','máquinas']),
-   C('O que atrai a vaca na ordenha com robôs?',['A ração no cocho','O facão','A enxada'],'A ração no cocho','A vaca vai sozinha comer no cocho.'),
-   F('Qual instrumento corta a cana na foto de 1996? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.'),
-   TF('A foice é um instrumento simples da subsistência.',true),
-   C('A cana vira o quê?',['açúcar e álcool','cimento','leite'],'açúcar e álcool','Cana vira açúcar e álcool.')]},
+   Object.assign(C('Na subsistência, quem come os alimentos?', ['As pessoas que cuidam das plantações','Só outros países','Só as máquinas'],'As pessoas que cuidam das plantações','Quem planta come; a sobra vende perto.'),{imgs:['img/hga/agr/arado.jpg']}),
+   Object.assign(TF('Na agricultura comercial, os produtos são destinados à venda.',true),{imgs:['img/hga/agr/colheitadeira.jpg']}),
+   Object.assign(P('Toque nos 2 da subsistência.',['propriedades pequenas','mão de obra familiar','máquinas grandes','venda para outros países'],['propriedades pequenas','mão de obra familiar']),{imgs:['img/hga/agr/arado.jpg']}),
+   Object.assign(S('Subsistência ou comercial?',['Subsistência','Comercial'],[['instrumentos simples como enxada',0],['máquinas como tratores',1],['vende em mercados próximos',0],['vende no país e outros países',1]]),{imgs:['img/hga/agr/arado.jpg','img/hga/agr/colheitadeira.jpg']}),
+   Object.assign(O('A manhã do Sr. Alfredo. Coloque em ordem.',['Acordava cedo e juntava o gado.','Ordenhava as vacas.','Fazia o queijo.']),{imgs:['img/hga/agr/gado.jpg','img/hga/agr/ordenha.jpg','img/hga/agr/queijo.jpg']}),
+   Object.assign(W('A máquina colhe a cana.'),{imgs:['img/hga/agr/harvester.jpg']}),
+   Object.assign(M('Ligue cada um ao seu par.',[['Subsistência','propriedades pequenas'],['Comercial','máquinas'],['Meeiro','reparte a produção']]),{imgs:['img/hga/agr/arado.jpg','img/hga/agr/colheitadeira.jpg']}),
+   Object.assign(Z('Complete.','Na cana, antes a colheita era {}. Hoje é com {}.',['manual','máquinas'],['manual','máquinas']),{imgs:['img/hga/agr/cana-facao.jpg','img/hga/agr/harvester.jpg']}),
+   Object.assign(C('O que atrai a vaca na ordenha com robôs?',['A ração no cocho','O facão','A enxada'],'A ração no cocho','A vaca vai sozinha comer no cocho.'),{imgs:['img/hga/agr/ordenha.jpg']}),
+   Object.assign(F('Qual instrumento corta a cana na foto de 1996? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.'),{imgs:['img/hga/agr/cana-facao.jpg']}),
+   Object.assign(TF('A foice é um instrumento simples da subsistência.',true),{imgs:['img/hga/agr/arado.jpg']}),
+   Object.assign(C('A cana vira o quê?',['açúcar e álcool','cimento','leite'],'açúcar e álcool','Cana vira açúcar e álcool.'),{imgs:['img/hga/agr/cana-facao.jpg']})]},
  {id:'agr-autismo',name:'Agricultura adaptado',pages:'p. 84, 85, 92, 95',pool:()=>[
-   C('Quem come na subsistência?',['Quem planta','Outros países'],'Quem planta','Quem planta come.'),
-   TF('A máquina ajuda na colheita.',true),
-   P('Toque nos 2 instrumentos simples.',['enxada','arado','trator','colheitadeira'],['enxada','arado']),
-   S('Subsistência ou comercial?',['Subsistência','Comercial'],[['propriedade pequena',0],['propriedade grande',1],['mão de obra da família',0],['máquinas',1]]),
-   O('O leite do Sr. Alfredo.',['Junta o gado.','Tira o leite.','Faz o queijo.']),
-   W('O robô tira o leite.'),
-   M('Ligue.',[['Subsistência','enxada'],['Comercial','máquina'],['Cana','facão']]),
-   Z('Complete.','Cana de 1996: {}. Cana de 2020: {}.',['facão','máquina'],['facão','máquina']),
-   C('O que a vaca usa no pescoço?',['chip','enxada'],'chip','O chip informa cada animal.'),
-   F('O que corta a cana? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.')]},
+   Object.assign(C('Quem come na subsistência?',['Quem planta','Outros países'],'Quem planta','Quem planta come.'),{imgs:['img/hga/agr/arado.jpg']}),
+   Object.assign(TF('A máquina ajuda na colheita.',true),{imgs:['img/hga/agr/harvester.jpg']}),
+   Object.assign(P('Toque nos 2 instrumentos simples.',['enxada','arado','trator'],['enxada','arado']),{imgs:['img/hga/agr/arado.jpg']}),
+   Object.assign(S('Subsistência ou comercial?',['Subsistência','Comercial'],[['propriedade pequena',0],['propriedade grande',1],['mão de obra da família',0],['máquinas',1]]),{imgs:['img/hga/agr/arado.jpg','img/hga/agr/colheitadeira.jpg']}),
+   Object.assign(O('O leite do Sr. Alfredo.',['Junta o gado.','Tira o leite.','Faz o queijo.']),{imgs:['img/hga/agr/gado.jpg','img/hga/agr/ordenha.jpg','img/hga/agr/queijo.jpg']}),
+   Object.assign(W('O robô tira o leite.'),{imgs:['img/hga/agr/ordenha.jpg']}),
+   Object.assign(M('Ligue.',[['Subsistência','enxada'],['Comercial','máquina'],['Cana','facão']]),{imgs:['img/hga/agr/arado.jpg','img/hga/agr/colheitadeira.jpg','img/hga/agr/cana-facao.jpg']}),
+   Object.assign(Z('Complete.','Cana de 1996: {}. Cana de 2020: {}.',['facão','máquina'],['facão','máquina']),{imgs:['img/hga/agr/cana-facao.jpg','img/hga/agr/harvester.jpg']}),
+   Object.assign(C('O que a vaca usa no pescoço?',['chip','enxada'],'chip','O chip informa cada animal.'),{imgs:['img/hga/agr/chip.jpg']}),
+   Object.assign(F('O que corta a cana? Escreva 1 palavra.',[{label:'Palavra',ans:['facão','facao']}],'O facão.'),{imgs:['img/hga/agr/cana-facao.jpg']})]},
  {id:'pec-adapt',name:'Pecuária',pages:'p. 86, 87',pool:()=>[
    C('Quem organiza as atividades dos outros trabalhadores?',['Administrador da propriedade','Trabalhador fixo','Arrendatário'],'Administrador da propriedade','O administrador organiza as atividades.'),
-   C('Em qual criação é necessário um número maior de trabalhadores?',['Pecuária intensiva','Pecuária extensiva','Nenhuma'],'Pecuária intensiva','Na intensiva precisa de mais trabalhadores.'),
+   Object.assign(C('Em qual criação é necessário um número maior de trabalhadores?',['Pecuária intensiva','Pecuária extensiva'],'Pecuária intensiva','Na intensiva precisa de mais trabalhadores.'),{imgs:['img/hga/pec/pasto.jpg','img/hga/pec/curral.jpg']}),
    TF('O trabalhador fixo recebe um salário pelo trabalho realizado.',true),
-   TF('Na pecuária extensiva, os animais são criados soltos em grandes áreas.',true),
+   Object.assign(TF('Na pecuária extensiva, os animais são criados soltos em grandes áreas.',true),{imgs:['img/hga/pec/pasto.jpg']}),
    P('Toque nos trabalhadores do campo.',['Administrador da propriedade','Trabalhador fixo','Parceiro','Arrendatário','estábulo','pastagens'],['Administrador da propriedade','Trabalhador fixo','Parceiro','Arrendatário']),
    P('Toque nos produtos obtidos com a pecuária.',['leite','carnes','ovos','couro','pastagens','estábulo'],['leite','carnes','ovos','couro']),
    S('Quem faz o quê?',['Administrador','Arrendatário'],[['Organiza as atividades dos outros trabalhadores',0],['Aluga parte da terra dos proprietários',1],['Os trabalhadores podem ser da família ou contratados',0],['Escolhe o que vai plantar ou criar',1]]),
-   S('Pecuária extensiva ou intensiva?',['Extensiva','Intensiva'],[['animais soltos em grandes áreas',0],['animais confinados',1],['alimentam-se nas pastagens',0],['recebem alimentação específica no estábulo',1],['pequeno número de trabalhadores',0],['maior número de trabalhadores',1]]),
+   Object.assign(S('Pecuária extensiva ou intensiva?',['Extensiva','Intensiva'],[['animais soltos em grandes áreas',0],['animais confinados',1],['alimentam-se nas pastagens',0],['recebem alimentação específica no estábulo',1],['pequeno número de trabalhadores',0],['maior número de trabalhadores',1]]),{imgs:['img/hga/pec/pasto.jpg','img/hga/pec/curral.jpg']}),
    O('Coloque na ordem do trabalhador volante.',['Vive nas cidades próximas às plantações.','É transportado de ônibus ou de caminhão.','Faz o plantio ou a colheita por um tempo.']),
-   O('Coloque na ordem da pecuária.',['Os animais são criados.','Os animais se reproduzem.','Obtemos leite, carnes, ovos e couro.','Os produtos são transformados nas indústrias.']),
+   Object.assign(O('Coloque na ordem da pecuária.',['Os animais são criados.','Os animais se reproduzem.','Obtemos leite, carnes, ovos e couro.','Os produtos são transformados nas indústrias.']),{imgs:['img/hga/pec/pasto.jpg']}),
    W('O administrador organiza as atividades.'),
-   W('Os animais comem nas pastagens.'),
+   Object.assign(W('Os animais comem nas pastagens.'),{imgs:['img/hga/pec/pasto.jpg']}),
    M('Relacione o trabalhador à sua função.',[['Administrador da propriedade','organiza as atividades'],['Trabalhador fixo','recebe salário'],['Parceiro','divide parte da produção'],['Arrendatário','aluga parte da terra']]),
-   M('Relacione a palavra ao significado.',[['Confinado','mantido em ambiente cercado'],['Estábulo','área coberta do gado'],['Extensiva','animais soltos'],['Intensiva','animais confinados']]),
+   Object.assign(M('Relacione a palavra ao significado.',[['Confinado','mantido em ambiente cercado'],['Estábulo','área coberta do gado'],['Extensiva','animais soltos'],['Intensiva','animais confinados']]),{imgs:['img/hga/pec/pasto.jpg','img/hga/pec/curral.jpg']}),
    Z('Complete.','O {} organiza as atividades. O trabalhador fixo recebe {}. O parceiro divide a {}. O arrendatário aluga a {}.',['Administrador','salário','produção','terra'],['Administrador','salário','produção','terra']),
-   Z('Complete.','Na pecuária {}, os animais vivem soltos e comem nas {}. Na pecuária {}, ficam {} no {}.',['extensiva','pastagens','intensiva','confinados','estábulo'],['extensiva','pastagens','intensiva','confinados','estábulo']),
+   Object.assign(Z('Complete.','Na pecuária {}, os animais vivem soltos e comem nas {}. Na pecuária {}, ficam {} no {}.',['extensiva','pastagens','intensiva','confinados','estábulo'],['extensiva','pastagens','intensiva','confinados','estábulo']),{imgs:['img/hga/pec/pasto.jpg','img/hga/pec/curral.jpg']}),
    C('Quem divide parte da produção com o dono?',['Parceiro','Administrador','Arrendatário'],'Parceiro','O parceiro divide a produção.'),
    TF('Ovos e leite podem vir da pecuária.',true),
    F('Como também é chamado o trabalhador volante?',[{label:'Resposta',ans:['boia-fria','boia fria']}],'Também chamado boia-fria.'),
-   F('Onde o gado da pecuária intensiva fica abrigado?',[{label:'Resposta',ans:['estábulo']}],'No estábulo.')]},
+   Object.assign(F('Onde o gado da pecuária intensiva fica abrigado?',[{label:'Resposta',ans:['estábulo']}],'No estábulo.'),{imgs:['img/hga/pec/curral.jpg']})]},
  {id:'pec-autismo',name:'Pecuária adaptado',pages:'p. 86, 87',pool:()=>[
-   C('Onde mora o boi da pecuária intensiva?',['No estábulo','Na pastagem'],'No estábulo','Boi intensivo mora no estábulo.'),
-   TF('Na pecuária extensiva, o boi vive solto.',true),
-   P('Toque nos 2 que a pecuária nos dá.',['leite','carne','estábulo','pastagem'],['leite','carne']),
+   Object.assign(C('Onde mora o boi da pecuária intensiva?',['No estábulo','Na pastagem'],'No estábulo','Boi intensivo mora no estábulo.'),{imgs:['img/hga/pec/curral.jpg','img/hga/pec/pasto.jpg']}),
+   Object.assign(TF('Na pecuária extensiva, o boi vive solto.',true),{imgs:['img/hga/pec/pasto.jpg']}),
+   P('Toque nos 2 que a pecuária nos dá.',['leite','carne','estábulo'],['leite','carne']),
    S('Quem faz o quê?',['Administrador','Arrendatário'],[['Organiza as atividades',0],['Aluga a terra',1],['Fala com os trabalhadores',0],['Escolhe o que plantar',1]]),
-   O('Do leite até você. Coloque em ordem.',['A vaca vive no pasto.','Tiramos o leite.','O leite vai para a fábrica.']),
-   W('O boi come capim.'),
+   Object.assign(O('Do leite até você. Coloque em ordem.',['A vaca vive no pasto.','Tiramos o leite.','O leite vai para a fábrica.']),{imgs:['img/hga/agr/ordenha.jpg']}),
+   Object.assign(W('O boi come capim.'),{imgs:['img/hga/pec/pasto.jpg']}),
    M('Ligue o animal ao produto.',[['vaca','leite'],['galinha','ovos'],['ovelha','lã']]),
-   Z('Complete com 2 palavras.','O boi vive na {}. O leite vem da {}.',['pastagem','vaca'],['pastagem','vaca']),
+   Object.assign(Z('Complete com 2 palavras.','Na extensiva, o boi vive {} e come nas {}.',['solto','pastagens'],['solto','pastagens']),{imgs:['img/hga/pec/pasto.jpg']}),
    C('Qual vem da pecuária?',['ovos','estábulo'],'ovos','Ovos vêm da pecuária.'),
-   F('Onde o boi dorme na intensiva? Escreva 1 palavra.',[{label:'Palavra',ans:['estábulo','estabulo']}],'Dorme no estábulo.')]},
+   Object.assign(F('Onde o boi dorme na intensiva? Escreva 1 palavra.',[{label:'Palavra',ans:['estábulo','estabulo']}],'Dorme no estábulo.'),{imgs:['img/hga/pec/curral.jpg']})]},
  {id:'min-base',name:'Extrativismo mineral',pages:'p. 90, 91',pool:()=>[
    C('Qual mineral é usado nos fios elétricos?',['cobre','ferro','calcário','areia'],'cobre','Fios de cobre, usados em instalações elétricas.',{img:'img/hga/min/cobre.jpg'}),
    Object.assign(TF('O ferro misturado com outros elementos e aquecido pode virar aço.',true),{img:'img/hga/min/ferro.jpg'}),
    Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílios domésticos','portão de ferro','cimento'],['fios de cobre','utensílios domésticos']),{img:'img/hga/min/cobre.jpg'}),
-   S('Cobre ou ferro?',['Cobre','Ferro'],[['fios elétricos',0],['ferramentas',1],['utensílios domésticos',0],['máquinas',1]]),
-   O('Do mineral ao produto. Coloque em ordem.',['Os minerais levam milhões de anos para se formar.','São extraídos da natureza.','Diminuem na natureza.','Viram produtos como fios e fogão.']),
+   Object.assign(S('Cobre ou ferro?',['Cobre','Ferro'],[['fios elétricos',0],['ferramentas',1],['utensílios domésticos',0],['máquinas',1]]),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg']}),
+   Object.assign(O('Do mineral ao produto. Coloque em ordem.',['Os minerais levam milhões de anos para se formar.','São extraídos da natureza.','Diminuem na natureza.','Viram produtos como fios e fogão.']),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg']}),
    Object.assign(W('O cobre faz fios elétricos.'),{img:'img/hga/min/cobre.jpg'}),
-   M('Ligue o mineral ao produto.',[['cobre','fios de cobre'],['ferro','portão de ferro'],['bauxita','objeto de alumínio'],['calcário','cimento']]),
-   Z('Complete.','O {} faz fios. O {} faz portão. O {} faz cimento.',['cobre','ferro','calcário'],['cobre','ferro','calcário']),
-   C('Qual objeto é feito de alumínio?',['utensílio de cozinha','fios de cobre','portão de ferro'],'utensílio de cozinha','Ralador e panelas são de alumínio.'),
+   Object.assign(M('Ligue o mineral ao produto.',[['cobre','fios de cobre'],['ferro','portão de ferro'],['bauxita','objeto de alumínio'],['calcário','cimento']]),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg','img/hga/min/aluminio.jpg','img/hga/min/cimento.jpg']}),
+   Object.assign(Z('Complete.','O {} faz fios. O {} faz portão. O {} faz cimento.',['cobre','ferro','calcário'],['cobre','ferro','calcário']),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg','img/hga/min/cimento.jpg']}),
+   C('De que material é este objeto?',['alumínio','cobre','ferro'],'alumínio','Objeto de alumínio. O alumínio vem da bauxita.',{img:'img/hga/min/aluminio.jpg'}),
    F('O cimento é feito a partir de qual recurso?',[{label:'Resposta',ans:['calcário','calcario']}],'Do calcário.',{img:'img/hga/min/cimento.jpg'})]},
  {id:'min-autismo',name:'Extrativismo mineral adaptado',pages:'p. 90, 91',pool:()=>[
    C('O fio elétrico é feito de quê?',['cobre','areia'],'cobre','Fio é de cobre.',{img:'img/hga/min/cobre.jpg'}),
    Object.assign(TF('O portão é de ferro.',true),{img:'img/hga/min/ferro.jpg'}),
-   Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílio de cobre','portão de ferro','cimento'],['fios de cobre','utensílio de cobre']),{img:'img/hga/min/cobre.jpg'}),
-   S('Cobre ou ferro?',['Cobre','Ferro'],[['fio elétrico',0],['portão',1],['utensílio doméstico',0],['fogão',1]]),
+   Object.assign(P('Toque nos 2 feitos com cobre.',['fios de cobre','utensílio de cobre','portão de ferro'],['fios de cobre','utensílio de cobre']),{img:'img/hga/min/cobre.jpg'}),
+   Object.assign(S('Cobre ou ferro?',['Cobre','Ferro'],[['fio elétrico',0],['portão',1],['utensílio doméstico',0],['fogão',1]]),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg']}),
    O('Da natureza ao produto.',['O mineral está na natureza.','Tiramos o mineral.','Fazemos o produto.']),
    Object.assign(W('Cimento vem do calcário.'),{img:'img/hga/min/cimento.jpg'}),
-   M('Ligue.',[['cobre','fios'],['ferro','portão'],['calcário','cimento']]),
-   Z('Complete com 2 palavras.','Fio é de {}. Portão é de {}.',['cobre','ferro'],['cobre','ferro']),
+   Object.assign(M('Ligue.',[['cobre','fios'],['ferro','portão'],['bauxita','alumínio']]),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg','img/hga/min/aluminio.jpg']}),
+   Object.assign(Z('Complete com 2 palavras.','Fio é de {}. Portão é de {}.',['cobre','ferro'],['cobre','ferro']),{imgs:['img/hga/min/cobre.jpg','img/hga/min/ferro.jpg']}),
    Object.assign(TF('Areia é um recurso mineral.',true),{img:'img/hga/min/areia.jpg'}),
    F('Fio é de quê? Escreva 1 palavra.',[{label:'Palavra',ans:['cobre']}],'De cobre.',{img:'img/hga/min/cobre.jpg'})]}
 ,
  {id:'cc-base',name:'Campo e cidade',pages:'p. 102, 104, 105',pool:()=>[
-   C('Onde Alice passeava aos domingos?',['Jardim da Luz','Cinema','Fábrica'],'Jardim da Luz','Aos domingos ia ao Jardim da Luz.'),
-   TF('O primeiro cinema foi mudo e em preto e branco.',true),
-   P('Toque nos 2 lazeres de Alice.',['piqueniques na Cantareira','passeio no Jardim da Luz','cinema 3-D','robôs'],['piqueniques na Cantareira','passeio no Jardim da Luz']),
-   S('Em 1895 ou atualmente?',['Em 1895','Atualmente'],[['filme mudo',0],['filme sonoro',1],['preto e branco',0],['colorido',1]]),
-   O('O cinema no tempo.',['1895: primeiro cinema mudo.','1927: primeiro com falas.','1937: cor nos desenhos.','1953: cinema 3-D.']),
-   W('Alice passeava no jardim.'),
-   M('Ligue o ano ao fato.',[['1895','primeiro cinema'],['1927','primeiro com falas'],['1937','desenho colorido']]),
-   Z('Complete.','O filme de 1895 era {} e {}.',['mudo','preto e branco'],['mudo','preto e branco']),
-   C('Quem ia com Alice nos passeios?',['As famílias amigas','Os robôs','As máquinas'],'As famílias amigas','Ia com as famílias amigas.'),
-   F('Em que cidade fica o Jardim da Luz?',[{label:'Resposta',ans:['São Paulo','Sao Paulo']}],'Em São Paulo.'),
-   TF('Alice fazia piquenique no Parque Antártica.',true),
-   TF('O primeiro cinema foi na França.',true),
-   C('Qual foi o primeiro filme com falas?',['O cantor de jazz','Branca de Neve','Museu de cera'],'O cantor de jazz','Em 1927, O cantor de jazz.'),
-   C('Qual desenho estreou em cores em 1937?',['Branca de Neve','Museu de cera','A saída dos trabalhadores'],'Branca de Neve','Branca de Neve, 1937.')]},
+   Object.assign(C('Onde Alice passeava aos domingos?',['Jardim da Luz','Cinema','Fábrica'],'Jardim da Luz','Aos domingos ia ao Jardim da Luz.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(TF('O primeiro cinema foi mudo e em preto e branco.',true),{imgs:['img/hga/cc/cinema-1895.jpg']}),
+   Object.assign(P('Toque nos 2 lazeres de Alice.',['piqueniques na Cantareira','passeio no Jardim da Luz','cinema 3-D','robôs'],['piqueniques na Cantareira','passeio no Jardim da Luz']),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(S('Em 1895 ou atualmente?',['Em 1895','Atualmente'],[['filme mudo',0],['filme sonoro',1],['preto e branco',0],['colorido',1]]),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(O('O cinema no tempo.',['1895: primeiro cinema mudo.','1927: primeiro com falas.','1937: cor nos desenhos.','1953: cinema 3-D.']),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/cinema-1927.jpg','img/hga/cc/branca-neve.jpg','img/hga/cc/museu-cera.jpg']}),
+   Object.assign(W('Alice passeava no jardim.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(M('Ligue o ano ao fato.',[['1895','primeiro cinema'],['1927','primeiro com falas'],['1937','desenho colorido']]),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/cinema-1927.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(Z('Complete.','O filme de 1895 era {} e {}.',['mudo','preto e branco'],['mudo','preto e branco']),{imgs:['img/hga/cc/cinema-1895.jpg']}),
+   Object.assign(C('Quem ia com Alice nos passeios?',['As famílias amigas','Os robôs','As máquinas'],'As famílias amigas','Ia com as famílias amigas.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(F('Em que cidade fica o Jardim da Luz?',[{label:'Resposta',ans:['São Paulo','Sao Paulo']}],'Em São Paulo.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(TF('Alice fazia piquenique no Parque Antártica.',true),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(TF('O primeiro cinema foi na França.',true),{imgs:['img/hga/cc/cinema-1895.jpg']}),
+   Object.assign(C('Qual foi o primeiro filme com falas?',['O cantor de jazz','Branca de Neve','Museu de cera'],'O cantor de jazz','Em 1927, O cantor de jazz.'),{imgs:['img/hga/cc/cinema-1927.jpg']}),
+   Object.assign(C('Qual desenho estreou em cores em 1937?',['Branca de Neve','Museu de cera','A saída dos trabalhadores'],'Branca de Neve','Branca de Neve, 1937.'),{imgs:['img/hga/cc/branca-neve.jpg']})]},
  {id:'cc-autismo',name:'Campo e cidade adaptado',pages:'p. 102, 104, 105',pool:()=>[
-   C('Alice ia a piquenique onde?',['Na Cantareira','Na fábrica'],'Na Cantareira','Piquenique na Cantareira.'),
-   TF('Alice passeava no Jardim da Luz.',true),
-   P('Toque nos 2 de lazer.',['piquenique','passeio no jardim','trator','facão'],['piquenique','passeio no jardim']),
-   S('1895 ou hoje?',['1895','Hoje'],[['mudo',0],['com falas',1],['preto e branco',0],['colorido',1]]),
-   O('O cinema muda.',['Cinema mudo.','Cinema com falas.','Cinema colorido.']),
-   W('O cinema era mudo.'),
-   M('Ligue.',[['1895','mudo'],['1927','falas'],['1937','cor']]),
-   Z('Complete.','Filme antigo: {}. Filme hoje: {}.',['mudo','colorido'],['mudo','colorido']),
-   C('Quem passeava com Alice?',['A família','O robô'],'A família','Com a família.'),
-   F('Jardim da ___? Escreva 1 palavra.',[{label:'Palavra',ans:['Luz','luz']}],'Jardim da Luz.')]},
+   Object.assign(C('Alice ia a piquenique onde?',['Na Cantareira','Na fábrica'],'Na Cantareira','Piquenique na Cantareira.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(TF('Alice passeava no Jardim da Luz.',true),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(P('Toque nos 2 de lazer.',['piquenique','passeio no jardim','trator'],['piquenique','passeio no jardim']),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(S('1895 ou hoje?',['1895','Hoje'],[['mudo',0],['com falas',1],['preto e branco',0],['colorido',1]]),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(O('O cinema muda.',['Cinema mudo.','Cinema com falas.','Cinema colorido.']),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/cinema-1927.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(W('O cinema era mudo.'),{imgs:['img/hga/cc/cinema-1895.jpg']}),
+   Object.assign(M('Ligue.',[['1895','mudo'],['1927','falas'],['1937','cor']]),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/cinema-1927.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(Z('Complete.','Filme antigo: {}. Filme hoje: {}.',['mudo','colorido'],['mudo','colorido']),{imgs:['img/hga/cc/cinema-1895.jpg','img/hga/cc/branca-neve.jpg']}),
+   Object.assign(C('Quem passeava com Alice?',['As famílias amigas','Um robô'],'As famílias amigas','Com as famílias amigas.'),{imgs:['img/hga/cc/jardim-luz.jpg']}),
+   Object.assign(F('Jardim da ___? Escreva 1 palavra.',[{label:'Palavra',ans:['Luz','luz']}],'Jardim da Luz.'),{imgs:['img/hga/cc/jardim-luz.jpg']})]},
  {id:'imp-base',name:'Impactos ambientais',pages:'p. 108 a 113',pool:()=>[
-   C('O que o campo manda para a cidade?',['alimentos do campo','carros','remédios'],'alimentos do campo','O campo manda comida.'),
-   TF('Desmatamento é tirar a vegetação natural.',true),
-   P('Toque nos 2 problemas do campo.',['desmatamento','uso de agrotóxicos','passeio no jardim','filme colorido'],['desmatamento','uso de agrotóxicos']),
-   S('Campo ou cidade?',['Campo','Cidade'],[['carne e leite',0],['roupas e remédios',1],['plantação de soja',0],['engarrafamento',1]]),
-   O('O desmatamento faz mal.',['Tiram a vegetação.','Os animais perdem a casa.','O solo fica pobre.']),
-   W('O campo manda comida.'),
-   M('Ligue o problema à causa.',[['Desmatamento','tira a vegetação'],['Agrotóxico','contamina o solo'],['Irrigação','usa muita água']]),
-   Z('Complete.','Máquinas aumentam a {} e aumentam o {}.',['produção','desemprego'],['produção','desemprego']),
-   C('Onde morar é perigoso?',['Encosta do morro','Jardim da Luz','Cinema'],'Encosta do morro','Morro e beira de rio são área de risco.'),
-   F('O que contamina o solo e a água? Escreva 1 palavra.',[{label:'Palavra',ans:['agrotóxicos','agrotoxicos','agrotóxico','agrotoxico']}],'Agrotóxicos.'),
-   S('O que há em cada plano da foto?',['Plano 1','Plano 2','Horizonte'],[['gado e grama',0],['plantação e casa',1],['céu e nuvens',2],['pecuária',0],['agricultura',1]]),
-   P('Toque nos 2 serviços públicos com problema.',['saúde','educação','cinema','piquenique'],['saúde','educação']),
-   C('Como controlar as pragas sem veneno?',['usando joaninhas','usando mais veneno','tirando árvores'],'usando joaninhas','Joaninhas comem as pragas.')]} ,
+   Object.assign(C('O que o campo manda para a cidade?',['alimentos do campo','carros','remédios'],'alimentos do campo','O campo manda comida.'),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(TF('Desmatamento é tirar a vegetação natural.',true),{imgs:['img/hga/imp/desmatamento.jpg']}),
+   Object.assign(P('Toque nos 2 problemas do campo.',['desmatamento','uso de agrotóxicos','passeio no jardim','filme colorido'],['desmatamento','uso de agrotóxicos']),{imgs:['img/hga/imp/desmatamento.jpg','img/hga/imp/agrotoxico.jpg']}),
+   Object.assign(S('Campo ou cidade?',['Campo','Cidade'],[['carne e leite',0],['roupas e remédios',1],['plantação de soja',0],['engarrafamento',1]]),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(O('O desmatamento faz mal.',['Tiram a vegetação.','Os animais perdem a casa.','O solo fica pobre.']),{imgs:['img/hga/imp/desmatamento.jpg']}),
+   Object.assign(W('O campo manda comida.'),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(M('Ligue o problema à causa.',[['Desmatamento','tira a vegetação'],['Agrotóxico','contamina o solo'],['Irrigação','usa muita água']]),{imgs:['img/hga/imp/desmatamento.jpg','img/hga/imp/agrotoxico.jpg','img/hga/imp/irrigacao.jpg']}),
+   Object.assign(Z('Complete.','Máquinas aumentam a {} e aumentam o {}.',['produção','desemprego'],['produção','desemprego']),{imgs:['img/hga/imp/colheitadeiras.jpg']}),
+   Object.assign(C('Onde morar é perigoso?',['Encosta do morro','Jardim da Luz','Cinema'],'Encosta do morro','Morro e beira de rio são área de risco.'),{imgs:['img/hga/imp/morro.jpg']}),
+   Object.assign(F('O que contamina o solo e a água? Escreva 1 palavra.',[{label:'Palavra',ans:['agrotóxicos','agrotoxicos','agrotóxico','agrotoxico']}],'Agrotóxicos.'),{imgs:['img/hga/imp/agrotoxico.jpg']}),
+   Object.assign(S('O que há em cada plano da foto?',['Plano 1','Plano 2','Horizonte'],[['gado e grama',0],['plantação e casa',1],['céu e nuvens',2],['pecuária',0],['agricultura',1]]),{imgs:['img/hga/imp/paisagem.jpg']}),
+   Object.assign(P('Toque nos 2 serviços públicos com problema.',['saúde','educação','cinema','piquenique'],['saúde','educação']),{imgs:['img/hga/imp/fila-servicos.jpg']}),
+   Object.assign(C('Como controlar as pragas sem veneno?',['usando joaninhas','usando mais veneno','tirando árvores'],'usando joaninhas','Joaninhas comem as pragas.'),{imgs:['img/hga/imp/agrotoxico.jpg']})]} ,
  {id:'imp-autismo',name:'Impactos ambientais adaptado',pages:'p. 108 a 113',pool:()=>[
-   C('O campo manda o quê?',['comida','carros'],'comida','O campo manda comida.'),
-   TF('Tirar as árvores faz mal.',true),
-   P('Toque nos 2 que fazem mal.',['desmatamento','agrotóxicos','piquenique','cinema'],['desmatamento','agrotóxicos']),
-   S('Campo ou cidade?',['Campo','Cidade'],[['vaca',0],['carro',1],['plantação',0],['prédio',1]]),
-   O('Da terra à cidade.',['Planta a semente.','Colhe a comida.','Manda para a cidade.']),
-   W('Cuide da água.'),
-   M('Ligue.',[['campo','comida'],['cidade','roupa'],['rio','água']]),
-   Z('Complete.','Campo dá {}. Cidade dá {}.',['comida','roupa'],['comida','roupa']),
-   C('Onde é perigoso morar?',['No morro','No jardim'],'No morro','Morro é área de risco.'),
-   F('O que suja a água? Escreva 1 palavra.',[{label:'Palavra',ans:['esgoto']}],'O esgoto.')]}
+   Object.assign(C('O campo manda o quê?',['comida','carros'],'comida','O campo manda comida.'),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(TF('Tirar as árvores faz mal.',true),{imgs:['img/hga/imp/desmatamento.jpg']}),
+   Object.assign(P('Toque nos 2 que fazem mal.',['desmatamento','agrotóxicos','piquenique'],['desmatamento','agrotóxicos']),{imgs:['img/hga/imp/desmatamento.jpg','img/hga/imp/agrotoxico.jpg']}),
+   Object.assign(S('Campo ou cidade?',['Campo','Cidade'],[['vaca',0],['carro',1],['plantação',0],['prédio',1]]),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(O('Da terra à cidade.',['Planta a semente.','Colhe a comida.','Manda para a cidade.']),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(W('Cuide da água.'),{imgs:['img/hga/imp/esgoto.jpg']}),
+   Object.assign(M('Ligue.',[['campo','comida'],['cidade','roupa'],['rio','água']]),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(Z('Complete.','Campo dá {}. Cidade dá {}.',['comida','roupa'],['comida','roupa']),{imgs:['img/hga/imp/ciclo.jpg']}),
+   Object.assign(C('Onde é perigoso morar?',['No morro','No jardim'],'No morro','Morro é área de risco.'),{imgs:['img/hga/imp/morro.jpg']}),
+   Object.assign(F('O que suja a água? Escreva 1 palavra.',[{label:'Palavra',ans:['esgoto']}],'O esgoto.'),{imgs:['img/hga/imp/esgoto.jpg']})]}
 ];
 
 /* =============== INGLÊS (Poptropica English 3 — Unidades 5 e 6) =============== */
@@ -987,8 +988,8 @@ function recognize(target,out){
   try{r.start()}catch(e){out('Espere um instante e toque de novo.')}
 }
 function speakEN(t,rate){speak(t,rate,'en-US')}
-const audioRow=(sel)=>`<div class="say audio"><button type="button" class="mini" data-a="0.85">🔊 Listen</button><button type="button" class="mini" data-a="0.55">🐢 Slow</button></div>${canSpeak()?'':'<p class="hint">Este aparelho não fala em inglês. Peça a um adulto para ler em voz alta.</p>'}`;
-function bindAudio(root,text){root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>speakEN(text,+b.dataset.a))}
+const audioRow=(lang)=>{lang=lang||'en-US';const pt=lang==='pt-BR';return `<div class="say audio"><button type="button" class="mini" data-a="0.85">🔊 ${pt?'Ouvir':'Listen'}</button><button type="button" class="mini" data-a="0.55">${pt?'🐢 Devagar':'🐢 Slow'}</button></div>${canSpeak()?'':'<p class="hint">Este aparelho não fala. Peça a um adulto para ler em voz alta.</p>'}`};
+function bindAudio(root,text,lang){root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>speak(text,+b.dataset.a,lang||'en-US'))}
 
 let labTab='clo';
 function renderLab(){
@@ -1059,15 +1060,25 @@ let admAsk=false;
 const ADM_HASH=2090113217;
 function admHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h}
 function admTry(){const v=$('#admPw'),ok=!!v&&admHash(v.value.trim().toLowerCase())===ADM_HASH;if(ok){store.admin=true;admAsk=false;save();renderHome()}else{const m=$('#admErr');if(m)m.textContent='Senha incorreta.';if(v){v.value='';v.focus()}}}
-function admKey(q){return q.t+'|'+norm(q.q.replace(/<[^>]+>/g,' ')).slice(0,80)}
+const qid=q=>{let s=q.q||'';if(q.t==='cloze')s+=' '+q.text;else if(q.t==='sort')s+=' '+JSON.stringify([q.cats,q.items]);else if(q.t==='match')s+=' '+JSON.stringify(q.pairs);else if(q.t==='order')s+=' '+q.steps.join(' ');else if(q.t==='inputs')s+=' '+JSON.stringify(q.fields);else if(q.opts)s+=' '+JSON.stringify(q.opts);return q.t+'|'+norm(s.replace(/<[^>]+>/g,' ')).slice(0,160)};
+function admKey(q){return qid(q)}
 function admGet(q){return SES.admLog.find(e=>e.key===admKey(q))}
 function admSave(e){const i=SES.admLog.findIndex(x=>x.key===e.key);if(i>=0)SES.admLog[i]=e;else SES.admLog.push(e);try{localStorage.setItem(ADM_STORE+'.draft',JSON.stringify({when:Date.now(),log:SES.admLog}))}catch(_){}}
-function admEntry(q,skip){let e=admGet(q);if(!e)e={key:admKey(q),materia:SES.sub.name,topico:SES.title,tipo:q.t,enunciado:q.q.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(),resposta:answerText(q),excluir:false,corrQ:'',corrA:'',pulada:false};if(skip)e.pulada=true;return e}
-function admPanel(){const e=admGet(SES.qs[SES.i]);return `<section class="qcard adm"><b>Modo admin</b><label class="hint" for="admQ">Correção do enunciado</label><textarea id="admQ" rows="2">${e?esc(e.corrQ):''}</textarea><label class="hint" for="admA">Correção das alternativas</label><textarea id="admA" rows="2">${e?esc(e.corrA):''}</textarea><div class="row"><button class="mini" id="bNote">Salvar anotação</button><button class="mini" id="bDel" aria-pressed="${e&&e.excluir}">Excluir: ${e&&e.excluir?'sim':'não'}</button><button class="mini" id="bSkip">Pular \u2192</button><button class="mini" id="bTxt">Baixar TXT</button><button class="mini" id="bCopy">Copiar TXT</button></div><p class="hint" id="admMsg" aria-live="polite"></p><textarea id="admBox" rows="10" readonly hidden></textarea></section>`}
+function admEntry(q,skip){let e=admGet(q);if(!e){const d={};Object.keys(q).forEach(k=>{if(typeof q[k]!=='function')d[k]=q[k]});e={key:admKey(q),materiaId:SES.sub.id,materia:SES.sub.name,topicoId:SES.base.topicId||'',topico:SES.title,tipo:q.t,enunciado:q.q.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(),resposta:answerText(q),dados:d,excluir:false,corrQ:'',corrA:'',pulada:false}}if(skip)e.pulada=true;return e}
+function admPanel(){const e=admGet(SES.qs[SES.i]);return `<section class="qcard adm"><b>Modo admin</b><label class="hint" for="admQ">Correção do enunciado</label><textarea id="admQ" rows="2">${e?esc(e.corrQ):''}</textarea><label class="hint" for="admA">Correção das alternativas</label><textarea id="admA" rows="2">${e?esc(e.corrA):''}</textarea><div class="row"><button class="mini" id="bNote">Salvar anotação</button><button class="mini" id="bDel" aria-pressed="${e&&e.excluir}">Excluir: ${e&&e.excluir?'sim':'não'}</button><button class="mini" id="bSkip">Pular \u2192</button><button class="mini" id="bTxt">Baixar TXT</button><button class="mini" id="bCopy">Copiar TXT</button><button class="mini" id="bSend">Enviar revisão</button></div><p class="hint" id="admMsg" aria-live="polite"></p><textarea id="admBox" rows="10" readonly hidden></textarea></section>`}
 function admNext(){const q=SES.qs[SES.i];const e=admEntry(q,true);admSave(e);SES.res[SES.i]={q,skip:true};SES.i++;SES.checked=false;if(SES.i>=SES.qs.length)renderResult();else renderQuestion();top()}
 function admTXT(){const d=new Date(),p2=n=>String(n).padStart(2,'0');const stamp=`${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`;const L=[`REVISÃO DE QUESTÕES - ${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`,`Matéria: ${SES.sub.name} | Treino: ${SES.title} | Anotações: ${SES.admLog.length}`,''];SES.admLog.forEach((e,i)=>{L.push(`[${i+1}] (${e.tipo}) ${e.enunciado}`);L.push(`    Resposta: ${e.resposta}`);if(e.pulada)L.push('    PULADA sem responder');if(e.excluir)L.push('    AÇÃO: EXCLUIR');if(e.corrQ)L.push('    CORREÇÃO ENUNCIADO: '+e.corrQ);if(e.corrA)L.push('    CORREÇÃO ALTERNATIVAS: '+e.corrA);L.push('')});return {name:`revisao-${stamp}.txt`,text:L.join('\n')}}
+function admPayload(){return {app:'treino-3ano-adaptado',versao:1,enviadoEm:new Date().toISOString(),materia:{id:SES.sub.id,nome:SES.sub.name},topicoId:SES.base.topicId||'',treino:SES.title,modo:SES.mode,totalQuestoes:SES.qs.length,anotacoes:SES.admLog}}
+async function admSend(){if(!SES.admLog.length)return {ok:false,msg:'Nada anotado ainda.'};try{const r=await fetch('revisoes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(admPayload())});if(!r.ok)throw 0;const j=await r.json().catch(()=>({}));return {ok:true,msg:'Revisão enviada: '+(j.arquivo||'ok')}}catch(e){return {ok:false,msg:'Servidor não respondeu. Use "Copiar TXT".'}}}
 function admDownload(){if(!SES.admLog.length)return false;const f=admTXT();try{const h=JSON.parse(localStorage.getItem(ADM_STORE)||'[]');h.push({when:Date.now(),materia:SES.sub.name,topico:SES.title,log:SES.admLog});localStorage.setItem(ADM_STORE,JSON.stringify(h))}catch(_){}const b=new Blob([f.text],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);return true}
-function wireAdm(){const q=SES.qs[SES.i];const msg=x=>{const m=$('#admMsg');if(m)m.textContent=x};const n=$('#bNote');if(n)n.onclick=()=>{const e=admEntry(q);e.corrQ=$('#admQ').value.trim();e.corrA=$('#admA').value.trim();admSave(e);msg('Anotação salva.')};const d=$('#bDel');if(d)d.onclick=()=>{const e=admEntry(q);e.excluir=!e.excluir;admSave(e);d.setAttribute('aria-pressed',e.excluir);d.textContent='Excluir: '+(e.excluir?'sim':'não');msg(e.excluir?'Marcada para excluir.':'Desmarcada.')};const s=$('#bSkip');if(s)s.onclick=()=>admNext();const x=$('#bTxt');if(x)x.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text}admDownload();msg('Baixado. Se não achar o arquivo, copie do quadro abaixo.')};const cp=$('#bCopy');if(cp)cp.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text;bx.focus();bx.select()}let ok=false;try{ok=document.execCommand('copy')}catch(_){}if(navigator.clipboard)navigator.clipboard.writeText(f.text).catch(()=>{});msg(ok?'Texto copiado.':'Selecione e copie manualmente.')}}
+function wireAdm(){const q=SES.qs[SES.i];const msg=x=>{const m=$('#admMsg');if(m)m.textContent=x};const n=$('#bNote');if(n)n.onclick=()=>{const e=admEntry(q);e.corrQ=$('#admQ').value.trim();e.corrA=$('#admA').value.trim();admSave(e);msg('Anotação salva.')};const d=$('#bDel');if(d)d.onclick=()=>{const e=admEntry(q);e.excluir=!e.excluir;admSave(e);d.setAttribute('aria-pressed',e.excluir);d.textContent='Excluir: '+(e.excluir?'sim':'não');msg(e.excluir?'Marcada para excluir.':'Desmarcada.')};const s=$('#bSkip');if(s)s.onclick=()=>admNext();const x=$('#bTxt');if(x)x.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text}admDownload();msg('Baixado. Se não achar o arquivo, copie do quadro abaixo.')};const cp=$('#bCopy');if(cp)cp.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text;bx.focus();bx.select()}let ok=false;try{ok=document.execCommand('copy')}catch(_){}if(navigator.clipboard)navigator.clipboard.writeText(f.text).catch(()=>{});msg(ok?'Texto copiado.':'Selecione e copie manualmente.')};const sd=$('#bSend');if(sd)sd.onclick=async()=>{msg('Enviando...');const r=await admSend();msg(r.msg)}}
+
+/* ---------- patches de revisão (gerados por aplicar_revisoes.py) ---------- */
+/*@@PATCH-START@@*/
+const PAT_REMOVE=new Set([]);
+const PAT_EDIT={};
+/*@@PATCH-END@@*/
+function patched(list){return list.filter(q=>!PAT_REMOVE.has(qid(q))).map(q=>{const e=PAT_EDIT[qid(q)];return e?Object.assign({},q,e):q})}
 
 /* =============== TELAS =============== */
 function renderHome(){
@@ -1115,8 +1126,8 @@ function renderSubject(id){
 function start(subId,topicId,reuse){
   const sub=SUBJECTS.find(s=>s.id===subId);let qs,title;
   if(reuse){qs=reuse.qs;title=reuse.title}
-  else if(topicId){const t=sub.topics.find(t=>t.id===topicId);qs=shuffle(t.pool()).slice(0,10);title=t.name}
-  else{const vts=visibleTopics(sub);const n=Math.max(2,Math.round(24/Math.max(1,vts.length)));qs=[];vts.forEach(t=>qs.push(...shuffle(t.pool()).slice(0,n)));title='Simulado completo'}
+  else if(topicId){const t=sub.topics.find(t=>t.id===topicId);qs=shuffle(patched(t.pool())).slice(0,10);title=t.name}
+  else{const vts=visibleTopics(sub);const n=Math.max(2,Math.round(24/Math.max(1,vts.length)));qs=[];vts.forEach(t=>qs.push(...shuffle(patched(t.pool())).slice(0,n)));title='Simulado completo'}
   const base=reuse?reuse.base:{subId,topicId};
   SES={sub,base,title,mode:(!reuse&&!topicId)?'simulado':'treino',qs,i:0,res:[],checked:false,retry:!!reuse,admLog:[]};
   renderQuestion();top();
@@ -1125,14 +1136,23 @@ function feedback(q,ok,note){
   const t=ok?pick1(['Muito bem!','Isso mesmo!','Acertou!','Perfeito!']):pick1(['Quase!','Vamos rever.','Ainda não.']);
   return `<div class="fb ${ok?'ok':'bad'}"><b>${ok?'✓':'✗'} ${t}</b>${ok?'':`<p>Resposta certa: <strong>${esc(answerText(q))}</strong></p>`}${note?`<p>${esc(note)}</p>`:''}${q.exp?`<p class="exp">${q.exp}</p>`:''}</div>`;
 }
+const ADAPT_ICON={'agr-autismo':'🌱','pec-autismo':'🐄','min-autismo':'⛏️','cc-autismo':'🎬','imp-autismo':'🌍'};
+const HINT_TIPO={choice:'Toque em 1 resposta.',sort:'Escolha o grupo de cada item.',match:'Escolha a resposta certa de cada linha.',cloze:'Escolha a palavra para cada lacuna.',inputs:'Escreva a resposta.'};
+function qSayText(q){return (q.q+' '+(q.text||'')).replace(/<[^>]+>/g,' ').replace(/\{\}/g,'lacuna ').replace(/\s+/g,' ').trim()}
+function qImgs(q){const a=[...(q.imgs||[])];if(q.img)a.push(q.img);return [...new Set(a.filter(Boolean))]}
 function renderQuestion(){
   const q=SES.qs[SES.i],n=SES.qs.length,last=SES.i===n-1;app.dataset.subject=SES.sub.id;
+  const adapt=/autismo/.test(SES.base.topicId||'');
+  const ic=adapt?(ADAPT_ICON[SES.base.topicId]||''):'';
+  const hint=adapt&&HINT_TIPO[q.t]?`<p class="hint">${HINT_TIPO[q.t]}</p>`:'';
+  const sayB=adapt?audioRow('pt-BR'):'';
   app.innerHTML=`<div class="wrap">
-    <div class="bar"><button class="mini" id="bExit">← Sair</button><div class="bar-t"><b>${esc(SES.title)}</b><span>${SES.mode==='simulado'?'Simulado: o resultado vem no fim':'Treino: confira cada resposta'}</span></div>${SES.sub.id==='ma'?'<button class="mini" id="bTab">Tabuada</button>':''}<span class="count">${SES.i+1}/${n}</span></div>
+    <div class="bar"><button class="mini" id="bExit">← Sair</button><div class="bar-t"><b>${ic?ic+' ':''}${esc(SES.title)}</b><span>${SES.mode==='simulado'?'Simulado: o resultado vem no fim':'Treino: confira cada resposta'}</span></div>${SES.sub.id==='ma'?'<button class="mini" id="bTab">Tabuada</button>':''}<span class="count">${SES.i+1}/${n}</span></div>
     <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${SES.i}"><i style="--p:${SES.i/n*100}%"></i></div>
-    <section class="qcard">${q.img?`<div class="qrow"><img class="qimg" src="${q.img}" alt="Pista visual"><p class="qtext">${q.q}</p></div>`:`<p class="qtext">${q.q}</p>`}${q.say?audioRow():''}${q.text?`<blockquote class="passage">${esc(q.text).replace(/\n/g,'<br>')}</blockquote>`:''}${q.vis||''}<div id="qbody"></div><div id="fb" aria-live="polite"></div></section>${store.admin?admPanel():''}
+    <section class="qcard"><p class="qtext">${q.q}</p>${qImgs(q).length?`<div class="qimgs">${qImgs(q).map(s=>`<img class="qimg" src="${s}" alt="Pista visual">`).join('')}</div>`:''}${q.say?audioRow():''}${adapt?`<div class="row">${sayB}${hint}</div>`:''}${q.text?`<blockquote class="passage">${esc(q.text).replace(/\n/g,'<br>')}</blockquote>`:''}${q.vis||''}<div id="qbody"></div><div id="fb" aria-live="polite"></div></section>${store.admin?admPanel():''}
     <div class="actions"><button class="btn" id="bMain" disabled>Conferir</button></div></div>`;
   if(q.say)bindAudio(app.querySelector('.qcard'),q.say);
+  if(adapt)bindAudio(app.querySelector('.qcard'),qSayText(q),'pt-BR');
   const btn=$('#bMain');let cur=null;
   const ch=()=>{if(!SES.checked&&cur)btn.disabled=!cur.ready()};
   cur=R[q.t](q,$('#qbody'),ch);
@@ -1163,11 +1183,12 @@ function renderResult(){
   app.innerHTML=`<div class="wrap">
     <div class="bar"><button class="mini" id="bBack">← ${esc(SES.sub.name)}</button><div class="bar-t"><b>Resultado</b><span>${esc(SES.title)}</span></div></div>
     <div class="res"><p class="kicker">Você acertou</p><div class="big">${right}<span style="font-size:.5em;color:var(--muted)"> de ${total}</span></div>${starHtml(st)}<p class="ptsup">+${earned} pontos</p><p class="lead">${msg}</p>${skipped?`<p class="lead">Puladas no modo admin: ${skipped}.</p>`:``}</div>
-    <div class="btnrow">${wrong.length?`<button class="btn" id="bErr">Refazer os erros (${wrong.length})</button>`:''}${store.admin?'<button class="btn ghost" id="bTxt2">Baixar TXT da revisão</button>':''}<button class="btn ghost" id="bAgain">Treinar de novo</button></div>${store.admin?'<textarea id="admBox2" rows="10" readonly hidden></textarea>':''}
-    ${wrong.length?`<h2 style="margin-bottom:12px">Para rever</h2><ul class="rev">${wrong.map(w=>`<li>${w.q.img?`<img class="qimg" src="${w.q.img}" alt="Pista visual" style="width:64px;height:64px">`:''}<p class="rq">${w.q.q}</p>${w.q.vis||''}<p>Resposta certa: <strong>${esc(answerText(w.q))}</strong></p>${w.q.exp?`<p class="hint">${w.q.exp}</p>`:''}</li>`).join('')}</ul>`:''}</div>`;
+    <div class="btnrow">${wrong.length?`<button class="btn" id="bErr">Refazer os erros (${wrong.length})</button>`:''}${store.admin?'<button class="btn ghost" id="bTxt2">Baixar TXT da revisão</button><button class="btn ghost" id="bSend2">Enviar revisão</button>':''}<button class="btn ghost" id="bAgain">Treinar de novo</button></div>${store.admin?'<textarea id="admBox2" rows="10" readonly hidden></textarea><p class="hint" id="admMsg2" aria-live="polite"></p>':''}
+    ${wrong.length?`<h2 style="margin-bottom:12px">Para rever</h2><ul class="rev">${wrong.map(w=>`<li>${qImgs(w.q).length?`<div class="qimgs">${qImgs(w.q).map(s=>`<img class="qimg" src="${s}" alt="Pista visual" style="width:64px;height:64px">`).join('')}</div>`:''}<p class="rq">${w.q.q}</p>${w.q.vis||''}<p>Resposta certa: <strong>${esc(answerText(w.q))}</strong></p>${w.q.exp?`<p class="hint">${w.q.exp}</p>`:''}</li>`).join('')}</ul>`:''}</div>`;
   $('#bBack').onclick=()=>{renderSubject(SES.sub.id);top()};
   $('#bAgain').onclick=()=>start(SES.base.subId,SES.base.topicId);
   const t2=$('#bTxt2');if(t2)t2.onclick=()=>{if(!SES.admLog.length)return;const f=admTXT(),bx=$('#admBox2');if(bx){bx.hidden=false;bx.value=f.text;bx.focus();bx.select()}admDownload()};
+  const s2=$('#bSend2');if(s2)s2.onclick=async()=>{const m=$('#admMsg2');if(m)m.textContent='Enviando...';const r=await admSend();if(m)m.textContent=r.msg};
   const e=$('#bErr');if(e)e.onclick=()=>start(SES.base.subId,null,{qs:wrong.map(w=>w.q),title:'Revisão dos erros',base:SES.base});
 }
 
