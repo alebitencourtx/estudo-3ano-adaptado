@@ -13,13 +13,15 @@
 <body>
 <main id="app"></main>
 <script>
-/* Pagina do topico "Pecuária" — gerada por _espec/gerar_menus.py. 5 jogos. */
+/* Pagina do topico "Pecuária" — gerada por _espec/gerar_menus.py. */
 const JOGOS = [
   {arquivo:'jogo-pecuaria-memoria.html', icone:'🐄', nome:'Memória dos bichos', como:'Encontre os dois iguais', oque:'Ache os 3 pares: vaca, galinha e ovelha.', id:'mem-pec'},
   {arquivo:'jogo-pecuaria-perguntas.html', icone:'🎯', nome:'Perguntas da pecuária', como:'Responda e veja a resposta', oque:'Três fases de perguntas do livro.', legado:'treino3ano.jogo.pec.v1'},
   {arquivo:'jogo-pecuaria-arrasta.html', icone:'🧺', nome:'Produtos e o lugar do gado', como:'Arraste e solte', oque:'Leite, ovos e lã; solto no pasto ou confinado.', legado:'treino3ano.jogo.peca.v1'},
   {arquivo:'jogo-pecuaria-trabalhadores.html', icone:'👷', nome:'Trabalhadores do campo', como:'Ligue a palavra à tarefa', oque:'O administrador, o fixo, o parceiro e o arrendatário.', id:'pec-trabalhadores'},
   {arquivo:'jogo-pecuaria-criacao.html', icone:'🐄', nome:'Solto ou confinado?', como:'Leve o cartão à caixa certa', oque:'Pecuária extensiva e intensiva, com as palavras do livro.', id:'pec-criacao'},
+  {arquivo:'jogo-pecuaria-volante.html', icone:'🚛', nome:'O trabalhador volante', como:'Responda e veja a resposta', oque:'Boia-fria, plantio e colheita por um tempo.', id:'pec-volante'},
+  {arquivo:'jogo-pecuaria-animais.html', icone:'🧵', nome:'Do animal ao produto', como:'Leve o cartão à caixa certa', oque:'Leite, carne, couro, ovos e lã.', id:'pec-animais'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -35,7 +37,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🐄 Pecuária</h1>
-  <p class="sub">p. 86, 87 · 5 jogos · base do livro</p>
+  <p class="sub">p. 86, 87 · 7 jogos · base do livro</p>
   <p class="sub">A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.</p>
 </header>
 <section class="cards">

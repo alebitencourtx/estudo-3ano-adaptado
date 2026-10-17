@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>O que se vê na paisagem — Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../jogo-kit.css">
+<script src="../jogo-kit.js"></script>
+<style>
+.foto-apoio{width:100%;max-height:180px;object-fit:cover;border-radius:12px;border:2px solid var(--line);margin:0 0 10px}
+.prox{margin-top:16px}
+opcoes-resposta .feed{text-align:left}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+(function () {
+  'use strict';
+  const esc = JogoKit.esc;
+  const ID_PROG = 'imp-paisagem';
+  const TOTAL = 4;
+  const RODADAS = [
+    {
+      pergunta: 'Na foto de Unaí (MG), o que é a área com gado?',
+      certa: 'Uma pastagem (pecuária)',
+      erradas: ['Uma plantação (agricultura)', 'Uma cidade'],
+      msg: 'A pastagem com gado é a pecuária.',
+      img: '../../img/hga/imp/paisagem.jpg'
+    },
+    {
+      pergunta: 'E a área com plantação de soja?',
+      certa: 'Agricultura',
+      erradas: ['Pecuária', 'Extrativismo mineral'],
+      msg: 'A plantação de soja é a agricultura.',
+      img: '../../img/hga/imp/paisagem.jpg'
+    },
+    {
+      pergunta: 'O que o campo manda para a cidade?',
+      certa: 'Comida, carne e leite',
+      erradas: ['Roupa, remédio e celular', 'Máquinas e ferramentas'],
+      msg: 'O campo abastece a cidade com produtos da agricultura e da pecuária.',
+      img: '../../img/hga/imp/ciclo.jpg'
+    },
+    {
+      pergunta: 'O que a cidade manda para o campo?',
+      certa: 'Roupa, remédio e celular',
+      erradas: ['Comida, carne e leite', 'Ovos e frutas'],
+      msg: 'A cidade abastece o campo com produtos da indústria, por meio do comércio.',
+      img: '../../img/hga/imp/ciclo.jpg'
+    }
+  ];
+  const FECHAMENTO = 'Do campo vêm comida, carne, leite, ovos, frutas e madeira. Da cidade vêm roupa, remédio, celular, ferramentas, caminhão e trator.';
+  const rodape = '<p class="rodape"><a href="index.html">← Todos os jogos do tópico</a> · <a href="../index.html">← Todos os tópicos</a> · <a href="../../index.html">← Treino</a></p>' +
+                 '<details class="detalhes"><summary>Créditos das imagens</summary><p>' + esc(FECHAMENTO) + '</p></details>';
+
+  const app = document.getElementById('app');
+  let i = 0, acertos = 0;
+
+  function rodada() {
+    const r = RODADAS[i];
+    let imgHtml = r.img ? '<img class="foto-apoio" src="' + esc(r.img) + '">' : '';
+    app.innerHTML = '<jogo-topo icone="🏞️" titulo="O que se vê na paisagem" contador="' + (i + 1) + '/' + TOTAL + '"></jogo-topo>' +
+                    '<barra-progresso valor="' + i + '" total="' + TOTAL + '"></barra-progresso>' +
+                    '<section class="card">' +
+                    '<fala-botoes texto="O campo e a cidade trocam produtos."></fala-botoes>' +
+                    imgHtml +
+                    '<fala-botoes texto="' + esc(r.pergunta) + '"></fala-botoes>' +
+                    '<div data-quiz></div>' +
+                    '<button type="button" class="btn prox escondido" data-prox>Próxima →</button>' +
+                    '</section>' + rodape;
+    const op = document.createElement('opcoes-resposta');
+    op.montar({ pergunta: r.pergunta, opcoes: JogoKit.embaralhar([r.certa].concat(r.erradas)), certa: r.certa, msg: r.msg });
+    app.querySelector('[data-quiz]').appendChild(op);
+    const prox = app.querySelector('[data-prox]');
+    prox.onclick = () => { i + 1 < TOTAL ? (i++, rodada()) : terminar(); };
+    op.addEventListener('resposta', function (e) {
+      if (e.detail && e.detail.ok) acertos++;
+      prox.classList.remove('escondido');
+      JogoKit.falar((e.detail.ok ? '✓ ' : '✗ ') + r.msg, 0.85);
+    });
+  }
+  function terminar() {
+    JogoKit.progresso.melhor(ID_PROG, acertos);
+    app.innerHTML = '<tela-fim icone="🏞️" titulo="O que se vê na paisagem" estrelas="' + acertos + '" total="' + TOTAL + '" resumo="Você respondeu tudo!"></tela-fim>' + rodape;
+  }
+  rodada();
+})();
+</script>
+</body>
+</html>
