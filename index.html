@@ -116,6 +116,9 @@ input:focus{border-color:var(--acc,var(--ma))}
 .qimg{width:84px;height:84px;object-fit:cover;border-radius:14px;border:2px solid var(--line);flex:none;background:var(--acc-soft)}
 .qrow .qtext{flex:1;min-width:0}
 .fita{width:26px;height:26px;object-fit:contain;vertical-align:middle;background:transparent;border:0}
+.adm{border-style:dashed;border-color:var(--focus)}
+.admgate{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;flex-wrap:wrap}
+.admgate input{width:96px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:inherit}
 .qtext{font-size:1.25rem;font-weight:700;line-height:1.35}
 .passage{margin:0;background:var(--acc-soft);border-radius:12px;padding:12px 14px;font-style:italic}
 .opts{display:flex;flex-direction:column;gap:10px}
@@ -242,8 +245,8 @@ let UID=0;
 
 /* ---------- progresso (só neste aparelho) ---------- */
 const KEY='treino3ano.v1';
-let store={name:'',points:0,board:'',scores:{},dev:'',skin:'azul',mode:'tudo'};
-function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);store.name=o.name||'';store.points=+o.points||0;store.board=o.board||'';store.scores=o.scores||{};store.dev=o.dev||'';store.skin=o.skin==='rosa'?'rosa':'azul';store.mode=['regular','autismo','tudo'].includes(o.mode)?o.mode:'tudo'}}catch(e){}}
+let store={name:'',points:0,board:'',scores:{},dev:'',skin:'azul',mode:'tudo',admin:false};
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);store.name=o.name||'';store.points=+o.points||0;store.board=o.board||'';store.scores=o.scores||{};store.dev=o.dev||'';store.skin=o.skin==='rosa'?'rosa':'azul';store.mode=['regular','autismo','tudo'].includes(o.mode)?o.mode:'tudo';store.admin=o.admin===true}}catch(e){}}
 function applySkin(){try{document.documentElement.dataset.skin=store.skin==='rosa'?'rosa':'azul'}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
 
@@ -1050,6 +1053,21 @@ function visibleTopics(sub){if(store.mode==='autismo')return sub.topics.filter(i
 function visibleSubjects(){if(store.mode==='autismo')return SUBJECTS.filter(s=>s.topics.some(isAut));return SUBJECTS.slice()}
 function modeTabs(){return `<div class="tabs" role="group" aria-label="Modo de questões"><button type="button" class="mini" data-mode="regular" aria-pressed="${store.mode==='regular'}">Regular</button><button type="button" class="mini" data-mode="autismo" aria-pressed="${store.mode==='autismo'}">Adaptado autismo <img class="fita" src="img/fita-autismo.png" alt="Símbolo do autismo"></button><button type="button" class="mini" data-mode="tudo" aria-pressed="${store.mode==='tudo'}">Tudo</button></div>`}
 function wireMode(rerender){app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{store.mode=b.dataset.mode;save();rerender()})};
+/* modo admin: anota excluir/corrigir por questão, salva em TXT por sessão */
+const ADM_STORE='treino3ano.admin.v1';
+let admAsk=false;
+const ADM_HASH=2090113217;
+function admHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h}
+function admTry(){const v=$('#admPw'),ok=!!v&&admHash(v.value.trim().toLowerCase())===ADM_HASH;if(ok){store.admin=true;admAsk=false;save();renderHome()}else{const m=$('#admErr');if(m)m.textContent='Senha incorreta.';if(v){v.value='';v.focus()}}}
+function admKey(q){return q.t+'|'+norm(q.q.replace(/<[^>]+>/g,' ')).slice(0,80)}
+function admGet(q){return SES.admLog.find(e=>e.key===admKey(q))}
+function admSave(e){const i=SES.admLog.findIndex(x=>x.key===e.key);if(i>=0)SES.admLog[i]=e;else SES.admLog.push(e);try{localStorage.setItem(ADM_STORE+'.draft',JSON.stringify({when:Date.now(),log:SES.admLog}))}catch(_){}}
+function admEntry(q,skip){let e=admGet(q);if(!e)e={key:admKey(q),materia:SES.sub.name,topico:SES.title,tipo:q.t,enunciado:q.q.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(),resposta:answerText(q),excluir:false,corrQ:'',corrA:'',pulada:false};if(skip)e.pulada=true;return e}
+function admPanel(){const e=admGet(SES.qs[SES.i]);return `<section class="qcard adm"><b>Modo admin</b><label class="hint" for="admQ">Correção do enunciado</label><textarea id="admQ" rows="2">${e?esc(e.corrQ):''}</textarea><label class="hint" for="admA">Correção das alternativas</label><textarea id="admA" rows="2">${e?esc(e.corrA):''}</textarea><div class="row"><button class="mini" id="bNote">Salvar anotação</button><button class="mini" id="bDel" aria-pressed="${e&&e.excluir}">Excluir: ${e&&e.excluir?'sim':'não'}</button><button class="mini" id="bSkip">Pular \u2192</button><button class="mini" id="bTxt">Baixar TXT</button><button class="mini" id="bCopy">Copiar TXT</button></div><p class="hint" id="admMsg" aria-live="polite"></p><textarea id="admBox" rows="10" readonly hidden></textarea></section>`}
+function admNext(){const q=SES.qs[SES.i];const e=admEntry(q,true);admSave(e);SES.res[SES.i]={q,skip:true};SES.i++;SES.checked=false;if(SES.i>=SES.qs.length)renderResult();else renderQuestion();top()}
+function admTXT(){const d=new Date(),p2=n=>String(n).padStart(2,'0');const stamp=`${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`;const L=[`REVISÃO DE QUESTÕES - ${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}`,`Matéria: ${SES.sub.name} | Treino: ${SES.title} | Anotações: ${SES.admLog.length}`,''];SES.admLog.forEach((e,i)=>{L.push(`[${i+1}] (${e.tipo}) ${e.enunciado}`);L.push(`    Resposta: ${e.resposta}`);if(e.pulada)L.push('    PULADA sem responder');if(e.excluir)L.push('    AÇÃO: EXCLUIR');if(e.corrQ)L.push('    CORREÇÃO ENUNCIADO: '+e.corrQ);if(e.corrA)L.push('    CORREÇÃO ALTERNATIVAS: '+e.corrA);L.push('')});return {name:`revisao-${stamp}.txt`,text:L.join('\n')}}
+function admDownload(){if(!SES.admLog.length)return false;const f=admTXT();try{const h=JSON.parse(localStorage.getItem(ADM_STORE)||'[]');h.push({when:Date.now(),materia:SES.sub.name,topico:SES.title,log:SES.admLog});localStorage.setItem(ADM_STORE,JSON.stringify(h))}catch(_){}const b=new Blob([f.text],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);return true}
+function wireAdm(){const q=SES.qs[SES.i];const msg=x=>{const m=$('#admMsg');if(m)m.textContent=x};const n=$('#bNote');if(n)n.onclick=()=>{const e=admEntry(q);e.corrQ=$('#admQ').value.trim();e.corrA=$('#admA').value.trim();admSave(e);msg('Anotação salva.')};const d=$('#bDel');if(d)d.onclick=()=>{const e=admEntry(q);e.excluir=!e.excluir;admSave(e);d.setAttribute('aria-pressed',e.excluir);d.textContent='Excluir: '+(e.excluir?'sim':'não');msg(e.excluir?'Marcada para excluir.':'Desmarcada.')};const s=$('#bSkip');if(s)s.onclick=()=>admNext();const x=$('#bTxt');if(x)x.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text}admDownload();msg('Baixado. Se não achar o arquivo, copie do quadro abaixo.')};const cp=$('#bCopy');if(cp)cp.onclick=()=>{if(!SES.admLog.length){msg('Nada anotado ainda.');return}const f=admTXT(),bx=$('#admBox');if(bx){bx.hidden=false;bx.value=f.text;bx.focus();bx.select()}let ok=false;try{ok=document.execCommand('copy')}catch(_){}if(navigator.clipboard)navigator.clipboard.writeText(f.text).catch(()=>{});msg(ok?'Texto copiado.':'Selecione e copie manualmente.')}}
 
 /* =============== TELAS =============== */
 function renderHome(){
@@ -1062,13 +1080,17 @@ function renderHome(){
 <div><span class="hint">Modo:</span>${modeTabs()}</div>
     ${store.name?'':`<form id="nameForm" class="nameform"><label for="nameIn">Seu primeiro nome ou apelido (fica só neste aparelho)</label><div class="row"><input id="nameIn" maxlength="16" autocomplete="off"><button class="btn" type="submit">Salvar</button></div></form>`}</header>
     <div class="subjects">${visibleSubjects().map(s=>`<button class="sub" data-subject="${s.id}" data-go="${s.id}"><span class="tile">${IC[s.id].startsWith('<')?IC[s.id]:esc(IC[s.id])}</span><span><h3>${s.name}${s.topics.some(isAut)?' <img class="fita" src="img/fita-autismo.png" alt="Temas adaptados">':''}</h3><small>${examInfo(s.exam)}</small></span></button>`).join('')}</div>
-    <div class="foot"><span>Cada vez que você treina, as questões mudam. Seu progresso fica salvo só neste aparelho.</span><button class="link" id="reset">Apagar meu progresso</button></div></div>`;
+    <div class="foot"><span>Cada vez que você treina, as questões mudam. Seu progresso fica salvo só neste aparelho.</span><button class="link" id="adm">Modo admin: ${store.admin?'on':'off'}</button>${(admAsk&&!store.admin)?'<span class="admgate"><input id="admPw" type="password" autocomplete="off" placeholder="senha" aria-label="Senha do modo admin"><button class="mini" id="admOk">Entrar</button><button class="mini" id="admCancel">Cancelar</button><span class="hint" id="admErr" aria-live="polite"></span></span>':''}<button class="link" id="reset">Apagar meu progresso</button></div></div>`;
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{renderSubject(b.dataset.go);top()});
   app.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{renderRanking();top()});
   app.querySelectorAll('[data-skin]').forEach(b=>b.onclick=()=>{store.skin=b.dataset.skin;save();applySkin();renderHome()});
   wireMode(renderHome);
+  const ad=$('#adm');if(ad)ad.onclick=()=>{if(store.admin){store.admin=false;save();renderHome()}else{admAsk=true;renderHome()}};
+  const ao=$('#admOk');if(ao)ao.onclick=admTry;
+  const ap=$('#admPw');if(ap){ap.focus();ap.onkeydown=e=>{if(e.key==='Enter')admTry()}};
+  const ac=$('#admCancel');if(ac)ac.onclick=()=>{admAsk=false;renderHome()};
   const f=$('#nameForm');if(f)f.onsubmit=e=>{e.preventDefault();store.name=cleanName($('#nameIn').value);save();renderHome()};
-  const rs=$('#reset');rs.onclick=()=>{if(rs.dataset.sure){store={name:'',points:0,board:'',scores:{},dev:store.dev,skin:store.skin,mode:store.mode};save();renderHome()}else{rs.dataset.sure=1;rs.textContent='Tem certeza? Toque de novo para apagar.'}};
+  const rs=$('#reset');rs.onclick=()=>{if(rs.dataset.sure){store={name:'',points:0,board:'',scores:{},dev:store.dev,skin:store.skin,mode:store.mode,admin:store.admin};save();renderHome()}else{rs.dataset.sure=1;rs.textContent='Tem certeza? Toque de novo para apagar.'}};
 }
 function renderSubject(id){
   const sub=SUBJECTS.find(s=>s.id===id);app.dataset.subject=id;
@@ -1096,7 +1118,7 @@ function start(subId,topicId,reuse){
   else if(topicId){const t=sub.topics.find(t=>t.id===topicId);qs=shuffle(t.pool()).slice(0,10);title=t.name}
   else{const vts=visibleTopics(sub);const n=Math.max(2,Math.round(24/Math.max(1,vts.length)));qs=[];vts.forEach(t=>qs.push(...shuffle(t.pool()).slice(0,n)));title='Simulado completo'}
   const base=reuse?reuse.base:{subId,topicId};
-  SES={sub,base,title,mode:(!reuse&&!topicId)?'simulado':'treino',qs,i:0,res:[],checked:false,retry:!!reuse};
+  SES={sub,base,title,mode:(!reuse&&!topicId)?'simulado':'treino',qs,i:0,res:[],checked:false,retry:!!reuse,admLog:[]};
   renderQuestion();top();
 }
 function feedback(q,ok,note){
@@ -1108,7 +1130,7 @@ function renderQuestion(){
   app.innerHTML=`<div class="wrap">
     <div class="bar"><button class="mini" id="bExit">← Sair</button><div class="bar-t"><b>${esc(SES.title)}</b><span>${SES.mode==='simulado'?'Simulado: o resultado vem no fim':'Treino: confira cada resposta'}</span></div>${SES.sub.id==='ma'?'<button class="mini" id="bTab">Tabuada</button>':''}<span class="count">${SES.i+1}/${n}</span></div>
     <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${SES.i}"><i style="--p:${SES.i/n*100}%"></i></div>
-    <section class="qcard">${q.img?`<div class="qrow"><img class="qimg" src="${q.img}" alt="Pista visual"><p class="qtext">${q.q}</p></div>`:`<p class="qtext">${q.q}</p>`}${q.say?audioRow():''}${q.text?`<blockquote class="passage">${esc(q.text).replace(/\n/g,'<br>')}</blockquote>`:''}${q.vis||''}<div id="qbody"></div><div id="fb" aria-live="polite"></div></section>
+    <section class="qcard">${q.img?`<div class="qrow"><img class="qimg" src="${q.img}" alt="Pista visual"><p class="qtext">${q.q}</p></div>`:`<p class="qtext">${q.q}</p>`}${q.say?audioRow():''}${q.text?`<blockquote class="passage">${esc(q.text).replace(/\n/g,'<br>')}</blockquote>`:''}${q.vis||''}<div id="qbody"></div><div id="fb" aria-live="polite"></div></section>${store.admin?admPanel():''}
     <div class="actions"><button class="btn" id="bMain" disabled>Conferir</button></div></div>`;
   if(q.say)bindAudio(app.querySelector('.qcard'),q.say);
   const btn=$('#bMain');let cur=null;
@@ -1129,21 +1151,23 @@ function renderQuestion(){
     }};
   $('#qbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!btn.disabled)btn.click()});
   $('#bExit').onclick=()=>{renderSubject(SES.sub.id);top()};
+  if(store.admin)wireAdm();
   const tb=$('#bTab');if(tb)tb.onclick=openTab;
   const first=$('#qbody input');if(first&&!first.closest('.frow').querySelector('[data-r]'))first.focus({preventScroll:true});
 }
 function renderResult(){
-  const total=SES.qs.length,right=SES.res.filter(r=>r&&r.ok).length,pct=Math.round(right/total*100),wrong=SES.res.filter(r=>r&&!r.ok),st=starsOf(pct),earned=right*10;
+  const scored=SES.res.filter(r=>r&&!r.skip),skipped=SES.res.filter(r=>r&&r.skip).length,total=scored.length,right=scored.filter(r=>r.ok).length,pct=total?Math.round(right/total*100):0,wrong=scored.filter(r=>!r.ok),st=starsOf(pct),earned=right*10;
   store.points=(store.points||0)+earned;save();syncScore();
   if(!SES.retry){const k=SES.base.subId+'/'+(SES.base.topicId||'simulado'),o=store.scores[k]||{best:0,tries:0};o.best=Math.max(o.best,pct);o.tries++;store.scores[k]=o;save()}
   const msg=pct>=90?'Excelente! Você está pronto para a prova.':pct>=70?'Muito bom! Revise só os erros abaixo.':pct>=50?'Está indo bem. Veja os erros e tente de novo.':'Vamos com calma: leia os erros abaixo e treine mais uma vez.';
   app.innerHTML=`<div class="wrap">
     <div class="bar"><button class="mini" id="bBack">← ${esc(SES.sub.name)}</button><div class="bar-t"><b>Resultado</b><span>${esc(SES.title)}</span></div></div>
-    <div class="res"><p class="kicker">Você acertou</p><div class="big">${right}<span style="font-size:.5em;color:var(--muted)"> de ${total}</span></div>${starHtml(st)}<p class="ptsup">+${earned} pontos</p><p class="lead">${msg}</p></div>
-    <div class="btnrow">${wrong.length?`<button class="btn" id="bErr">Refazer os erros (${wrong.length})</button>`:''}<button class="btn ghost" id="bAgain">Treinar de novo</button></div>
+    <div class="res"><p class="kicker">Você acertou</p><div class="big">${right}<span style="font-size:.5em;color:var(--muted)"> de ${total}</span></div>${starHtml(st)}<p class="ptsup">+${earned} pontos</p><p class="lead">${msg}</p>${skipped?`<p class="lead">Puladas no modo admin: ${skipped}.</p>`:``}</div>
+    <div class="btnrow">${wrong.length?`<button class="btn" id="bErr">Refazer os erros (${wrong.length})</button>`:''}${store.admin?'<button class="btn ghost" id="bTxt2">Baixar TXT da revisão</button>':''}<button class="btn ghost" id="bAgain">Treinar de novo</button></div>${store.admin?'<textarea id="admBox2" rows="10" readonly hidden></textarea>':''}
     ${wrong.length?`<h2 style="margin-bottom:12px">Para rever</h2><ul class="rev">${wrong.map(w=>`<li>${w.q.img?`<img class="qimg" src="${w.q.img}" alt="Pista visual" style="width:64px;height:64px">`:''}<p class="rq">${w.q.q}</p>${w.q.vis||''}<p>Resposta certa: <strong>${esc(answerText(w.q))}</strong></p>${w.q.exp?`<p class="hint">${w.q.exp}</p>`:''}</li>`).join('')}</ul>`:''}</div>`;
   $('#bBack').onclick=()=>{renderSubject(SES.sub.id);top()};
   $('#bAgain').onclick=()=>start(SES.base.subId,SES.base.topicId);
+  const t2=$('#bTxt2');if(t2)t2.onclick=()=>{if(!SES.admLog.length)return;const f=admTXT(),bx=$('#admBox2');if(bx){bx.hidden=false;bx.value=f.text;bx.focus();bx.select()}admDownload()};
   const e=$('#bErr');if(e)e.onclick=()=>start(SES.base.subId,null,{qs:wrong.map(w=>w.q),title:'Revisão dos erros',base:SES.base});
 }
 
