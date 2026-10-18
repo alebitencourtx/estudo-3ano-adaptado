@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jogos do 3º ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="jogo-kit.css">
+<script src="jogo-kit.js"></script>
+<style>jogo-topo,barra-progresso,tela-fim{display:block}</style>
+</head>
+<body>
+<!-- Jogador único dos 38 jogos: abre com ?jogo=<id> (ex.: jogar.html?jogo=mem-pec).
+     O conteúdo de cada jogo está em <topico>/dados.js e os motores no jogo-kit.js. -->
+<main id="app"></main>
+
+<script src="pecuaria/dados.js"></script>
+<script src="agricultura/dados.js"></script>
+<script src="mineral/dados.js"></script>
+<script src="campo-cidade/dados.js"></script>
+<script src="impactos/dados.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var JOGOS = window.JOGOS || {};
+
+  function lerId() {
+    try { var v = new URLSearchParams(location.search).get('jogo'); if (v) return v; } catch (e) {}
+    var m = /[?&]jogo=([^&]+)/.exec(location.search || '');
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  var cfg = JOGOS[lerId()];
+  document.title = (cfg ? cfg.titulo + ' — ' : '') + 'Jogos do 3º ano';
+  window.JogoKit.iniciar(cfg);
+})();
+</script>
+</body>
+</html>

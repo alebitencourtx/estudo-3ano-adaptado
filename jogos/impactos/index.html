@@ -15,14 +15,15 @@
 <script>
 /* Pagina do topico "Impactos ambientais" — gerada por _espec/gerar_menus.py. */
 const JOGOS = [
-  {arquivo:'jogo-impactos-campo-cidade.html', icone:'🚚', nome:'Campo e cidade trocam', como:'Leve a peça à caixa certa', oque:'O campo manda comida, a cidade manda produtos.', id:'campo-cidade-imp'},
-  {arquivo:'jogo-impactos-causas.html', icone:'⚠️', nome:'O problema e a causa', como:'Ligue o problema à causa', oque:'Desmatamento, agrotóxico, irrigação e esgoto.', id:'imp-causas'},
-  {arquivo:'jogo-impactos-reciclagem.html', icone:'♻️', nome:'Cada lixo na sua lixeira', como:'Leve o lixo à lixeira certa', oque:'Papel azul, plástico vermelho, vidro verde, metal amarelo.', id:'imp-reciclagem'},
-  {arquivo:'jogo-impactos-ajudar.html', icone:'💚', nome:'Ajudar a natureza', como:'Toque nas atitudes certas', oque:'O que ajuda a natureza e os problemas da cidade.', id:'imp-ajudar'},
-  {arquivo:'jogo-impactos-perguntas.html', icone:'❓', nome:'Perguntas do ambiente', como:'Responda e veja a resposta', oque:'Mecanização, irrigação, engarrafamento e área de risco.', id:'imp-perguntas'},
-  {arquivo:'jogo-impactos-servicos.html', icone:'🏥', nome:'Os serviços públicos', como:'Toque nos certos', oque:'Saúde, educação, coleta de lixo e segurança.', id:'imp-servicos'},
-  {arquivo:'jogo-impactos-paisagem.html', icone:'🏞️', nome:'O que se vê na paisagem', como:'Responda e veja a resposta', oque:'Pastagem e soja, campo e cidade.', id:'imp-paisagem'},
-  {arquivo:'jogo-impactos-consequencias.html', icone:'🐟', nome:'O que isso pode causar?', como:'Responda sim ou não', oque:'Extinção, doenças, saúde, água.', id:'imp-consequencias'},
+  {arquivo:'../jogar.html?jogo=campo-cidade-imp', icone:'🚚', nome:'Campo e cidade trocam', como:'Leve a peça à caixa certa', oque:'O campo manda comida, a cidade manda produtos.', id:'campo-cidade-imp'},
+  {arquivo:'../jogar.html?jogo=imp-causas', icone:'⚠️', nome:'O problema e a causa', como:'Ligue o problema à causa', oque:'Desmatamento, agrotóxico, irrigação e esgoto.', id:'imp-causas'},
+  {arquivo:'../jogar.html?jogo=imp-reciclagem', icone:'♻️', nome:'Cada lixo na sua lixeira', como:'Leve o lixo à lixeira certa', oque:'Papel azul, plástico vermelho, vidro verde, metal amarelo.', id:'imp-reciclagem'},
+  {arquivo:'../jogar.html?jogo=imp-ajudar', icone:'💚', nome:'Ajudar a natureza', como:'Toque nas atitudes certas', oque:'O que ajuda a natureza e os problemas da cidade.', id:'imp-ajudar'},
+  {arquivo:'../jogar.html?jogo=imp-perguntas', icone:'❓', nome:'Perguntas do ambiente', como:'Responda e veja a resposta', oque:'Mecanização, irrigação, engarrafamento e área de risco.', id:'imp-perguntas'},
+  {arquivo:'../jogar.html?jogo=imp-servicos', icone:'🏥', nome:'Os serviços públicos', como:'Toque nos certos', oque:'Saúde, educação, coleta de lixo e segurança.', id:'imp-servicos'},
+  {arquivo:'../jogar.html?jogo=imp-paisagem', icone:'🏞️', nome:'O que se vê na paisagem', como:'Responda e veja a resposta', oque:'Pastagem e soja, campo e cidade.', id:'imp-paisagem'},
+  {arquivo:'../jogar.html?jogo=imp-consequencias', icone:'🐟', nome:'O que isso pode causar?', como:'Responda sim ou não', oque:'Extinção, doenças, saúde, água.', id:'imp-consequencias'},
+  {arquivo:'../jogar.html?jogo=imp-agua', icone:'💧', nome:'O esgoto no rio', como:'Ponha na ordem certa', oque:'Esgoto sem tratamento, água contaminada e doenças.', id:'imp-agua'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -38,7 +39,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🚚 Impactos ambientais</h1>
-  <p class="sub">p. 108 a 113 · 8 jogos · base do livro</p>
+  <p class="sub">p. 108 a 113 · 9 jogos · base do livro</p>
   <p class="sub">O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.</p>
 </header>
 <section class="cards">

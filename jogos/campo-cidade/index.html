@@ -15,12 +15,13 @@
 <script>
 /* Pagina do topico "Campo e cidade em diferentes tempos" — gerada por _espec/gerar_menus.py. */
 const JOGOS = [
-  {arquivo:'jogo-campo-cidade-tempo.html', icone:'🎬', nome:'Linha do tempo do cinema', como:'Passeie pelas paradas', oque:'Do cinema mudo, em 1895, ao cinema em 3-D.', id:'tempo-cc'},
-  {arquivo:'jogo-campo-cidade-lazer.html', icone:'🧺', nome:'O passeio de dona Alice', como:'Responda e veja a resposta', oque:'Piquenique, Jardim da Luz, famílias amigas.', id:'cc-lazer'},
-  {arquivo:'jogo-campo-cidade-antes-agora.html', icone:'⏳', nome:'Antigamente ou hoje?', como:'Leve o cartão à caixa certa', oque:'Lampião e carroça × energia elétrica e metrô.', id:'cc-antes-agora'},
-  {arquivo:'jogo-campo-cidade-cinema.html', icone:'🎥', nome:'O ano e o fato', como:'Ligue o ano ao fato', oque:'Mudo, com falas, colorido e 3-D.', id:'cc-cinema'},
-  {arquivo:'jogo-campo-cidade-filme.html', icone:'❓', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Como era o cinema em 1895 e como é hoje.', id:'cc-filme'},
-  {arquivo:'jogo-campo-cidade-filmes.html', icone:'🎥', nome:'Os primeiros filmes', como:'Responda e veja a resposta', oque:'França, Lumière, cantor de jazz, Branca de Neve.', id:'cc-filmes'},
+  {arquivo:'../jogar.html?jogo=tempo-cc', icone:'🎬', nome:'Linha do tempo do cinema', como:'Passeie pelas paradas', oque:'Do cinema mudo, em 1895, ao cinema em 3-D.', id:'tempo-cc'},
+  {arquivo:'../jogar.html?jogo=cc-lazer', icone:'🧺', nome:'O passeio de dona Alice', como:'Responda e veja a resposta', oque:'Piquenique, Jardim da Luz, famílias amigas.', id:'cc-lazer'},
+  {arquivo:'../jogar.html?jogo=cc-antes-agora', icone:'⏳', nome:'Antigamente ou hoje?', como:'Leve o cartão à caixa certa', oque:'Mudo, sonoro, preto e branco, colorido e 3-D.', id:'cc-antes-agora'},
+  {arquivo:'../jogar.html?jogo=cc-cinema', icone:'🎥', nome:'O ano e o fato', como:'Ligue o ano ao fato', oque:'Mudo, com falas, colorido e 3-D.', id:'cc-cinema'},
+  {arquivo:'../jogar.html?jogo=cc-filme', icone:'❓', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Como era o cinema em 1895 e como é hoje.', id:'cc-filme'},
+  {arquivo:'../jogar.html?jogo=cc-filmes', icone:'🎥', nome:'Os primeiros filmes', como:'Responda e veja a resposta', oque:'França, Lumière, cantor de jazz, Branca de Neve.', id:'cc-filmes'},
+  {arquivo:'../jogar.html?jogo=mem-cc', icone:'🎬', nome:'Memória do cinema', como:'Encontre os dois iguais', oque:'1895, 1927, 1937 e 1953.', id:'mem-cc'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -36,8 +37,8 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🎬 Campo e cidade em diferentes tempos</h1>
-  <p class="sub">p. 102, 104, 105 · 6 jogos · base do livro</p>
-  <p class="sub">O passeio de dona Alice, o cinema em 1895, 1927, 1937 e 1953, e o que mudou nas cidades.</p>
+  <p class="sub">p. 102, 104, 105 · 7 jogos · base do livro</p>
+  <p class="sub">O passeio de dona Alice e a história do cinema em 1895, 1927, 1937 e 1953.</p>
 </header>
 <section class="cards">
   ${JOGOS.map(j => `

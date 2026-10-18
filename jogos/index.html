@@ -16,10 +16,10 @@
 /* Menu por topico — gerado por _espec/gerar_menus.py. */
 const TOPICOS = [
   {dir:'pecuaria', icone:'🐄', nome:'Pecuária', paginas:'p. 86, 87', resumo:'A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.', jogos:7},
-  {dir:'agricultura', icone:'🌾', nome:'Agricultura', paginas:'p. 84, 85, 92, 95', resumo:'Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.', jogos:7},
-  {dir:'mineral', icone:'⛏️', nome:'Extrativismo mineral', paginas:'p. 90, 91', resumo:'Os minerais saem da natureza e viram produtos: cobre, ferro, bauxita, areia e calcário.', jogos:6},
-  {dir:'campo-cidade', icone:'🎬', nome:'Campo e cidade em diferentes tempos', paginas:'p. 102, 104, 105', resumo:'O passeio de dona Alice, o cinema em 1895, 1927, 1937 e 1953, e o que mudou nas cidades.', jogos:6},
-  {dir:'impactos', icone:'🚚', nome:'Impactos ambientais', paginas:'p. 108 a 113', resumo:'O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.', jogos:8},
+  {dir:'agricultura', icone:'🌾', nome:'Agricultura', paginas:'p. 84, 85, 92, 95', resumo:'Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.', jogos:8},
+  {dir:'mineral', icone:'⛏️', nome:'Extrativismo mineral', paginas:'p. 90, 91', resumo:'Os minerais saem da natureza e viram produtos: cobre, ferro, bauxita, areia e calcário.', jogos:7},
+  {dir:'campo-cidade', icone:'🎬', nome:'Campo e cidade em diferentes tempos', paginas:'p. 102, 104, 105', resumo:'O passeio de dona Alice e a história do cinema em 1895, 1927, 1937 e 1953.', jogos:7},
+  {dir:'impactos', icone:'🚚', nome:'Impactos ambientais', paginas:'p. 108 a 113', resumo:'O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.', jogos:9},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -27,7 +27,7 @@ const legados = {};
 ['treino3ano.jogo.pec.v1', 'treino3ano.jogo.peca.v1'].forEach(function (k) {
   try { Object.keys(JSON.parse(localStorage.getItem(k) || '{}')).forEach(function (x) { legados[k + ':' + x] = 1; }); } catch (e) {}
 });
-const CHAVES = {"pecuaria": ["mem-pec", "treino3ano.jogo.pec.v1", "treino3ano.jogo.peca.v1", "pec-trabalhadores", "pec-criacao", "pec-volante", "pec-animais"], "agricultura": ["ordem-agr", "agr-subsistencia", "tempo-cana", "agr-perguntas", "mem-agr", "tempo-leite", "agr-alimentos"], "mineral": ["ligar-min", "mem-min", "min-perguntas", "min-natureza", "min-toque", "min-objetos"], "campo-cidade": ["tempo-cc", "cc-lazer", "cc-antes-agora", "cc-cinema", "cc-filme", "cc-filmes"], "impactos": ["campo-cidade-imp", "imp-causas", "imp-reciclagem", "imp-ajudar", "imp-perguntas", "imp-servicos", "imp-paisagem", "imp-consequencias"]};
+const CHAVES = {"pecuaria": ["mem-pec", "pec-perguntas", "pec-toque", "pec-trabalhadores", "pec-criacao", "pec-volante", "pec-animais"], "agricultura": ["ordem-agr", "agr-subsistencia", "tempo-cana", "agr-perguntas", "mem-agr", "tempo-leite", "agr-alimentos", "agr-simnao"], "mineral": ["ligar-min", "mem-min", "min-perguntas", "min-natureza", "min-toque", "min-objetos", "min-qual"], "campo-cidade": ["tempo-cc", "cc-lazer", "cc-antes-agora", "cc-cinema", "cc-filme", "cc-filmes", "mem-cc"], "impactos": ["campo-cidade-imp", "imp-causas", "imp-reciclagem", "imp-ajudar", "imp-perguntas", "imp-servicos", "imp-paisagem", "imp-consequencias", "imp-agua"]};
 function quantos(t) {
   const ids = CHAVES[t.dir] || [];
   return ids.filter(function (id) { return prog[id] !== undefined || Object.keys(legados).some(function (k) { return k.indexOf(id + ':') === 0; }); }).length;
@@ -50,14 +50,14 @@ app.innerHTML = `
     <button type="button" class="btn jogar" data-ir="${t.dir}/index.html">Ver os jogos</button>
   </article>`).join('')}
 </section>
-<p class="hint" style="text-align:center">Cada tópico tem 5 jogos curtos, com as palavras do livro. Nenhum tem cronômetro.</p>
+<p class="hint" style="text-align:center">Cada tópico tem de 7 a 9 jogos curtos, com as palavras do livro. Nenhum tem cronômetro.</p>
 <p class="rodape"><a href="../index.html">← Voltar para o treino</a></p>
 <details class="detalhes">
   <summary>Como estes jogos foram feitos</summary>
   <ul>
-    <li>30 jogos: 5 para cada tópico (Pecuária, Agricultura, Extrativismo mineral, Campo e cidade, Impactos ambientais).</li>
+    <li>38 jogos: 7 de Pecuária, 8 de Agricultura, 7 de Extrativismo mineral, 7 de Campo e cidade em diferentes tempos, 9 de Impactos ambientais.</li>
     <li>Conteúdo só com as palavras e fatos do livro (listas fechadas em <code>resumos/</code>).</li>
-    <li>Cada jogo é um arquivo HTML estático, com componentes web nativos (sem build e sem biblioteca).</li>
+    <li>Cada jogo é um conjunto de dados (<code>&lt;topico&gt;/dados.js</code>) lido por um único jogador (<code>jogar.html</code>), com os motores em <code>jogo-kit.js</code> — sem build e sem biblioteca.</li>
     <li>Sem cronômetro. Se errar, a resposta certa aparece e a criança pode tentar de novo.</li>
   </ul>
 </details>`;
