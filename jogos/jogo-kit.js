@@ -309,6 +309,135 @@
     get conferido() { return !!this._feito; }
   }
 
+  /* ---------- MOTORES DECLARATIVOS REUTILIZÁVEIS (DRY & Boas Práticas) ---------- */
+
+  // Motor para Jogos de Memória (elimina ~180 linhas de duplicação por jogo)
+  K.iniciarMemoria = function (cfg) {
+    const app = document.getElementById('app') || document.body;
+    const pares = cfg.pares || [];
+    const total = pares.length;
+    const idProg = cfg.id;
+    const espera = cfg.espera || 850;
+    let timer = null;
+    let estado = { paresAcertados: 0, tentativas: 0, primeira: null, trava: false };
+
+    function lerRecorde() {
+      const p = K.progresso.ler();
+      const r = p[idProg];
+      return typeof r === 'number' && isFinite(r) ? r : null;
+    }
+
+    function renderPartida() {
+      if (timer) { clearTimeout(timer); timer = null; }
+      estado = { paresAcertados: 0, tentativas: 0, primeira: null, trava: false };
+      const rec = lerRecorde();
+      const cartas = K.embaralhar(pares.concat(pares));
+
+      app.innerHTML =
+        '<jogo-topo icone="' + K.esc(cfg.icone) + '" titulo="' + K.esc(cfg.titulo) + '" contador="0/' + total + '" rotulo-voltar="← Fases"></jogo-topo>' +
+        '<barra-progresso valor="0" total="' + total + '"></barra-progresso>' +
+        '<section class="card">' +
+          '<p class="pergunta" id="instrucao">' + K.esc(cfg.instrucao || 'Encontre os dois iguais.') + '</p>' +
+          '<fala-botoes texto="' + K.esc(cfg.instrucao || 'Encontre os dois iguais.') + '"></fala-botoes>' +
+          '<div class="tabuleiro" id="tabuleiro" aria-label="Cartas do jogo" style="margin-top:16px">' +
+            cartas.map(function (b) {
+              return '<div class="carta" data-id="' + K.esc(b.id) + '" role="button" tabindex="0" aria-label="Carta fechada"><span class="verso">?</span></div>';
+            }).join('') +
+          '</div>' +
+          '<p class="feed" id="feed" aria-live="polite"></p>' +
+          '<p class="recorde" id="recorde">' +
+            (rec == null ? 'Cada par aparece em duas cartas.' : 'Seu recorde: ' + rec + (rec === 1 ? ' tentativa.' : ' tentativas.')) +
+          '</p>' +
+        '</section>' +
+        (cfg.creditos ? '<details class="detalhes"><summary>Créditos e Conteúdo</summary><p>' + K.esc(cfg.creditos) + '</p></details>' : '') +
+        '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>';
+
+      const topo = app.querySelector('jogo-topo');
+      if (topo) topo.addEventListener('voltar', function () { location.href = cfg.voltarUrl || '../index.html'; });
+
+      app.querySelectorAll('.carta').forEach(function (carta) {
+        function acao() { tocarCarta(carta); }
+        carta.addEventListener('click', acao);
+        carta.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); acao(); }
+        });
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function tocarCarta(carta) {
+      if (estado.trava || carta.classList.contains('virada') || carta.classList.contains('travada')) return;
+      const b = pares.find(function (x) { return x.id === carta.dataset.id; });
+      if (!b) return;
+
+      carta.classList.add('virada');
+      carta.innerHTML = '<img src="' + K.esc(b.ico || b.foto) + '" alt=""><span class="nome">' + K.esc(b.nome) + '</span>';
+      carta.setAttribute('aria-label', b.nome);
+
+      if (!estado.primeira) {
+        estado.primeira = carta;
+        if (b.frase) K.falar(b.nome);
+        return;
+      }
+
+      estado.tentativas++;
+      const p1 = estado.primeira;
+      estado.primeira = null;
+
+      if (p1.dataset.id === carta.dataset.id) {
+        estado.paresAcertados++;
+        p1.classList.add('travada');
+        carta.classList.add('travada');
+        const feed = app.querySelector('#feed');
+        if (feed) { feed.className = 'feed ok'; feed.textContent = '✓ Par encontrado: ' + b.nome + '!'; }
+        if (b.frase) K.falar(b.frase);
+        const prog = app.querySelector('barra-progresso');
+        if (prog) prog.setAttribute('valor', estado.paresAcertados);
+        const topo = app.querySelector('jogo-topo');
+        if (topo) topo.contador = estado.paresAcertados + '/' + total;
+
+        if (estado.paresAcertados === total) {
+          setTimeout(finalizar, 600);
+        }
+      } else {
+        estado.trava = true;
+        const feed = app.querySelector('#feed');
+        if (feed) { feed.className = 'feed bad'; feed.textContent = 'Diferentes... tente memorizar!'; }
+        timer = setTimeout(function () {
+          p1.classList.remove('virada');
+          p1.innerHTML = '<span class="verso">?</span>';
+          carta.classList.remove('virada');
+          carta.innerHTML = '<span class="verso">?</span>';
+          estado.trava = false;
+        }, espera);
+      }
+    }
+
+    function finalizar() {
+      const rec = lerRecorde();
+      const bateu = rec == null || estado.tentativas < rec;
+      if (bateu) K.progresso.gravar(idProg, estado.tentativas);
+
+      const msg = 'Você completou em ' + estado.tentativas + ' tentativa' + (estado.tentativas > 1 ? 's' : '') + '.' +
+        (bateu ? ' Novo recorde!' : (rec ? ' Recorde: ' + rec : ''));
+
+      app.innerHTML =
+        '<tela-fim icone="' + K.esc(cfg.icone) + '" titulo="' + K.esc(cfg.titulo) + '" estrelas="3" total="3" resumo="Parabéns!" msg="' + K.esc(msg) + '"></tela-fim>' +
+        '<p class="rodape"><a href="../index.html">← Todos os jogos</a> · <a href="../../index.html">← Treino</a></p>';
+
+      const fim = app.querySelector('tela-fim');
+      if (fim) {
+        fim.addEventListener('fim', function (e) {
+          if (e.detail && e.detail.acao === 'denovo') renderPartida();
+          else location.href = cfg.voltarUrl || '../index.html';
+        });
+      }
+      K.falar('Parabéns! ' + msg);
+    }
+
+    renderPartida();
+  };
+
   customElements.define('fala-botoes', FalaBotoes);
   customElements.define('barra-progresso', BarraProgresso);
   customElements.define('jogo-topo', JogoTopo);
