@@ -1,0 +1,8 @@
+{
+  "name": "Treino do 3º Ano Adaptado",
+  "description": "Aplicativo educacional adaptado para o 3º ano do Ensino Fundamental com treino interativo, recursos de acessibilidade para TEA, Sound Lab de inglês e 34 jogos pedagógicos.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

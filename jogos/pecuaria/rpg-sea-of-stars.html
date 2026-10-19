@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
+<title>Fazenda da Pecuária — Aventura 2D (Estilo Sea of Stars)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --farm-green: #2e7d32;
+  --farm-gold: #f59e0b;
+  --farm-amber: #d97706;
+  --farm-cream: #fef3c7;
+  --dark-panel: rgba(15, 23, 42, 0.95);
+  --border-gold: #eab308;
+  --pixel-font: 'Press Start 2P', monospace;
+  --text-font: 'Nunito', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box; margin: 0; padding: 0;
+  user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #0f172a; font-family: var(--text-font);
+  color: #fff; touch-action: none; position: fixed; inset: 0;
+}
+
+#canvas-container {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+canvas#gameCanvas {
+  display: block; width: 100%; height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Barra Superior Rural */
+.hud-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0) 100%);
+  pointer-events: none;
+}
+
+.hud-btn {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid #64748b; border-radius: 999px;
+  color: #f1f5f9; padding: 7px 14px; font-family: var(--pixel-font);
+  font-size: 0.62rem; text-decoration: none; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.12s, background 0.15s;
+}
+.hud-btn:active { transform: scale(0.92); background: #334155; }
+
+.hud-title-box {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.hud-title {
+  font-family: var(--pixel-font); font-size: 0.68rem; color: #fde047;
+  text-shadow: 2px 2px 0 #000; letter-spacing: 0.5px;
+}
+.hud-sub {
+  font-size: 0.68rem; color: #cbd5e1; font-weight: 800; margin-top: 1px;
+}
+
+/* Alternador do Horário da Fazenda (Manhã, Tarde, Noite) */
+.time-btn {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(30, 41, 59, 0.9); border: 2px solid var(--border-gold);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4); transition: transform 0.15s;
+}
+.time-btn:active { transform: scale(0.92); }
+.time-icon { font-size: 1rem; }
+.time-text { font-family: var(--pixel-font); font-size: 0.55rem; color: #fef08a; }
+
+/* Caderno de Campo do 3º Ano (Checklist de Aprendizado do Livro) */
+.notebook-pill {
+  position: absolute; top: calc(56px + env(safe-area-inset-top, 0px)); left: 50%;
+  transform: translateX(-50%); z-index: 25;
+  background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(250, 204, 21, 0.5); border-radius: 999px;
+  padding: 5px 14px; font-size: 0.72rem; font-weight: 800; color: #fef08a;
+  display: flex; align-items: center; gap: 8px; pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* Marcador de Toque na Fazenda (Destino de Caminhada) */
+.touch-target-ring {
+  position: absolute; width: 36px; height: 36px; margin-left: -18px; margin-top: -18px;
+  border-radius: 50%; border: 2.5px solid #fde047;
+  box-shadow: 0 0 14px #fde047; pointer-events: none; z-index: 20; display: none;
+  animation: targetPulse 0.6s infinite alternate ease-in-out;
+}
+@keyframes targetPulse { 0% { transform: scale(0.85); opacity: 0.9; } 100% { transform: scale(1.15); opacity: 0.4; } }
+
+/* Joystick Virtual Flutuante para Celular */
+.touch-joystick-base {
+  position: absolute; width: 90px; height: 90px; margin-left: -45px; margin-top: -45px;
+  border-radius: 50%; background: radial-gradient(circle, rgba(234, 179, 8, 0.2) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border: 2px dashed rgba(234, 179, 8, 0.6); pointer-events: none; z-index: 22; display: none;
+}
+.touch-joystick-knob {
+  position: absolute; width: 40px; height: 40px; margin-left: -20px; margin-top: -20px;
+  top: 50%; left: 50%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fbbf24, #d97706);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.7); pointer-events: none;
+}
+
+/* Botões de Ação na Tela (Mobile) */
+.mobile-action-dock {
+  position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); right: 16px;
+  z-index: 30; display: flex; gap: 10px; align-items: center; pointer-events: none;
+}
+.btn-action-round {
+  pointer-events: auto;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #22c55e, #15803d);
+  border: 2.5px solid #86efac; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--pixel-font); font-size: 0.78rem; font-weight: 900;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6); cursor: pointer; transition: transform 0.1s;
+}
+.btn-action-round:active { transform: scale(0.9); }
+.btn-action-round span.sub-txt { font-size: 0.5rem; margin-top: -1px; opacity: 0.95; }
+.btn-action-notebook {
+  background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8);
+  border-color: #93c5fd; width: 50px; height: 50px; font-size: 0.7rem;
+}
+
+/* Diálogo com Retratos Clássicos do Livro */
+.dialog-overlay {
+  position: absolute; inset: 0; z-index: 40; display: none;
+  background: rgba(4, 8, 18, 0.45); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+.dialog-card {
+  position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%;
+  transform: translateX(-50%); width: min(620px, 94vw);
+  background: var(--dark-panel); border: 3px solid #eab308; border-radius: 14px;
+  box-shadow: 0 0 0 2px #0f172a, 0 16px 40px rgba(0,0,0,0.9);
+  padding: 14px 16px; pointer-events: auto;
+  animation: slideDialog 0.2s ease-out;
+}
+@keyframes slideDialog { from { transform: translate(-50%, 15px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+.dialog-header {
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.dialog-avatar-box {
+  width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0;
+  background: #1e293b; border: 2.5px solid var(--border-gold);
+  display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.7);
+}
+.dialog-content { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.dialog-speaker {
+  font-family: var(--pixel-font); font-size: 0.72rem; color: #fde047;
+  text-shadow: 1px 1px 0 #000; letter-spacing: 0.5px;
+}
+.dialog-body {
+  font-size: 0.95rem; line-height: 1.45; color: #f8fafc; font-weight: 700;
+}
+.dialog-tap-hint {
+  align-self: flex-end; font-family: var(--pixel-font); font-size: 0.55rem;
+  color: #38bdf8; margin-top: 6px; animation: hintBlink 0.9s infinite;
+}
+@keyframes hintBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Mini-Game de Ordenha Mecânica (Ritmo da Pecuária Intensiva) */
+.timed-hit-modal {
+  position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+  width: min(380px, 92vw); background: rgba(15, 23, 42, 0.98);
+  border: 3px solid var(--border-gold); border-radius: 16px;
+  box-shadow: 0 16px 50px rgba(0,0,0,0.95); z-index: 50; display: none;
+  padding: 18px 16px; text-align: center;
+}
+.timed-hit-title {
+  font-family: var(--pixel-font); font-size: 0.75rem; color: #fde047; margin-bottom: 6px;
+}
+.timed-hit-sub { font-size: 0.85rem; color: #cbd5e1; font-weight: 700; margin-bottom: 14px; }
+.timed-track {
+  width: 100%; height: 26px; background: #0b1329; border: 2px solid #334155;
+  border-radius: 999px; position: relative; overflow: hidden; margin-bottom: 16px;
+}
+.timed-sweet-zone {
+  position: absolute; top: 0; bottom: 0; width: 60px; left: calc(50% - 30px);
+  background: rgba(34, 197, 94, 0.45); border: 2px solid #22c55e;
+}
+.timed-pin {
+  position: absolute; top: 2px; bottom: 2px; width: 14px; border-radius: 999px;
+  background: #38bdf8; box-shadow: 0 0 12px #38bdf8; left: 0px;
+}
+.btn-hit-now {
+  width: 100%; padding: 12px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  font-family: var(--pixel-font); font-size: 0.75rem; color: #111; font-weight: 900;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+}
+.btn-hit-now:active { transform: scale(0.96); }
+
+/* Toast */
+.sos-toast {
+  position: absolute; top: calc(62px + env(safe-area-inset-top, 0px)); left: 50%;
+  transform: translateX(-50%); z-index: 35;
+  background: rgba(15, 23, 42, 0.95); border: 2px solid var(--border-gold);
+  border-radius: 999px; padding: 6px 16px; font-family: var(--pixel-font);
+  font-size: 0.62rem; color: #fef08a; box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  display: none; pointer-events: none; animation: popUp 0.3s ease-out;
+}
+@keyframes popUp { from { transform: translate(-50%, -10px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div id="canvas-container">
+  <canvas id="gameCanvas"></canvas>
+</div>
+
+<!-- Elementos Interativos de Toque no Celular -->
+<div class="touch-target-ring" id="touchTargetRing"></div>
+<div class="touch-joystick-base" id="touchJoyBase">
+  <div class="touch-joystick-knob" id="touchJoyKnob"></div>
+</div>
+
+<!-- Barra Superior -->
+<header class="hud-top">
+  <a class="hud-btn" href="index.html">← VOLTAR</a>
+  <div class="hud-title-box">
+    <div class="hud-title">FAZENDA DA PECUÁRIA</div>
+    <div class="hud-sub">Estudo do 3º Ano · Livro p. 86-87</div>
+  </div>
+  <div class="time-btn" id="btnTimeOfDay">
+    <span class="time-icon" id="timeIcon">☀️</span>
+    <span class="time-text" id="timeText">MANHÃ</span>
+  </div>
+</header>
+
+<!-- Indicador de Missões da Aula -->
+<div class="notebook-pill" id="notebookPill">
+  <span>📋 Caderno de Campo: <strong id="missionsCompleted">0/4 Descobertas</strong></span>
+</div>
+
+<!-- Toast -->
+<div class="sos-toast" id="sosToast">🌟 CONHECIMENTO ADQUIRIDO!</div>
+
+<!-- Botões de Ação na Tela -->
+<div class="mobile-action-dock">
+  <button class="btn-action-round btn-action-notebook" id="btnNotebook" title="Ver Caderno de Campo">
+    📋<span class="sub-txt">Caderno</span>
+  </button>
+  <button class="btn-action-round" id="btnAction" title="Interagir / Conversar">
+    💬<span class="sub-txt">Agir</span>
+  </button>
+</div>
+
+<!-- Diálogo com Retrato e Texto Educativo -->
+<div class="dialog-overlay" id="dialogOverlay">
+  <div class="dialog-card" id="dialogCard">
+    <div class="dialog-header">
+      <div class="dialog-avatar-box" id="dialogAvatar">👨‍🌾</div>
+      <div class="dialog-content">
+        <div class="dialog-speaker" id="dialogSpeaker">Administrador da Fazenda</div>
+        <div class="dialog-body" id="dialogBody">Bem-vindo à Fazenda Modelo de Agropecuária! Toque na tela para prosseguir.</div>
+        <div class="dialog-tap-hint">Toque em qualquer lugar para avançar ▸</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mini-Game de Ritmo de Ordenha Mecânica -->
+<div class="timed-hit-modal" id="timedModal">
+  <div class="timed-hit-title">⚡ ORDENHA MECÂNICA DA VACA LEITEIRA ⚡</div>
+  <div class="timed-hit-sub">Toque quando a barra azul entrar na zona verde para colher o leite puro!</div>
+  <div class="timed-track">
+    <div class="timed-sweet-zone"></div>
+    <div class="timed-pin" id="timedPin"></div>
+  </div>
+  <button class="btn-hit-now" id="btnHitNow">RETIRAR LEITE AGORA!</button>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---------- ÁUDIO WEB SYNTH (Passos, Muugidos, Diálogos e Fanfarras) ----------
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  window.addEventListener('click', () => getAudio(), { once: true });
+  window.addEventListener('touchstart', () => getAudio(), { once: true });
+
+  function playSound(type) {
+    try {
+      const actx = getAudio();
+      if (!actx) return;
+      const now = actx.currentTime;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+
+      if (type === 'talk') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320 + Math.random() * 80, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain); gain.connect(actx.destination);
+        osc.start(now); osc.stop(now + 0.055);
+      } else if (type === 'step') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120 + Math.random() * 25, now);
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain); gain.connect(actx.destination);
+        osc.start(now); osc.stop(now + 0.045);
+      } else if (type === 'moo') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(135, now + 0.3);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.9);
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+        osc.connect(gain); gain.connect(actx.destination);
+        osc.start(now); osc.stop(now + 1.05);
+      } else if (type === 'success') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const o = actx.createOscillator();
+          const g = actx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + idx * 0.09);
+          g.gain.setValueAtTime(0.12, now + idx * 0.09);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
+          o.connect(g); g.connect(actx.destination);
+          o.start(now + idx * 0.09); o.stop(now + idx * 0.09 + 0.38);
+        });
+      }
+    } catch(e){}
+  }
+
+  // ---------- CANVAS RESPONSIVO TOTAL (TELA CHEIA NO CELULAR) ----------
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  let viewW = 0, viewH = 0, dpr = 1;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    viewW = window.innerWidth;
+    viewH = window.innerHeight;
+    canvas.width = Math.floor(viewW * dpr);
+    canvas.height = Math.floor(viewH * dpr);
+    ctx.imageSmoothingEnabled = false;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Dimensões do mapa da fazenda
+  const MAP_W = 1280;
+  const MAP_H = 860;
+
+  // ---------- PROTAGONISTA: JOVEM PESQUISADOR(A) RURAL DO 3º ANO ----------
+  const player = {
+    x: 640, y: 440,
+    targetX: 640, targetY: 440,
+    hasTarget: false,
+    speed: 3.5,
+    dir: 'down',
+    stepSoundTimer: 0,
+    isMoving: false
+  };
+
+  // ---------- HORÁRIOS DA FAZENDA (MANHÃ, TARDE, NOITE) ----------
+  let timeOfDayIdx = 0;
+  const timeOfDayModes = [
+    { name: 'MANHÃ', icon: '☀️', tint: 'rgba(0,0,0,0)', desc: 'Hora da ordenha e do trato nos animais' },
+    { name: 'TARDE', icon: '⛅', tint: 'rgba(234, 179, 8, 0.16)', desc: 'Gado pastando nas pastagens abertas' },
+    { name: 'NOITE', icon: '🌙', tint: 'rgba(15, 23, 42, 0.65)', desc: 'Animais abrigados e descanso no campo' }
+  ];
+
+  const btnTimeOfDay = document.getElementById('btnTimeOfDay');
+  const timeIcon = document.getElementById('timeIcon');
+  const timeText = document.getElementById('timeText');
+
+  function toggleTimeOfDay() {
+    timeOfDayIdx = (timeOfDayIdx + 1) % timeOfDayModes.length;
+    timeIcon.textContent = timeOfDayModes[timeOfDayIdx].icon;
+    timeText.textContent = timeOfDayModes[timeOfDayIdx].name;
+    showToast(`🕒 TURNO: ${timeOfDayModes[timeOfDayIdx].name} · ${timeOfDayModes[timeOfDayIdx].desc}`);
+  }
+  btnTimeOfDay.onclick = toggleTimeOfDay;
+
+  function showToast(msg) {
+    const t = document.getElementById('sosToast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2600);
+  }
+
+  // ---------- CADERNO DE CAMPO (4 CONCEITOS DO LIVRO P. 86-87) ----------
+  const caderno = {
+    extensiva: false,
+    intensiva: false,
+    trabalhadores: false,
+    produtos: false
+  };
+
+  function updateMissions() {
+    const count = Object.values(caderno).filter(Boolean).length;
+    document.getElementById('missionsCompleted').textContent = `${count}/4 Descobertas`;
+    if (count === 4) {
+      playSound('success');
+      showToast('🏆 PARABÉNS! VOCÊ DOMINOU O TÓPICO DE PECUÁRIA!');
+    }
+  }
+
+  // ---------- OS 4 TRABALHADORES DO CAMPO (LIVRO P. 86-87) ----------
+  const npcs = [
+    {
+      id: 'admin',
+      x: 460, y: 340, w: 32, h: 42,
+      nome: 'Administrador da Fazenda',
+      avatar: '👨‍🌾',
+      corRoupa: '#2563eb', // camisa azul
+      chapeu: '#78350f',
+      falas: [
+        'Olá! Eu sou o ADMINISTRADOR desta propriedade rural.',
+        'Minha tarefa é organizar as atividades do campo, orientar os outros trabalhadores e administrar as finanças da fazenda.',
+        'Na pecuária, cuidamos da criação e reprodução de animais. É uma atividade econômica importantíssima para o Brasil!'
+      ]
+    },
+    {
+      id: 'fixo',
+      x: 940, y: 280, w: 32, h: 42,
+      nome: 'Trabalhador Fixo (Manejo)',
+      avatar: '👷‍♂️',
+      corRoupa: '#d97706', // macacão de trabalho
+      chapeu: '#451a03',
+      falas: [
+        'Bom dia! Eu sou o TRABALHADOR FIXO.',
+        'Moro aqui na propriedade com minha família e recebo um salário fixo todo mês.',
+        'Minha rotina é cuidar diariamente do gado: faço a ordenha mecânica no estábulo, trato dos bezerros e acompanho a vacinação!'
+      ]
+    },
+    {
+      id: 'volante',
+      x: 680, y: 660, w: 32, h: 42,
+      nome: 'Trabalhador Volante (Boia-fria)',
+      avatar: '🛻',
+      corRoupa: '#059669', // camisa verde de campo
+      chapeu: '#ca8a04',
+      falas: [
+        'Olá! Eu sou o TRABALHADOR VOLANTE, também chamado popularmente de BOIA-FRIA.',
+        'Moro na cidade próxima e venho de caminhão ou ônibus fazer serviços temporários, como cortar capim para o gado ou trabalhar na colheita.',
+        'Recebo por dia trabalhado (diária). O livro nos lembra que é preciso garantir boas condições e equipamentos de proteção a todos nós!'
+      ]
+    },
+    {
+      id: 'parceiro',
+      x: 260, y: 600, w: 32, h: 42,
+      nome: 'Trabalhador Parceiro',
+      avatar: '🤝',
+      corRoupa: '#9333ea', // camisa roxa
+      chapeu: '#581c87',
+      falas: [
+        'Muito prazer! Eu sou o PARCEIRO.',
+        'Cuido das criações ou das plantações na terra do dono da fazenda e, no final, divido parte da produção com ele conforme o nosso acordo.',
+        'Essa cooperação é uma forma tradicional e justa de trabalho familiar no campo.'
+      ]
+    }
+  ];
+
+  // ---------- ANIMAIS E ESTRUTURAS REAIS DA AGROPECUÁRIA ----------
+  const animais = [
+    {
+      id: 'nelore1', x: 260, y: 280, w: 58, h: 42,
+      tipo: 'nelore', nome: 'Gado Nelore no Pasto', avatar: '🐄',
+      sistema: 'Pecuária Extensiva (Livro p. 86)',
+      info: 'Na PECUÁRIA EXTENSIVA, os animais vivem soltos em grandes áreas de pastagem e comem capim natural. Exige poucos trabalhadores cuidando do rebanho!'
+    },
+    {
+      id: 'nelore2', x: 380, y: 440, w: 58, h: 42,
+      tipo: 'nelore', nome: 'Touro Nelore Zebuíno', avatar: '🐂',
+      sistema: 'Pecuária Extensiva (Gado de Corte)',
+      info: 'O Nelore tem pelagem branca que reflete o sol forte e a corcova (cupim) que guarda reserva de energia para períodos de seca.'
+    },
+    {
+      id: 'holandesa', x: 980, y: 380, w: 58, h: 42,
+      tipo: 'holandesa', nome: 'Vaca Holandesa Leiteira', avatar: '🥛',
+      sistema: 'Pecuária Intensiva (Livro p. 86)',
+      info: 'Na PECUÁRIA INTENSIVA, os animais ficam confinados no estábulo e curral, comem ração específica e silagem no cocho, e a retirada do leite é feita por ordenha mecânica!'
+    },
+    {
+      id: 'ovelhas', x: 520, y: 580, w: 44, h: 32,
+      tipo: 'ovelha', nome: 'Criação de Ovinos', avatar: '🐑',
+      sistema: 'Produção de Lã e Carnes',
+      info: 'Por meio da criação de ovelhas, obtemos carnes e a lã usada na fabricação de tecidos e agasalhos para o frio.'
+    },
+    {
+      id: 'galinheiro', x: 840, y: 520, w: 32, h: 28,
+      tipo: 'galinha', nome: 'Galinheiro da Fazenda', avatar: '🐔',
+      sistema: 'Avicultura (Ovos e Carnes)',
+      info: 'A criação de aves (avicultura) produz ovos frescos e carnes fundamentais na mesa das famílias brasileiras.'
+    }
+  ];
+
+  // Sede da Fazenda / Casa Colonial
+  const sedeFazenda = { x: 640, y: 220, w: 180, h: 100 };
+
+  // Curral e Estábulo
+  const estabulo = { x: 880, y: 150, w: 240, h: 120 };
+
+  // Galpão de Máquinas com Trator Agrícola e Fardos de Feno
+  const trator = { x: 440, y: 540 };
+
+  // Depósito de Produtos da Pecuária (Leite, Queijo, Carnes, Couro, Ovos)
+  const depositoProdutos = { x: 640, y: 490 };
+
+  // ---------- CONTROLE E NAVEGAÇÃO NO CELULAR ----------
+  const touchRing = document.getElementById('touchTargetRing');
+  const touchJoyBase = document.getElementById('touchJoyBase');
+  const touchJoyKnob = document.getElementById('touchJoyKnob');
+
+  let isTouchDragging = false;
+  let joyOrigin = { x: 0, y: 0 };
+  let joyDelta = { x: 0, y: 0 };
+  const joyMaxDist = 40;
+
+  function setPlayerDestination(screenX, screenY) {
+    const worldX = screenX + camera.x;
+    const worldY = screenY + camera.y;
+
+    player.targetX = Math.max(30, Math.min(MAP_W - 30, worldX));
+    player.targetY = Math.max(30, Math.min(MAP_H - 30, worldY));
+    player.hasTarget = true;
+
+    touchRing.style.left = screenX + 'px';
+    touchRing.style.top = screenY + 'px';
+    touchRing.style.display = 'block';
+  }
+
+  function onTouchStart(e) {
+    if (e.target.closest('.hud-top, .mobile-action-dock, .dialog-card, .timed-hit-modal')) return;
+    const touch = e.touches ? e.touches[0] : e;
+    isTouchDragging = true;
+    joyOrigin = { x: touch.clientX, y: touch.clientY };
+    joyDelta = { x: 0, y: 0 };
+
+    touchJoyBase.style.left = joyOrigin.x + 'px';
+    touchJoyBase.style.top = joyOrigin.y + 'px';
+    touchJoyBase.style.display = 'block';
+    touchJoyKnob.style.transform = 'translate(0px, 0px)';
+
+    setPlayerDestination(touch.clientX, touch.clientY);
+  }
+
+  function onTouchMove(e) {
+    if (!isTouchDragging) return;
+    const touch = e.touches ? e.touches[0] : e;
+    let dx = touch.clientX - joyOrigin.x;
+    let dy = touch.clientY - joyOrigin.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 8) {
+      player.hasTarget = false;
+      touchRing.style.display = 'none';
+
+      if (dist > joyMaxDist) {
+        dx = (dx / dist) * joyMaxDist;
+        dy = (dy / dist) * joyMaxDist;
+      }
+      joyDelta.x = dx / joyMaxDist;
+      joyDelta.y = dy / joyMaxDist;
+      touchJoyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+    } else {
+      setPlayerDestination(touch.clientX, touch.clientY);
+    }
+  }
+
+  function onTouchEnd() {
+    isTouchDragging = false;
+    touchJoyBase.style.display = 'none';
+    joyDelta = { x: 0, y: 0 };
+  }
+
+  window.addEventListener('touchstart', onTouchStart, { passive: false });
+  window.addEventListener('touchmove', onTouchMove, { passive: false });
+  window.addEventListener('touchend', onTouchEnd, { passive: false });
+
+  // Mouse no computador
+  window.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.hud-top, .mobile-action-dock, .dialog-card, .timed-hit-modal')) return;
+    isTouchDragging = true;
+    setPlayerDestination(e.clientX, e.clientY);
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (isTouchDragging) setPlayerDestination(e.clientX, e.clientY);
+  });
+  window.addEventListener('mouseup', () => { isTouchDragging = false; });
+
+  // Teclado
+  const keys = { up: false, down: false, left: false, right: false };
+  window.addEventListener('keydown', (e) => {
+    if (['KeyW', 'ArrowUp', 'w', 'W'].includes(e.code || e.key)) keys.up = true;
+    if (['KeyS', 'ArrowDown', 's', 'S'].includes(e.code || e.key)) keys.down = true;
+    if (['KeyA', 'ArrowLeft', 'a', 'A'].includes(e.code || e.key)) keys.left = true;
+    if (['KeyD', 'ArrowRight', 'd', 'D'].includes(e.code || e.key)) keys.right = true;
+    if (['Space', 'Enter', 'KeyE', 'e', 'E'].includes(e.code || e.key)) interagirComMaisProximo();
+  });
+  window.addEventListener('keyup', (e) => {
+    if (['KeyW', 'ArrowUp', 'w', 'W'].includes(e.code || e.key)) keys.up = false;
+    if (['KeyS', 'ArrowDown', 's', 'S'].includes(e.code || e.key)) keys.down = false;
+    if (['KeyA', 'ArrowLeft', 'a', 'A'].includes(e.code || e.key)) keys.left = false;
+    if (['KeyD', 'ArrowRight', 'd', 'D'].includes(e.code || e.key)) keys.right = false;
+  });
+
+  // ---------- DIÁLOGOS EDUCATIVOS ----------
+  const dialogOverlay = document.getElementById('dialogOverlay');
+  const dialogAvatar = document.getElementById('dialogAvatar');
+  const dialogSpeaker = document.getElementById('dialogSpeaker');
+  const dialogBody = document.getElementById('dialogBody');
+
+  let dialogFalas = [];
+  let dialogIndex = 0;
+  let isDialogueOpen = false;
+
+  function abrirDialogo(nome, avatar, listaFalas) {
+    dialogSpeaker.textContent = nome;
+    dialogAvatar.textContent = avatar;
+    dialogFalas = listaFalas;
+    dialogIndex = 0;
+    isDialogueOpen = true;
+    dialogOverlay.style.display = 'block';
+    mostrarFala();
+  }
+
+  function mostrarFala() {
+    if (dialogIndex < dialogFalas.length) {
+      dialogBody.textContent = dialogFalas[dialogIndex];
+      playSound('talk');
+      dialogIndex++;
+    } else {
+      fecharDialogo();
+    }
+  }
+
+  function fecharDialogo() {
+    dialogOverlay.style.display = 'none';
+    isDialogueOpen = false;
+  }
+
+  dialogOverlay.onclick = (e) => {
+    e.stopPropagation();
+    mostrarFala();
+  };
+
+  document.getElementById('btnAction').onclick = (e) => {
+    e.stopPropagation();
+    interagirComMaisProximo();
+  };
+
+  document.getElementById('btnNotebook').onclick = (e) => {
+    e.stopPropagation();
+    abrirDialogo('Caderno de Campo do 3º Ano', '📋', [
+      'Aqui estão os 4 pilares da pecuária do livro (páginas 86 e 87):',
+      '1. PECUÁRIA EXTENSIVA: Gado solto no pasto amplo, come capim, corte de Nelore, poucos trabalhadores.',
+      '2. PECUÁRIA INTENSIVA: Gado confinado no estábulo, come ração e silagem no cocho, ordenha mecânica do leite, mais trabalhadores.',
+      '3. OS 4 TRABALHADORES DO CAMPO: Administrador, Trabalhador Fixo, Parceiro e Volante (Boia-fria).',
+      '4. PRODUTOS DA PECUÁRIA: Leite e derivados, Carnes diversas, Ovos, Couro para sapatos e Lã para roupas!'
+    ]);
+  };
+
+  // Interação ao se aproximar de elementos reais
+  function interagirComMaisProximo() {
+    if (isDialogueOpen) {
+      mostrarFala();
+      return;
+    }
+
+    // 1. Trabalhadores
+    for (let npc of npcs) {
+      const d = Math.hypot(player.x - npc.x, player.y - npc.y);
+      if (d < 60) {
+        caderno.trabalhadores = true;
+        updateMissions();
+        abrirDialogo(npc.nome, npc.avatar, npc.falas);
+        showToast(`👷 ${npc.nome.toUpperCase()}`);
+        return;
+      }
+    }
+
+    // 2. Animais
+    for (let a of animais) {
+      const d = Math.hypot(player.x - a.x, player.y - a.y);
+      if (d < 65) {
+        playSound('moo');
+        if (a.tipo === 'nelore') {
+          caderno.extensiva = true;
+          updateMissions();
+          abrirDialogo(a.nome, a.avatar, [
+            `Você inspecionou ${a.nome}!`,
+            `Sistema: ${a.sistema}`,
+            a.info
+          ]);
+        } else if (a.tipo === 'holandesa') {
+          caderno.intensiva = true;
+          updateMissions();
+          iniciarTimedHit();
+        } else {
+          abrirDialogo(a.nome, a.avatar, [
+            `Você visitou ${a.nome}!`,
+            `Setor: ${a.sistema}`,
+            a.info
+          ]);
+        }
+        return;
+      }
+    }
+
+    // 3. Depósito de Produtos da Pecuária
+    const dDep = Math.hypot(player.x - depositoProdutos.x, player.y - depositoProdutos.y);
+    if (dDep < 65) {
+      caderno.produtos = true;
+      updateMissions();
+      playSound('success');
+      abrirDialogo('Depósito de Produtos da Pecuária', '📦', [
+        'Aqui são armazenados os produtos obtidos na pecuária (p. 86-87):',
+        '🥛 LEITE: Nos latões inox de 50 litros para fazer queijos e manteiga.',
+        '🥩 CARNES: Cortes bovinos nobres de Nelore e aves selecionadas.',
+        '🥚 OVOS: Dúzias fresquinhas colhidas no galinheiro.',
+        '👞 COURO & LÃ: Matérias-primas para calçados, bolsas, cintos e roupas de inverno!'
+      ]);
+      return;
+    }
+
+    // 4. Trator Agrícola e Silagem
+    const dTrator = Math.hypot(player.x - trator.x, player.y - trator.y);
+    if (dTrator < 65) {
+      abrirDialogo('Trator Agrícola da Fazenda', '🚜', [
+        'Este trator é essencial para o transporte do capim, silagem e fardos de feno.',
+        'A mecanização ajuda a alimentar o rebanho mesmo nos meses mais secos do ano!'
+      ]);
+      return;
+    }
+
+    showToast('🌾 Aproxime-se dos animais, trabalhadores ou do depósito!');
+  }
+
+  // ---------- MINI-GAME DE ORDENHA MECÂNICA ----------
+  const timedModal = document.getElementById('timedModal');
+  const timedPin = document.getElementById('timedPin');
+  const btnHitNow = document.getElementById('btnHitNow');
+  let timedRunning = false;
+  let pinX = 0;
+  let pinSpeed = 5.4;
+
+  function iniciarTimedHit() {
+    timedRunning = true;
+    pinX = 0;
+    timedModal.style.display = 'block';
+  }
+
+  btnHitNow.onclick = (e) => {
+    e.stopPropagation();
+    if (!timedRunning) return;
+    timedRunning = false;
+    timedModal.style.display = 'none';
+
+    const trackW = document.querySelector('.timed-track').clientWidth;
+    const center = trackW / 2;
+    const diff = Math.abs(pinX - center);
+
+    if (diff < 36) {
+      playSound('success');
+      showToast('🌟 EXCELENTE! ORDENHA MECÂNICA REALIZADA COM SUCESSO!');
+      abrirDialogo('Sala de Ordenha Mecânica', '🥛', [
+        'Ordenha mecânica concluída no ritmo exato!',
+        'Na PECUÁRIA INTENSIVA, a ordenha com equipamentos limpos e automatizados garante um leite puro, seguro e nutritivo.',
+        'O leite foi acondicionado nos latões refrigerados e está pronto para o caminhão de laticínios!'
+      ]);
+    } else {
+      playSound('step');
+      showToast('🥛 Ordenha finalizada!');
+      abrirDialogo('Sala de Ordenha Mecânica', '🥛', [
+        'A vaca foi ordenhada e voltou tranquila para o cocho com ração balanceada.',
+        'A pecuária leiteira abastece padarias, mercados e escolas com queijos, manteigas e iogurtes!'
+      ]);
+    }
+  };
+
+  // ---------- CÂMERA SUAVE QUE SEGUE O JOGADOR ----------
+  const camera = { x: 0, y: 0 };
+  function updateCamera() {
+    const targetCamX = player.x - (viewW / 2);
+    const targetCamY = player.y - (viewH / 2);
+    camera.x += (targetCamX - camera.x) * 0.12;
+    camera.y += (targetCamY - camera.y) * 0.12;
+
+    camera.x = Math.max(0, Math.min(MAP_W - viewW, camera.x));
+    camera.y = Math.max(0, Math.min(MAP_H - viewH, camera.y));
+  }
+
+  // ---------- RENDERIZAÇÃO GRÁFICA PIXEL ART RICA DA FAZENDA ----------
+  function renderFarm() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.translate(-Math.floor(camera.x), -Math.floor(camera.y));
+
+    // 1. Solo: Pastagens Verdejantes de Braquiária
+    ctx.fillStyle = '#2f6927';
+    ctx.fillRect(0, 0, MAP_W, MAP_H);
+
+    // Textura de capim e flores silvestres de pasto
+    for (let gx = 24; gx < MAP_W; gx += 40) {
+      for (let gy = 24; gy < MAP_H; gy += 40) {
+        if ((gx + gy) % 80 === 0) {
+          ctx.fillStyle = '#3f8534';
+          ctx.fillRect(gx, gy, 5, 4);
+          ctx.fillRect(gx + 2, gy - 3, 4, 5);
+        } else if ((gx * 3 + gy) % 120 === 0) {
+          ctx.fillStyle = (gx % 2 === 0) ? '#fde047' : '#ffffff';
+          ctx.fillRect(gx, gy, 3, 3);
+        }
+      }
+    }
+
+    // 2. Estradas de terra batida (Acesso da fazenda)
+    ctx.fillStyle = '#946638';
+    ctx.fillRect(120, 410, MAP_W - 240, 52); // Leste-Oeste
+    ctx.fillRect(610, 100, 54, MAP_H - 200); // Norte-Sul
+
+    // Bordas de terra da estrada
+    ctx.fillStyle = '#785028';
+    ctx.fillRect(120, 408, MAP_W - 240, 3);
+    ctx.fillRect(120, 461, MAP_W - 240, 3);
+    ctx.fillRect(608, 100, 3, MAP_H - 200);
+    ctx.fillRect(663, 100, 3, MAP_H - 200);
+
+    // 3. Piquete da Pecuária Extensiva (Cercas de Madeira Tratada)
+    ctx.fillStyle = '#543015';
+    for (let cx = 140; cx <= 500; cx += 32) {
+      ctx.fillRect(cx, 180, 6, 26);
+      ctx.fillRect(cx, 520, 6, 26);
+    }
+    // Arame liso esticado
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(140, 188, 366, 2);
+    ctx.fillRect(140, 198, 366, 2);
+    ctx.fillRect(140, 528, 366, 2);
+    ctx.fillRect(140, 538, 366, 2);
+
+    // Porteira de madeira do pasto extensivo
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(300, 182, 44, 20);
+    ctx.fillStyle = '#fef3c7';
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.fillText('PASTO EXTENSIVO', 170, 172);
+
+    // Árvores de sombra para bem-estar animal no pasto
+    function drawTree(tx, ty) {
+      // Sombra
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(tx, ty + 30, 34, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Tronco
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(tx - 6, ty, 12, 34);
+      // Copa verde exuberante
+      ctx.fillStyle = '#166534';
+      ctx.beginPath();
+      ctx.arc(tx, ty - 14, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(tx - 6, ty - 20, 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    drawTree(180, 240);
+    drawTree(460, 420);
+    drawTree(1120, 520);
+
+    // 4. Curral e Estábulo da Pecuária Intensiva
+    const ex = estabulo.x, ey = estabulo.y;
+    // Sombra do galpão
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(ex - 8, ey + 10, estabulo.w + 16, estabulo.h);
+
+    // Paredes de madeira tratada
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(ex, ey, estabulo.w, estabulo.h);
+
+    // Ranhuras das tábuas de madeira
+    ctx.fillStyle = '#5c2707';
+    for (let px = ex; px < ex + estabulo.w; px += 18) {
+      ctx.fillRect(px, ey, 2, estabulo.h);
+    }
+
+    // Telhado de telhas coloniais terracota
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath();
+    ctx.moveTo(ex - 16, ey);
+    ctx.lineTo(ex + estabulo.w / 2, ey - 50);
+    ctx.lineTo(ex + estabulo.w + 16, ey);
+    ctx.fill();
+
+    // Ranhuras das telhas
+    ctx.fillStyle = '#991b1b';
+    for (let tx = ex; tx < ex + estabulo.w; tx += 14) {
+      ctx.fillRect(tx, ey - 20, 3, 20);
+    }
+
+    // Cocho de Alvenaria com Silagem e Ração
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(ex + 20, ey + 60, 80, 24);
+    ctx.fillStyle = '#85752c'; // silagem
+    ctx.fillRect(ex + 24, ey + 64, 72, 16);
+
+    // Bebedouro com boia
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(ex + 120, ey + 60, 40, 24);
+    ctx.fillStyle = '#38bdf8'; // água limpa
+    ctx.fillRect(ex + 124, ey + 64, 32, 16);
+
+    // Placa do Estábulo Intensivo
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(ex + 45, ey - 16, 150, 20);
+    ctx.fillStyle = '#78350f';
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.fillText('ESTÁBULO INTENSIVO', ex + 52, ey - 2);
+
+    // Latões de Leite de Metal Inox de 50L
+    for (let lx = ex + 175; lx < ex + 215; lx += 14) {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(lx, ey + 75, 11, 16);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(lx - 1, ey + 72, 13, 3); // tampa
+      ctx.fillRect(lx + 2, ey + 70, 7, 3); // alça
+    }
+
+    // 5. Trator Agrícola com Carretinha e Fardos de Feno
+    const trx = trator.x, try_ = trator.y;
+    // Sombra do trator
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(trx + 20, try_ + 26, 42, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Corpo do trator verde agrícola
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(trx, try_, 38, 22);
+    // Cabine com vidro
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(trx + 4, try_ - 14, 20, 14);
+    ctx.fillStyle = '#bae6fd';
+    ctx.fillRect(trx + 7, try_ - 11, 14, 9);
+    // Escapamento
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(trx + 30, try_ - 12, 4, 12);
+    // Rodas traseiras grandes e dianteiras menores
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(trx + 10, try_ + 20, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(trx + 32, try_ + 22, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Carretinha com fardos de feno amarelos
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(trx - 36, try_ + 6, 32, 16);
+    // Fardos de feno
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(trx - 34, try_ - 4, 14, 10);
+    ctx.fillRect(trx - 18, try_ - 4, 14, 10);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(trx - 28, try_ - 4, 2, 10); // amarra do fardo
+    ctx.fillRect(trx - 12, try_ - 4, 2, 10);
+
+    // 6. Depósito de Produtos da Pecuária (Leite, Carnes, Ovos, Couro)
+    const dpx = depositoProdutos.x, dpy = depositoProdutos.y;
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(dpx - 36, dpy - 16, 72, 32);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(dpx - 36, dpy - 24, 72, 8); // telhado
+    // Caixas de produtos
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(dpx - 30, dpy - 6, 18, 16);
+    ctx.fillRect(dpx - 6, dpy - 6, 18, 16);
+    ctx.fillRect(dpx + 16, dpy - 6, 16, 16);
+    // Latão de leite
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(dpx - 26, dpy + 12, 10, 12);
+    // Placa
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(dpx - 44, dpy - 36, 88, 14);
+    ctx.fillStyle = '#1e293b';
+    ctx.font = '7px "Press Start 2P", monospace';
+    ctx.fillText('PRODUTOS', dpx - 28, dpy - 26);
+
+    // 7. Renderizar Animais com Anatomia Fiel
+    animais.forEach(a => {
+      // Sombra
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(a.x, a.y + a.h / 2, a.w / 2, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const mastigando = Math.sin(Date.now() * 0.007 + a.x) * 1.5;
+
+      if (a.tipo === 'nelore') {
+        // Gado Nelore: Corpo branco-acinzentado, cupim do Zebu, barbela no peito e chifres
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.ellipse(a.x, a.y, 23, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cupim característico no lombo
+        ctx.beginPath();
+        ctx.ellipse(a.x - 5, a.y - 15, 9, 8, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Barbela no peito
+        ctx.fillRect(a.x + 8, a.y + 6, 8, 7);
+
+        // Cabeça com focinho escuro
+        ctx.fillRect(a.x + 14, a.y - 13 + mastigando, 16, 17);
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(a.x + 22, a.y - 6 + mastigando, 9, 10); // focinho escuro
+
+        // Chifres curvos voltados para cima
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(a.x + 15, a.y - 19 + mastigando, 3, 7);
+        ctx.fillRect(a.x + 21, a.y - 19 + mastigando, 3, 7);
+
+        // Pernas
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(a.x - 14, a.y + 11, 5, 13);
+        ctx.fillRect(a.x - 4, a.y + 11, 5, 13);
+        ctx.fillRect(a.x + 6, a.y + 11, 5, 13);
+        ctx.fillRect(a.x + 16, a.y + 11, 5, 13);
+
+        // Olho
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(a.x + 19, a.y - 10 + mastigando, 3, 3);
+      } else if (a.tipo === 'holandesa') {
+        // Vaca Holandesa: Malhada preto e branco, úbere rosado com tetos e sino de latão
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(a.x, a.y, 23, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Manchas pretas
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.ellipse(a.x - 8, a.y - 2, 9, 10, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(a.x + 6, a.y + 3, 8, 7, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cabeça com focinho rosa
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(a.x + 14, a.y - 13 + mastigando, 16, 17);
+        ctx.fillStyle = '#f472b6'; // focinho rosa
+        ctx.fillRect(a.x + 22, a.y - 6 + mastigando, 9, 10);
+
+        // Sino no pescoço
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(a.x + 12, a.y + 3, 6, 7);
+
+        // Úbere desenvolvido com tetos
+        ctx.fillStyle = '#fbcfe8';
+        ctx.fillRect(a.x - 9, a.y + 9, 16, 8);
+        ctx.fillRect(a.x - 7, a.y + 17, 3, 4);
+        ctx.fillRect(a.x + 3, a.y + 17, 3, 4);
+
+        // Pernas
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(a.x - 14, a.y + 11, 5, 13);
+        ctx.fillRect(a.x - 4, a.y + 11, 5, 13);
+        ctx.fillRect(a.x + 6, a.y + 11, 5, 13);
+        ctx.fillRect(a.x + 16, a.y + 11, 5, 13);
+
+        // Olho
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(a.x + 19, a.y - 10 + mastigando, 3, 3);
+      } else if (a.tipo === 'ovelha') {
+        // Ovelha fofa
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(a.x + 10, a.y - 6, 9, 9);
+      } else {
+        // Galinheiro
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(a.x - 14, a.y - 12, 28, 20);
+        ctx.fillStyle = '#ea580c';
+        ctx.fillRect(a.x - 2, a.y - 2, 10, 8); // galinha
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(a.x + 2, a.y - 5, 4, 4); // crista
+      }
+    });
+
+    // 8. Renderizar Trabalhadores Rurais (4 Profissionais)
+    npcs.forEach(npc => {
+      // Sombra
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      ctx.beginPath();
+      ctx.ellipse(npc.x, npc.y + npc.h / 2 - 2, 10, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Roupa profissional
+      ctx.fillStyle = npc.corRoupa;
+      ctx.fillRect(npc.x - 9, npc.y - 7, 18, 22);
+
+      // Cabeça humana
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(npc.x - 8, npc.y - 22, 16, 15);
+
+      // Chapéu rural de palha / couro
+      ctx.fillStyle = npc.chapeu;
+      ctx.fillRect(npc.x - 12, npc.y - 26, 24, 6);
+      ctx.fillRect(npc.x - 7, npc.y - 32, 14, 7);
+
+      // Olhos
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(npc.x - 4, npc.y - 16, 2, 3);
+      ctx.fillRect(npc.x + 3, npc.y - 16, 2, 3);
+
+      // Balão de conversa sobre a cabeça
+      const bob = Math.sin(Date.now() * 0.007 + npc.x) * 4;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(npc.x - 9, npc.y - 46 + bob, 18, 13);
+      ctx.fillStyle = '#16a34a';
+      ctx.fillRect(npc.x - 5, npc.y - 42 + bob, 10, 5);
+    });
+
+    // 9. Renderizar Estudante Pesquisador(a) (Protagonista com Jardineira Jeans e Mochila de Campo)
+    // Sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.beginPath();
+    ctx.ellipse(player.x, player.y + 15, 11, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mochila de campo marrom
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(player.x - 11, player.y - 8, 22, 16);
+
+    // Camisa xadrez vermelha/branca
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(player.x - 8, player.y - 8, 16, 18);
+
+    // Jardineira jeans azul clássica
+    ctx.fillStyle = '#1d4ed8';
+    ctx.fillRect(player.x - 7, player.y, 14, 12);
+    // Alças da jardineira
+    ctx.fillRect(player.x - 6, player.y - 7, 3, 8);
+    ctx.fillRect(player.x + 3, player.y - 7, 3, 8);
+
+    // Cabeça
+    ctx.fillStyle = '#fed7aa';
+    ctx.fillRect(player.x - 7, player.y - 23, 14, 15);
+
+    // Chapéu de palha de campo com fita verde
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(player.x - 12, player.y - 26, 24, 5);
+    ctx.fillRect(player.x - 7, player.y - 32, 14, 7);
+    ctx.fillStyle = '#15803d'; // fita verde
+    ctx.fillRect(player.x - 7, player.y - 27, 14, 2);
+
+    // Olhos expressivos
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(player.x - 4, player.y - 17, 2, 3);
+    ctx.fillRect(player.x + 2, player.y - 17, 2, 3);
+
+    // Pernas e botinas com animação de caminhada
+    ctx.fillStyle = '#1e3a5f';
+    const legBob = player.isMoving ? Math.sin(Date.now() * 0.02) * 4 : 0;
+    ctx.fillRect(player.x - 7, player.y + 11, 5, 9 + legBob);
+    ctx.fillRect(player.x + 2, player.y + 11, 5, 9 - legBob);
+    // Botinas de couro
+    ctx.fillStyle = '#451a03';
+    ctx.fillRect(player.x - 8, player.y + 19 + legBob, 6, 4);
+    ctx.fillRect(player.x + 2, player.y + 19 - legBob, 6, 4);
+
+    ctx.restore();
+
+    // 10. Tonalidade do Período do Dia (Manhã, Tarde, Noite)
+    if (timeOfDayModes[timeOfDayIdx].tint !== 'rgba(0,0,0,0)') {
+      ctx.save();
+      ctx.fillStyle = timeOfDayModes[timeOfDayIdx].tint;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (timeOfDayIdx === 2) {
+        // À noite, as lâmpadas do estábulo e da sede iluminam ao redor
+        ctx.globalCompositeOperation = 'lighter';
+        const screenEstX = estabulo.x + 100 - camera.x;
+        const screenEstY = estabulo.y + 60 - camera.y;
+        const glow = ctx.createRadialGradient(screenEstX, screenEstY, 10, screenEstX, screenEstY, 140);
+        glow.addColorStop(0, 'rgba(253, 224, 71, 0.45)');
+        glow.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(screenEstX, screenEstY, 140, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  // ---------- LOOP DO JOGO E MOVIMENTAÇÃO ----------
+  let lastTime = performance.now();
+
+  function gameLoop(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    player.isMoving = false;
+
+    if (!isDialogueOpen && !timedRunning) {
+      let moveX = 0;
+      let moveY = 0;
+
+      // 1. Joystick Virtual Touch
+      if (isTouchDragging && (Math.abs(joyDelta.x) > 0.1 || Math.abs(joyDelta.y) > 0.1)) {
+        moveX = joyDelta.x;
+        moveY = joyDelta.y;
+      }
+      // 2. Destino de Toque Direto
+      else if (player.hasTarget) {
+        const distTarget = Math.hypot(player.targetX - player.x, player.targetY - player.y);
+        if (distTarget > 6) {
+          moveX = (player.targetX - player.x) / distTarget;
+          moveY = (player.targetY - player.y) / distTarget;
+        } else {
+          player.hasTarget = false;
+          touchRing.style.display = 'none';
+        }
+      }
+      // 3. Teclado
+      else {
+        if (keys.up) moveY -= 1;
+        if (keys.down) moveY += 1;
+        if (keys.left) moveX -= 1;
+        if (keys.right) moveX += 1;
+        if (moveX !== 0 && moveY !== 0) {
+          moveX *= 0.7071;
+          moveY *= 0.7071;
+        }
+      }
+
+      if (moveX !== 0 || moveY !== 0) {
+        player.isMoving = true;
+        player.x += moveX * player.speed;
+        player.y += moveY * player.speed;
+
+        player.x = Math.max(30, Math.min(MAP_W - 30, player.x));
+        player.y = Math.max(30, Math.min(MAP_H - 30, player.y));
+
+        player.stepSoundTimer += dt;
+        if (player.stepSoundTimer >= 0.32) {
+          player.stepSoundTimer = 0;
+          playSound('step');
+        }
+      }
+    }
+
+    // Mini-game de ordenha
+    if (timedRunning) {
+      const trackW = document.querySelector('.timed-track').clientWidth;
+      pinX += pinSpeed;
+      if (pinX >= trackW - 14 || pinX <= 0) pinSpeed *= -1;
+      timedPin.style.left = pinX + 'px';
+    }
+
+    updateCamera();
+    renderFarm();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  requestAnimationFrame(gameLoop);
+
+})();
+</script>
+</body>
+</html>

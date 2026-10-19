@@ -15,13 +15,16 @@
 <script>
 /* Pagina do topico "Pecuária" — gerada por _espec/gerar_menus.py. */
 const JOGOS = [
-  {arquivo:'jogo-pecuaria-memoria.html', icone:'🐄', nome:'Memória dos bichos', como:'Encontre os dois iguais', oque:'Ache os 3 pares: vaca, galinha e ovelha.', id:'mem-pec'},
-  {arquivo:'jogo-pecuaria-perguntas.html', icone:'🎯', nome:'Perguntas da pecuária', como:'Responda e veja a resposta', oque:'Três fases de perguntas do livro.', legado:'treino3ano.jogo.pec.v1'},
-  {arquivo:'jogo-pecuaria-arrasta.html', icone:'🧺', nome:'Produtos e o lugar do gado', como:'Arraste e solte', oque:'Leite, ovos e lã; solto no pasto ou confinado.', legado:'treino3ano.jogo.peca.v1'},
-  {arquivo:'jogo-pecuaria-trabalhadores.html', icone:'👷', nome:'Trabalhadores do campo', como:'Ligue a palavra à tarefa', oque:'O administrador, o fixo, o parceiro e o arrendatário.', id:'pec-trabalhadores'},
-  {arquivo:'jogo-pecuaria-criacao.html', icone:'🐄', nome:'Solto ou confinado?', como:'Leve o cartão à caixa certa', oque:'Pecuária extensiva e intensiva, com as palavras do livro.', id:'pec-criacao'},
-  {arquivo:'jogo-pecuaria-volante.html', icone:'🚛', nome:'O trabalhador volante', como:'Responda e veja a resposta', oque:'Boia-fria, plantio e colheita por um tempo.', id:'pec-volante'},
-  {arquivo:'jogo-pecuaria-animais.html', icone:'🧵', nome:'Do animal ao produto', como:'Leve o cartão à caixa certa', oque:'Leite, carne, couro, ovos e lã.', id:'pec-animais'},
+  {arquivo:'rpg-sea-of-stars.html', icone:'🌾', nome:'Fazenda da Pecuária (Aventura 2D)', como:'Explore a fazenda em 2D pixel art no celular', oque:'Pecuária extensiva e intensiva, ordenha mecânica, os 4 trabalhadores rurais e produtos (p. 86-87).', id:'pec-sea-of-stars'},
+  {arquivo:'fazenda-3d.html', icone:'🌟', nome:'Simulador Fazenda 3D', como:'Ande livremente pela fazenda em 3D', oque:'Pecuária extensiva e intensiva, ordenha, animais e trabalhadores em 3D.', id:'fazenda-3d-realista'},
+  {arquivo:'../jogar.html?jogo=mem-pec', icone:'🐄', nome:'Memória do pasto e do curral', como:'Encontre as duas fotos iguais', oque:'2 pares com as imagens de extensiva e intensiva.', id:'mem-pec'},
+  {arquivo:'../jogar.html?jogo=pec-perguntas', icone:'🎯', nome:'Perguntas da pecuária', como:'Responda e veja a resposta', oque:'Extensiva, intensiva, ordenha e produtos.', id:'pec-perguntas'},
+  {arquivo:'../jogar.html?jogo=pec-toque', icone:'👆', nome:'Toque nos certos', como:'Toque nas 3 coisas certas', oque:'Extensiva e intensiva, com as fotos do livro.', id:'pec-toque'},
+  {arquivo:'../jogar.html?jogo=pec-trabalhadores', icone:'👷', nome:'Trabalhadores do campo', como:'Ligue a palavra à tarefa', oque:'O administrador, o fixo, o parceiro e o arrendatário.', id:'pec-trabalhadores'},
+  {arquivo:'../jogar.html?jogo=pec-criacao', icone:'🐄', nome:'Solto ou confinado?', como:'Leve o cartão à caixa certa', oque:'Pecuária extensiva e intensiva, com as palavras do livro.', id:'pec-criacao'},
+  {arquivo:'../jogar.html?jogo=pec-volante', icone:'🚛', nome:'O trabalhador volante', como:'Responda e veja a resposta', oque:'Boia-fria, plantio e colheita por um tempo.', id:'pec-volante'},
+  {arquivo:'../jogar.html?jogo=pec-animais', icone:'🧵', nome:'Produtos da pecuária', como:'Separe produtos das outras informações', oque:'Leite, carnes, ovos e couro, como no livro.', id:'pec-animais'},
+  {arquivo:'../jogar-3d.html?topico=pecuaria', icone:'✨', nome:'Fazenda 3D da Pecuária', como:'Explore o pasto e o estábulo em 3D', oque:'Pecuária extensiva e intensiva em um lindo cenário 3D interativo.', id:'pec-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -37,7 +40,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🐄 Pecuária</h1>
-  <p class="sub">p. 86, 87 · 7 jogos · base do livro</p>
+  <p class="sub">p. 86, 87 · 10 jogos (inclui RPG 2D Sea of Stars e Simulador 3D) · base do livro</p>
   <p class="sub">A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.</p>
 </header>
 <section class="cards">

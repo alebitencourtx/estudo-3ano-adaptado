@@ -1,0 +1,1696 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Fazenda 3D: Aventura da Pecuária — 3º Ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Three.js e OrbitControls via CDN confiável para GitHub Pages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+:root{
+  --font-display:'Baloo 2','Nunito',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --paper:#EEF3FB; --card:#FFFFFF; --ink:#18264A; --muted:#55628A; --line:#CBD6EC;
+  --ok:#16794F; --ok-soft:#DDF4E8; --bad:#B63030; --bad-soft:#FBE4E4;
+  --focus:#2A55C4; --star:#E09A00; --acc:#965F10; --acc-soft:#FBEED2;
+  --shadow:0 8px 24px rgba(24,38,74,0.12);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0F1730; --card:#18223F; --ink:#E9EEFB; --muted:#A5B1D2; --line:#2B3963;
+    --ok:#58D39B; --ok-soft:#153A2B; --bad:#FF8F8F; --bad-soft:#44202A;
+    --focus:#8FB0FF; --star:#FFC83D; --acc:#F2B650; --acc-soft:#3B2F14;
+    --shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+}
+
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#87CEEB;font-family:var(--font-body);color:var(--ink);touch-action:none}
+
+#canvas-container{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+canvas{display:block;width:100%;height:100%}
+
+/* Barra Superior */
+.top-bar{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;
+  background:linear-gradient(to bottom,rgba(15,23,48,0.75) 0%,rgba(15,23,48,0) 100%);
+  pointer-events:none;
+}
+.top-bar>*{pointer-events:auto}
+.btn-voltar{
+  background:var(--card);color:var(--ink);border:2px solid var(--line);
+  font:800 0.95rem var(--font-body);padding:8px 14px;border-radius:12px;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+  box-shadow:0 3px 0 var(--line);transition:transform .1s;
+}
+.btn-voltar:active{transform:translateY(2px)}
+.titulo-box{
+  display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.92);
+  padding:6px 14px;border-radius:99px;border:2px solid var(--line);box-shadow:var(--shadow);
+}
+@media (prefers-color-scheme:dark){.titulo-box{background:rgba(24,34,63,0.92)}}
+.titulo-box h1{font:800 1.15rem var(--font-display);color:var(--ink);display:flex;align-items:center;gap:6px}
+.fita{width:22px;height:22px;object-fit:contain}
+.badge{background:var(--acc);color:#fff;font:800 0.75rem var(--font-body);padding:3px 8px;border-radius:99px;text-transform:uppercase}
+
+.audio-controls{display:flex;gap:6px}
+.btn-audio{
+  background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:12px;
+  padding:8px 12px;font:800 0.9rem var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+}
+.btn-audio:active{transform:scale(0.96)}
+
+/* Card de Missão / Guia Central Superior (Totalmente minimizável para não tapar o jogo no celular) */
+.mission-card{
+  position:absolute;top:calc(54px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);
+  z-index:9;width:min(560px,94vw);background:rgba(255,255,255,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:2px solid var(--line);border-radius:18px;padding:8px 14px;box-shadow:var(--shadow);pointer-events:auto;
+  display:flex;flex-direction:column;gap:5px;transition:all .22s ease;
+}
+@media (prefers-color-scheme:dark){.mission-card{background:rgba(24,34,63,0.88)}}
+
+.mission-card.collapsed{
+  padding:4px 12px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);width:fit-content;max-width:94vw;cursor:pointer;
+}
+@media (prefers-color-scheme:dark){.mission-card.collapsed{background:rgba(24,34,63,0.88)}}
+.mission-card.collapsed .mission-body{display:none}
+.mission-card.hidden{display:none!important}
+
+.mission-header{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}
+.mission-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mission-tag{font:800 0.82rem var(--font-display);color:var(--acc);text-transform:uppercase;letter-spacing:0.04em}
+.mission-stars{font-size:0.95rem;color:var(--star)}
+.btn-toggle-mission{
+  background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;
+  padding:3px 9px;font:800 0.76rem var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:3px;
+  flex-shrink:0;transition:transform .1s;
+}
+.btn-toggle-mission:active{transform:scale(0.95)}
+.mission-body{display:flex;flex-direction:column;gap:4px}
+.mission-text{font:700 0.95rem var(--font-body);line-height:1.3;color:var(--ink)}
+.mission-hint{font:600 0.8rem var(--font-body);color:var(--muted);display:flex;align-items:center;gap:5px}
+
+@media (max-width: 640px){
+  .top-bar{padding:calc(6px + env(safe-area-inset-top,0px)) 8px 4px;gap:5px}
+  .titulo-box{padding:4px 8px}
+  .titulo-box h1{font-size:0.85rem}
+  .fita{width:16px;height:16px}
+  .badge{display:none}
+  .btn-voltar{padding:5px 8px;font-size:0.78rem;border-radius:8px}
+  .audio-controls{gap:4px}
+  .btn-audio{padding:5px 8px;font-size:0.75rem;border-radius:8px}
+
+  /* No celular: card reposicionado e compacto para NUNCA tampar o centro da tela */
+  .mission-card{
+    top:calc(46px + env(safe-area-inset-top,0px));
+    padding:6px 10px;
+    border-radius:14px;
+    width:min(420px,94vw);
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .mission-card.collapsed{
+    top:calc(46px + env(safe-area-inset-top,0px));
+    padding:4px 10px;
+  }
+  .mission-tag{font-size:0.76rem}
+  .mission-text{font-size:0.82rem;line-height:1.25}
+  .mission-hint{font-size:0.72rem}
+
+  /* Dock inferior no celular: barra horizontal rolável, compacta, 1 linha só */
+  .bottom-dock{bottom:calc(6px + env(safe-area-inset-bottom,0px));width:96vw}
+  .dock-panel{
+    padding:4px 6px;
+    border-radius:14px;
+    overflow-x:auto;
+    white-space:nowrap;
+    flex-wrap:nowrap;
+    justify-content:flex-start;
+    gap:4px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .dock-panel::-webkit-scrollbar{display:none}
+  .dock-group{flex-wrap:nowrap;gap:4px}
+  .dock-btn{padding:5px 8px;font-size:0.74rem;border-radius:8px;flex-shrink:0}
+
+  #virtual-joystick-zone{bottom:54px;left:10px;width:86px;height:86px}
+  #virtual-joystick-knob{top:23px;left:23px;width:40px;height:40px}
+  .interact-bubble{bottom:54px;right:10px;padding:9px 14px;font-size:0.9rem}
+}
+
+/* Dock de Controles Inferior (Ergonomia Conforme Skill ThreeJS) */
+.bottom-dock{
+  position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);
+  z-index:10;width:min(760px,94vw);display:flex;flex-direction:column;align-items:center;gap:8px;
+  pointer-events:none;
+}
+.bottom-dock>*{pointer-events:auto}
+.dock-panel{
+  width:100%;background:rgba(255,255,255,0.92);backdrop-filter:none;border:2px solid var(--line);
+  border-radius:20px;padding:10px 14px;box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+}
+@media (prefers-color-scheme:dark){.dock-panel{background:rgba(24,34,63,0.94)}}
+.dock-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dock-btn{
+  background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:12px;
+  padding:8px 12px;font:800 0.88rem var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  transition:all .12s;
+}
+.dock-btn.active{background:var(--focus);color:#fff;border-color:var(--focus)}
+.dock-btn:active{transform:scale(0.96)}
+
+/* Teclas de Ajuda (Desktop) */
+.keys-hint{
+  background:rgba(15,23,48,0.7);color:#fff;font:700 0.78rem var(--font-body);
+  padding:4px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;
+}
+.key-badge{background:rgba(255,255,255,0.25);padding:2px 6px;border-radius:6px;font-weight:800}
+
+/* Joystick Virtual (Mobile/Touch) */
+#virtual-joystick-zone{
+  position:absolute;bottom:80px;left:24px;width:120px;height:120px;z-index:15;
+  background:rgba(255,255,255,0.25);border:2px dashed rgba(255,255,255,0.5);border-radius:50%;
+  touch-action:none;display:none;pointer-events:auto;
+}
+#virtual-joystick-knob{
+  position:absolute;top:35px;left:35px;width:50px;height:50px;
+  background:var(--focus);border:3px solid #fff;border-radius:50%;pointer-events:none;
+}
+@media (pointer: coarse){
+  #virtual-joystick-zone{display:block}
+  .keys-hint{display:none}
+}
+
+/* Modal Educativo / Quiz Interativo */
+.modal-overlay{
+  position:fixed;inset:0;z-index:40;background:rgba(10,16,38,0.65);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-box{
+  background:var(--card);border:2px solid var(--line);border-radius:24px;
+  max-width:560px;width:100%;padding:22px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto;
+  transform:scale(0.95);transition:transform .25s ease;
+}
+.modal-overlay.open .modal-box{transform:scale(1)}
+.modal-title{font:800 1.5rem var(--font-display);display:flex;align-items:center;gap:8px}
+.modal-content{font:600 1.05rem var(--font-body);line-height:1.5;color:var(--ink)}
+.quiz-options{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.quiz-opt{
+  background:var(--paper);border:2px solid var(--line);border-radius:14px;
+  padding:12px 16px;font:700 1.05rem var(--font-body);text-align:left;cursor:pointer;
+  transition:all .15s;color:var(--ink);
+}
+.quiz-opt:hover{border-color:var(--focus);background:var(--acc-soft)}
+.quiz-opt.ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ok)!important}
+.quiz-opt.bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--bad)!important}
+.modal-feedback{font:800 1rem var(--font-body);padding:10px 14px;border-radius:12px;display:none}
+.modal-feedback.show{display:block}
+.modal-feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.modal-feedback.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* Notificação flutuante de sucesso */
+.toast-msg{
+  position:absolute;top:140px;left:50%;transform:translateX(-50%) translateY(-20px);
+  z-index:25;background:var(--ok);color:#fff;font:800 1.1rem var(--font-display);
+  padding:10px 22px;border-radius:99px;box-shadow:var(--shadow);opacity:0;
+  pointer-events:none;transition:all .3s ease;
+}
+.toast-msg.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Indicador de interação 3D (ponto de interesse) */
+.interact-bubble{
+  position:absolute;bottom:100px;right:24px;z-index:15;
+  background:var(--acc);color:#fff;border:3px solid #fff;border-radius:99px;
+  padding:14px 22px;font:800 1.1rem var(--font-display);cursor:pointer;box-shadow:var(--shadow);
+  display:none;align-items:center;gap:8px;pointer-events:auto;
+}
+.interact-bubble:active{transform:scale(0.95)}
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<!-- Barra Superior -->
+<header class="top-bar">
+  <a class="btn-voltar" href="index.html">← Voltar</a>
+  <div class="titulo-box">
+    <img class="fita" src="../../img/fita-autismo.png" alt="Acessibilidade TEA">
+    <h1>🐄 Fazenda 3D: Pecuária</h1>
+    <span class="badge">3º Ano</span>
+  </div>
+  <div class="audio-controls">
+    <button type="button" class="btn-audio" id="btnToggleCard" title="Ocultar ou mostrar texto">👁️ Texto</button>
+    <button type="button" class="btn-audio" id="btnAudioOuvir" title="Ouvir instrução">🔊 Ouvir</button>
+    <button type="button" class="btn-audio" id="btnAudioLento" title="Ouvir devagar">🐢 Devagar</button>
+  </div>
+</header>
+
+<!-- Card de Missão Atual (Minimizável com 1 toque para desimpedir a visão no celular) -->
+<section class="mission-card" id="missionCard">
+  <div class="mission-header" id="missionHeader" role="button" tabindex="0" title="Toque para recolher ou expandir o texto">
+    <div class="mission-header-left">
+      <span class="mission-tag" id="missionTag">Missão 1 de 4</span>
+      <span class="mission-stars" id="missionStars">⭐⭐⭐</span>
+    </div>
+    <button type="button" class="btn-toggle-mission" id="btnToggleMission" title="Recolher ou expandir texto">🔼 Ocultar</button>
+  </div>
+  <div class="mission-body" id="missionBody">
+    <p class="mission-text" id="missionText">🌿 <b>Pecuária Extensiva</b>: Vá até o pasto verde e examine o gado solto alimentando-se nas pastagens.</p>
+    <p class="mission-hint" id="missionHint">💡 Use o joystick ou teclas para andar até o pasto.</p>
+  </div>
+</section>
+
+<!-- Notificação Flutuante -->
+<div class="toast-msg" id="toastMsg">✓ Parabéns! Missão Concluída!</div>
+
+<!-- Botão Flutuante de Ação no Ponto de Interesse -->
+<button type="button" class="interact-bubble" id="btnInteragir">
+  <span>✨</span> <span id="txtInteragir">Interagir</span>
+</button>
+
+<!-- Joystick Virtual para Celular / Tablet -->
+<div id="virtual-joystick-zone">
+  <div id="virtual-joystick-knob"></div>
+</div>
+
+<!-- Dock de Controles Inferior -->
+<div class="bottom-dock">
+  <div class="keys-hint">
+    <span>Use</span>
+    <span class="key-badge">W</span><span class="key-badge">A</span><span class="key-badge">S</span><span class="key-badge">D</span> ou <span class="key-badge">Setas</span>
+    <span>para andar · Mouse para girar a câmera</span>
+  </div>
+  <nav class="dock-panel" aria-label="Controles da câmera e opções">
+    <div class="dock-group">
+      <button type="button" class="dock-btn active" id="btnCamFollow">🚶 Modo Andar</button>
+      <button type="button" class="dock-btn" id="btnCamPasto">🌿 Ver Pasto</button>
+      <button type="button" class="dock-btn" id="btnCamEstabulo">🏡 Ver Estábulo</button>
+      <button type="button" class="dock-btn" id="btnCamAerea">🦅 Vista Aérea</button>
+    </div>
+    <div class="dock-group">
+      <button type="button" class="dock-btn" id="btnSonsToggle">🔊 Sons: Ligados</button>
+      <button type="button" class="dock-btn" id="btnQuizOpen">📝 Fazer Desafio</button>
+    </div>
+  </nav>
+</div>
+
+<!-- Modal de Interação Educativa / Quiz da Pecuária -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">🐮 Desafio da Pecuária</div>
+    <div class="modal-content" id="modalQuestion">Na pecuária extensiva, como os animais são criados?</div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="modal-feedback" id="modalFeedback"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+      <button type="button" class="dock-btn" id="btnModalClose">Continuar Explorando</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   FAZENDA 3D DA PECUÁRIA — SIMULADOR REALISTA EDUCATIVO DO 3º ANO
+   Conceitos abordados:
+   - Pecuária Extensiva (animais soltos em pastagens, capim, sal, bebedouro)
+   - Pecuária Intensiva (animais confinados em estábulos, cochos, ração balanceada, chip auricular)
+   - Trabalhadores da Pecuária (Administrador, Trabalhador Fixo, Arrendatário, Volante/Boia-Fria)
+   - Produtos da Pecuária (Leite, Carnes, Ovos, Couro, Lã)
+   Totalmente compatível com GitHub Pages (Three.js puro, Web Audio procedural, sem dependências de arquivos de terceiros)
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  // ---------- SÍNTESE DE ÁUDIO WEB (Zero 404, sons 100% procedurais) ----------
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  let sonsAtivos = true;
+
+  function initAudio() {
+    if (!audioCtx && AudioCtx) {
+      audioCtx = new AudioCtx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playMoo() {
+    if (!sonsAtivos || !audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const now = audioCtx.currentTime;
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(130, now);
+      osc.frequency.exponentialRampToValueAtTime(105, now + 0.4);
+      osc.frequency.exponentialRampToValueAtTime(75, now + 1.2);
+
+      // Filtro passa-baixa para som mais encorpado e aveludado de vaca
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(450, now);
+      filter.frequency.exponentialRampToValueAtTime(300, now + 1.2);
+
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.2, now + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 1.3);
+    } catch (_) {}
+  }
+
+  function playChime(success = true) {
+    if (!sonsAtivos || !audioCtx) return;
+    try {
+      const notes = success ? [523.25, 659.25, 783.99, 1046.50] : [349.23, 293.66];
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const now = audioCtx.currentTime + idx * 0.08;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.45);
+      });
+    } catch (_) {}
+  }
+
+  function playStep() {
+    if (!sonsAtivos || !audioCtx) return;
+    try {
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(90, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } catch (_) {}
+  }
+
+  // ---------- VOZ SINTETIZADA ACESSÍVEL (TTS pt-BR) ----------
+  function falar(texto, velocidade = 0.88) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const clean = texto.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'pt-BR';
+      u.rate = velocidade;
+      window.speechSynthesis.speak(u);
+    } catch (_) {}
+  }
+
+  // ---------- TEXTURAS PROCEDURAIS GERADAS VIA CANVAS (Qualidade PBR e Zero 404s) ----------
+  function criarTexturaGrama() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#4fa336';
+    ctx.fillRect(0, 0, 512, 512);
+
+    for (let i = 0; i < 4000; i++) {
+      const x = Math.random() * 512, y = Math.random() * 512;
+      const len = 4 + Math.random() * 8;
+      ctx.strokeStyle = Math.random() > 0.5 ? '#5db842' : '#3f8c2b';
+      ctx.lineWidth = 1 + Math.random() * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (Math.random() - 0.5) * 4, y - len);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(24, 24);
+    return tex;
+  }
+
+  function criarTexturaMadeira() {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#8b5a2b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let y = 0; y < 256; y += 4) {
+      ctx.fillStyle = (y % 8 === 0) ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.06)';
+      ctx.fillRect(0, y, 256, 2);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  function criarTexturaVacaMalhada() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Manchas pretas naturais de vaca holandesa
+    ctx.fillStyle = '#1a1a1a';
+    for (let i = 0; i < 12; i++) {
+      const cx = Math.random() * 512, cy = Math.random() * 512;
+      const rx = 35 + Math.random() * 55, ry = 30 + Math.random() * 50;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return new THREE.CanvasTexture(c);
+  }
+
+  function criarTexturaTelhadoZinco() {
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 128;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#8a9597';
+    ctx.fillRect(0, 0, 128, 128);
+
+    for (let x = 0; x < 128; x += 8) {
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillRect(x, 0, 4, 128);
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(x + 4, 0, 4, 128);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 6);
+    return tex;
+  }
+
+  // ---------- MISSÕES EDUCATIVAS ALINHADAS AO LIVRO DO 3º ANO ----------
+  const MISSOES = [
+    {
+      id: 1,
+      titulo: 'Missão 1: Pecuária Extensiva',
+      texto: '🌿 <b>Pecuária Extensiva</b>: Vá até o grande pasto verde. Veja o gado solto que se alimenta livremente do capim.',
+      dica: 'Aproxime-se do cercado do pasto com o rebanho Nelore.',
+      alvoPos: new THREE.Vector3(-24, 0, -10),
+      raio: 14,
+      tag: '🌿 Pasto Aberto',
+      fato: 'Na pecuária extensiva, os animais são criados soltos em grandes áreas e alimentam-se nas pastagens naturais.',
+      pergunta: 'Como os animais vivem na pecuária extensiva?',
+      opcoes: ['Soltos em grandes pastagens', 'Presos em gaiolas pequenas', 'Dentro de casa'],
+      correta: 0,
+      explica: 'Correto! Na pecuária extensiva, o gado vive solto no pasto e come capim.'
+    },
+    {
+      id: 2,
+      titulo: 'Missão 2: Pecuária Intensiva no Estábulo',
+      texto: '🏡 <b>Pecuária Intensiva</b>: Entre no estábulo moderno. O gado confinado recebe ração controlada no cocho e cuidados especiais.',
+      dica: 'Caminhe até a entrada do grande estábulo coberto.',
+      alvoPos: new THREE.Vector3(22, 0, -8),
+      raio: 12,
+      tag: '🏡 Estábulo / Curral',
+      fato: 'Na pecuária intensiva, os animais ficam confinados em estábulos ou currais e recebem alimentação balanceada no cocho.',
+      pergunta: 'Onde o gado fica abrigado na pecuária intensiva?',
+      opcoes: ['Em estábulos ou currais fechados', 'Nadando nos rios', 'No topo das árvores'],
+      correta: 0,
+      explica: 'Exato! Ficam confinados em estábulos e currais com alimentação no cocho.'
+    },
+    {
+      id: 3,
+      titulo: 'Missão 3: Ordenha e Produtos da Pecuária',
+      texto: '🥛 <b>Produtos da Pecuária</b>: Visite a área de ordenha e os animais. Obtenha leite, carne, ovos e couro.',
+      dica: 'Vá até o galpão de ordenha ao lado do tanque de leite cromado.',
+      alvoPos: new THREE.Vector3(18, 0, 10),
+      raio: 10,
+      tag: '🥛 Sala de Ordenha',
+      fato: 'A pecuária nos fornece alimentos essenciais como leite, carnes e ovos, e matérias-primas como couro e lã.',
+      pergunta: 'Quais destes produtos vêm da criação de animais na pecuária?',
+      opcoes: ['Leite, carne, ovos e couro', 'Cimento e tijolos', 'Alumínio e cobre'],
+      correta: 0,
+      explica: 'Muito bem! Da pecuária obtemos alimentos ricos e produtos como couro e lã.'
+    },
+    {
+      id: 4,
+      titulo: 'Missão 4: Os Trabalhadores do Campo',
+      texto: '👷 <b>Trabalhadores do Campo</b>: Encontre o Administrador da Fazenda perto do trator agrícola.',
+      dica: 'Vá até o trator verde estacionado na praça central da fazenda.',
+      alvoPos: new THREE.Vector3(0, 0, 0),
+      raio: 8,
+      tag: '🚜 Trator & Administrador',
+      fato: 'O administrador da fazenda organiza e planeja o trabalho de todos os funcionários.',
+      pergunta: 'Qual é a função do administrador da propriedade rural?',
+      opcoes: ['Organizar as atividades dos outros trabalhadores', 'Dormir o dia inteiro', 'Comprar ingressos de cinema'],
+      correta: 0,
+      explica: 'Perfeito! O administrador organiza as atividades e a produção da fazenda.'
+    }
+  ];
+
+  let missaoAtualIdx = 0;
+  let estrelasGanhas = 0;
+
+  // ---------- SETUP THREE.JS SCENE ----------
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xa7d8ff);
+  scene.fog = new THREE.FogExp2(0xd6ecff, 0.008);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.2, 350);
+  camera.position.set(0, 8, 22);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  // OrbitControls para exploração livre
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.maxPolarAngle = Math.PI / 2 - 0.04;
+  controls.minDistance = 3;
+  controls.maxDistance = 120;
+  controls.target.set(0, 2, 0);
+
+  // Iluminação Realista de Estúdio ao Ar Livre
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x446633, 0.65);
+  scene.add(hemiLight);
+
+  const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.25);
+  sunLight.position.set(45, 60, 35);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.camera.near = 10;
+  sunLight.shadow.camera.far = 160;
+  const d = 55;
+  sunLight.shadow.camera.left = -d;
+  sunLight.shadow.camera.right = d;
+  sunLight.shadow.camera.top = d;
+  sunLight.shadow.camera.bottom = -d;
+  sunLight.shadow.bias = -0.0004;
+  sunLight.shadow.normalBias = 0.02;
+  scene.add(sunLight);
+
+  const ambientWarm = new THREE.AmbientLight(0xffeedd, 0.3);
+  scene.add(ambientWarm);
+
+  // Texturas Compartilhadas
+  const texGrama = criarTexturaGrama();
+  const texMadeira = criarTexturaMadeira();
+  const texVacaMalhada = criarTexturaVacaMalhada();
+  const texZinco = criarTexturaTelhadoZinco();
+
+  // Materiais PBR
+  const matGrama = new THREE.MeshStandardMaterial({ map: texGrama, roughness: 0.9, metalness: 0.05 });
+  const matMadeira = new THREE.MeshStandardMaterial({ map: texMadeira, roughness: 0.8, metalness: 0.1 });
+  const matNelore = new THREE.MeshStandardMaterial({ color: 0xdfdfdb, roughness: 0.65, metalness: 0.05 });
+  const matHolandesa = new THREE.MeshStandardMaterial({ map: texVacaMalhada, roughness: 0.65, metalness: 0.05 });
+  const matEstrada = new THREE.MeshStandardMaterial({ color: 0xc49f6a, roughness: 0.95 });
+  const matAgua = new THREE.MeshStandardMaterial({ color: 0x2288cc, roughness: 0.1, metalness: 0.7, transparent: true, opacity: 0.85 });
+  const matInox = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.2, metalness: 0.9 });
+  const matZinco = new THREE.MeshStandardMaterial({ map: texZinco, roughness: 0.45, metalness: 0.7 });
+
+  // Terreno e Estrada Principal
+  const groundGeo = new THREE.PlaneGeometry(160, 160, 32, 32);
+  const groundMesh = new THREE.Mesh(groundGeo, matGrama);
+  groundMesh.rotation.x = -Math.PI / 2;
+  groundMesh.receiveShadow = true;
+  scene.add(groundMesh);
+
+  // Estrada de terra batida dividindo o Pasto (Esquerda) e o Estábulo (Direita)
+  const roadGeo = new THREE.PlaneGeometry(7, 140);
+  const roadMesh = new THREE.Mesh(roadGeo, matEstrada);
+  roadMesh.rotation.x = -Math.PI / 2;
+  roadMesh.position.y = 0.02;
+  roadMesh.receiveShadow = true;
+  scene.add(roadMesh);
+
+  // Pátio central
+  const patioGeo = new THREE.CircleGeometry(12, 32);
+  const patioMesh = new THREE.Mesh(patioGeo, matEstrada);
+  patioMesh.rotation.x = -Math.PI / 2;
+  patioMesh.position.y = 0.025;
+  patioMesh.receiveShadow = true;
+  scene.add(patioMesh);
+
+  // ---------- CONSTRUTOR DE VACA 3D MULTI-PARTES COM ANIMAÇÃO ----------
+  const animaveis = [];
+
+  function criarVaca({ raca = 'holandesa', x = 0, z = 0, rotY = 0, escala = 1.0 }) {
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = rotY;
+    group.scale.set(escala, escala, escala);
+
+    const matPele = raca === 'holandesa' ? matHolandesa : matNelore;
+
+    // 1. Tronco / Corpo Muscular
+    const bodyGeo = new THREE.BoxGeometry(1.6, 1.4, 2.6);
+    const body = new THREE.Mesh(bodyGeo, matPele);
+    body.position.y = 1.55;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+
+    // Cupim característico do gado Nelore (Pecuária Extensiva)
+    if (raca === 'nelore') {
+      const cupimGeo = new THREE.SphereGeometry(0.45, 12, 10);
+      cupimGeo.scale(1, 1.2, 0.9);
+      const cupim = new THREE.Mesh(cupimGeo, matNelore);
+      cupim.position.set(0, 2.4, 0.5);
+      cupim.castShadow = true;
+      group.add(cupim);
+    }
+
+    // 2. Pescoço e Cabeça
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.9, 1.3);
+
+    const headGeo = new THREE.BoxGeometry(0.85, 0.95, 1.1);
+    const head = new THREE.Mesh(headGeo, matPele);
+    head.position.set(0, 0, 0.4);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // Focinho cor de pele
+    const snoutGeo = new THREE.BoxGeometry(0.7, 0.45, 0.45);
+    const snoutMat = new THREE.MeshStandardMaterial({ color: 0xf5b7b1, roughness: 0.6 });
+    const snout = new THREE.Mesh(snoutGeo, snoutMat);
+    snout.position.set(0, -0.25, 0.95);
+    headGroup.add(snout);
+
+    // Chifres elegantes
+    const hornMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.4 });
+    const hornGeo = new THREE.ConeGeometry(0.09, 0.45, 8);
+    const hornL = new THREE.Mesh(hornGeo, hornMat);
+    hornL.position.set(-0.35, 0.48, 0.35);
+    hornL.rotation.z = 0.45;
+    hornL.rotation.x = -0.3;
+    const hornR = hornL.clone();
+    hornR.position.x = 0.35;
+    hornR.rotation.z = -0.45;
+    headGroup.add(hornL);
+    headGroup.add(hornR);
+
+    // Orelhas
+    const earGeo = new THREE.BoxGeometry(0.35, 0.14, 0.18);
+    const earL = new THREE.Mesh(earGeo, matPele);
+    earL.position.set(-0.48, 0.25, 0.2);
+    earL.rotation.z = raca === 'nelore' ? -0.4 : 0.15; // Orelha caída no Nelore
+    const earR = earL.clone();
+    earR.position.x = 0.48;
+    earR.rotation.z = raca === 'nelore' ? 0.4 : -0.15;
+    headGroup.add(earL);
+    headGroup.add(earR);
+
+    // Chip auricular tecnológico (Pecuária Intensiva)
+    const chipGeo = new THREE.BoxGeometry(0.12, 0.16, 0.05);
+    const chipMat = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.3 });
+    const chip = new THREE.Mesh(chipGeo, chipMat);
+    chip.position.set(-0.52, 0.2, 0.22);
+    headGroup.add(chip);
+
+    group.add(headGroup);
+
+    // 3. Úbere de leite (Vaca Holandesa)
+    if (raca === 'holandesa') {
+      const udderGeo = new THREE.SphereGeometry(0.35, 10, 8);
+      const udder = new THREE.Mesh(udderGeo, snoutMat);
+      udder.position.set(0, 0.9, -0.3);
+      group.add(udder);
+    }
+
+    // 4. Quatro Patas Articuladas
+    const legGeo = new THREE.CylinderGeometry(0.14, 0.12, 1.25, 8);
+    const hoofMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7 });
+    const hoofGeo = new THREE.CylinderGeometry(0.13, 0.15, 0.2, 8);
+
+    const legs = [];
+    const offsets = [
+      [-0.55, -0.85], // Dianteira E
+      [0.55, -0.85],  // Dianteira D
+      [-0.55, 0.85],  // Traseira E
+      [0.55, 0.85]   // Traseira D
+    ];
+
+    offsets.forEach(([lx, lz]) => {
+      const legPivot = new THREE.Group();
+      legPivot.position.set(lx, 1.2, lz);
+
+      const legMesh = new THREE.Mesh(legGeo, matPele);
+      legMesh.position.y = -0.5;
+      legMesh.castShadow = true;
+      legPivot.add(legMesh);
+
+      const hoof = new THREE.Mesh(hoofGeo, hoofMat);
+      hoof.position.y = -1.1;
+      legPivot.add(hoof);
+
+      group.add(legPivot);
+      legs.push(legPivot);
+    });
+
+    // 5. Rabo com Tufinho
+    const tailPivot = new THREE.Group();
+    tailPivot.position.set(0, 1.8, -1.3);
+    const tailGeo = new THREE.CylinderGeometry(0.04, 0.05, 1.1, 6);
+    const tail = new THREE.Mesh(tailGeo, matPele);
+    tail.position.y = -0.55;
+    tailPivot.add(tail);
+    group.add(tailPivot);
+
+    scene.add(group);
+
+    // Adiciona ao loop de animação orgânica
+    animaveis.push({
+      group,
+      tipo: 'vaca',
+      headGroup,
+      tailPivot,
+      legs,
+      seed: Math.random() * 100,
+      atualizar: function (tempo) {
+        // Mastigação e movimento de cabeça suave
+        headGroup.rotation.x = Math.sin(tempo * 2 + this.seed) * 0.08 + 0.12;
+        headGroup.rotation.y = Math.sin(tempo * 0.8 + this.seed) * 0.15;
+        // Rabo espantando moscas
+        tailPivot.rotation.z = Math.sin(tempo * 5 + this.seed) * 0.35;
+      }
+    });
+
+    return group;
+  }
+
+  // Criando Rebanho no Pasto (Pecuária Extensiva - Nelore Solto)
+  for (let i = 0; i < 7; i++) {
+    const px = -16 - Math.random() * 24;
+    const pz = -28 + Math.random() * 48;
+    criarVaca({ raca: 'nelore', x: px, z: pz, rotY: Math.random() * Math.PI * 2, escala: 0.95 + Math.random() * 0.15 });
+  }
+
+  // Criando Vacas Holandesas no Estábulo (Pecuária Intensiva - Confinamento)
+  for (let i = 0; i < 6; i++) {
+    const side = (i % 2 === 0) ? -1 : 1;
+    const pz = -18 + Math.floor(i / 2) * 8;
+    criarVaca({ raca: 'holandesa', x: 22 + side * 3.2, z: pz, rotY: side > 0 ? -Math.PI / 2 : Math.PI / 2, escala: 1.0 });
+  }
+
+  // ---------- OVELHAS (Ovinos para Lã) ----------
+  function criarOvelha(x, z) {
+    const ovelha = new THREE.Group();
+    ovelha.position.set(x, 0, z);
+
+    const matLa = new THREE.MeshStandardMaterial({ color: 0xf5f5f0, roughness: 0.95 });
+    const matCara = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+
+    // Corpo de lã fofinho
+    const corpo = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 10), matLa);
+    corpo.position.y = 0.8;
+    corpo.scale.set(1, 0.9, 1.4);
+    corpo.castShadow = true;
+    ovelha.add(corpo);
+
+    // Cabeça
+    const cabeca = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.45, 0.6), matCara);
+    cabeca.position.set(0, 1.1, 0.85);
+    ovelha.add(cabeca);
+
+    // Patinhas
+    for (let dx of [-0.3, 0.3]) {
+      for (let dz of [-0.4, 0.4]) {
+        const pata = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.65), matCara);
+        pata.position.set(dx, 0.32, dz);
+        pata.castShadow = true;
+        ovelha.add(pata);
+      }
+    }
+    scene.add(ovelha);
+  }
+  criarOvelha(-8, 16);
+  criarOvelha(-11, 18);
+  criarOvelha(-9, 21);
+
+  // ---------- GALINHAS (Avicultura para Ovos) ----------
+  function criarGalinha(x, z) {
+    const g = new THREE.Group();
+    g.position.set(x, 0, z);
+
+    const matPena = new THREE.MeshStandardMaterial({ color: 0xdf8a28, roughness: 0.8 });
+    const matCrista = new THREE.MeshStandardMaterial({ color: 0xd32f2f, roughness: 0.5 });
+    const matBico = new THREE.MeshStandardMaterial({ color: 0xffa000 });
+
+    const corpo = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), matPena);
+    corpo.position.y = 0.35;
+    corpo.scale.set(0.8, 1, 1.2);
+    g.add(corpo);
+
+    const bico = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.15, 6), matBico);
+    bico.position.set(0, 0.45, 0.35);
+    bico.rotation.x = Math.PI / 2;
+    g.add(bico);
+
+    const crista = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.15), matCrista);
+    crista.position.set(0, 0.56, 0.1);
+    g.add(crista);
+
+    scene.add(g);
+  }
+  for (let i = 0; i < 5; i++) {
+    criarGalinha(8 + Math.random() * 4, 18 + Math.random() * 5);
+  }
+
+  // ---------- ESTÁBULO MODERNO (PECUÁRIA INTENSIVA) ----------
+  function construirEstabulo() {
+    const est = new THREE.Group();
+    est.position.set(22, 0, -8);
+
+    // Piso de concreto limpo
+    const piso = new THREE.Mesh(new THREE.BoxGeometry(16, 0.3, 36), new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.8 }));
+    piso.position.y = 0.15;
+    piso.receiveShadow = true;
+    est.add(piso);
+
+    // Pilares de madeira robustos
+    const pilarGeo = new THREE.BoxGeometry(0.5, 5, 0.5);
+    for (let px of [-7.5, 7.5]) {
+      for (let pz = -16; pz <= 16; pz += 8) {
+        const pilar = new THREE.Mesh(pilarGeo, matMadeira);
+        pilar.position.set(px, 2.5, pz);
+        pilar.castShadow = true;
+        est.add(pilar);
+      }
+    }
+
+    // Telhado de Duas Águas em Zinco Ondulado
+    const roofLeft = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.15, 37), matZinco);
+    roofLeft.position.set(-4.2, 5.8, 0);
+    roofLeft.rotation.z = 0.28;
+    roofLeft.castShadow = true;
+    est.add(roofLeft);
+
+    const roofRight = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.15, 37), matZinco);
+    roofRight.position.set(4.2, 5.8, 0);
+    roofRight.rotation.z = -0.28;
+    roofRight.castShadow = true;
+    est.add(roofRight);
+
+    // Cochos de Alimentação (Ração Balanceada / Silagem)
+    const cochoMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.7 });
+    const racaoMat = new THREE.MeshStandardMaterial({ color: 0xc0ca33, roughness: 0.95 }); // Ração verde-amarelada
+
+    for (let cx of [-3.8, 3.8]) {
+      const cocho = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.65, 32), cochoMat);
+      cocho.position.set(cx, 0.45, 0);
+      cocho.castShadow = true;
+      est.add(cocho);
+
+      const racao = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 31.6), racaoMat);
+      racao.position.set(cx, 0.75, 0);
+      est.add(racao);
+    }
+
+    // Placa frontal: Pecuária Intensiva
+    const placaGeo = new THREE.BoxGeometry(6, 1.1, 0.2);
+    const placaMat = new THREE.MeshStandardMaterial({ color: 0x965f10 });
+    const placa = new THREE.Mesh(placaGeo, placaMat);
+    placa.position.set(0, 5.2, 18.1);
+    est.add(placa);
+
+    // Silo de Ração Cilíndrico
+    const silo = new THREE.Group();
+    silo.position.set(11, 0, -12);
+    const corpoSilo = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 11, 16), matInox);
+    corpoSilo.position.y = 5.5;
+    corpoSilo.castShadow = true;
+    silo.add(corpoSilo);
+
+    const topoSilo = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2, 16), matInox);
+    topoSilo.position.y = 12;
+    silo.add(topoSilo);
+    est.add(silo);
+
+    scene.add(est);
+  }
+  construirEstabulo();
+
+  // ---------- SALA DE ORDENHA & TANQUES DE LEITE INOX ----------
+  function construirSalaOrdenha() {
+    const ordenha = new THREE.Group();
+    ordenha.position.set(22, 0, 16);
+
+    // Galpão de apoio
+    const galpao = new THREE.Mesh(new THREE.BoxGeometry(12, 4.5, 10), matMadeira);
+    galpao.position.y = 2.25;
+    galpao.castShadow = true;
+    ordenha.add(galpao);
+
+    // Tanque de resfriamento de leite em Inox
+    const tanque = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 4.5, 16), matInox);
+    tanque.rotation.z = Math.PI / 2;
+    tanque.position.set(-4, 1.8, 6.2);
+    tanque.castShadow = true;
+    ordenha.add(tanque);
+
+    // Galões de leite
+    const galaoGeo = new THREE.CylinderGeometry(0.35, 0.4, 1.1, 12);
+    for (let gx = -1; gx <= 2; gx += 0.8) {
+      const galao = new THREE.Mesh(galaoGeo, matInox);
+      galao.position.set(gx, 0.55, 6);
+      galao.castShadow = true;
+      ordenha.add(galao);
+    }
+
+    scene.add(ordenha);
+  }
+  construirSalaOrdenha();
+
+  // ---------- CERCA DO PASTO, BEBEDOURO E SAL MINERAL (EXTENSIVA) ----------
+  function construirPastoExtensivo() {
+    const pasto = new THREE.Group();
+
+    // Cerca de Madeira rústica em volta do pasto
+    const mourraoGeo = new THREE.CylinderGeometry(0.12, 0.14, 1.6, 8);
+    const tabuaGeo = new THREE.BoxGeometry(0.1, 0.15, 6.2);
+
+    for (let pz = -38; pz <= 30; pz += 6) {
+      // Linha de cerca ao longo da estrada
+      const m = new THREE.Mesh(mourraoGeo, matMadeira);
+      m.position.set(-6, 0.8, pz);
+      m.castShadow = true;
+      pasto.add(m);
+
+      if (pz < 30) {
+        const t1 = new THREE.Mesh(tabuaGeo, matMadeira);
+        t1.position.set(-6, 1.15, pz + 3);
+        pasto.add(t1);
+
+        const t2 = new THREE.Mesh(tabuaGeo, matMadeira);
+        t2.position.set(-6, 0.65, pz + 3);
+        pasto.add(t2);
+      }
+    }
+
+    // Bebedouro Circular Grande com Água
+    const bebedouroBorda = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.8, 20), new THREE.MeshStandardMaterial({ color: 0x78909c }));
+    bebedouroBorda.position.set(-20, 0.4, -4);
+    bebedouroBorda.castShadow = true;
+    pasto.add(bebedouroBorda);
+
+    const aguaBebedouro = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.0, 0.1, 20), matAgua);
+    aguaBebedouro.position.set(-20, 0.72, -4);
+    pasto.add(aguaBebedouro);
+
+    // Cocho Coberto para Sal Mineral
+    const cochoSal = new THREE.Group();
+    cochoSal.position.set(-24, 0, 10);
+    const baseSal = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.6, 1.4), matMadeira);
+    baseSal.position.y = 0.5;
+    baseSal.castShadow = true;
+    cochoSal.add(baseSal);
+
+    const salBranco = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 1.1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }));
+    salBranco.position.y = 0.8;
+    cochoSal.add(salBranco);
+
+    // Telhadinho de proteção para o sal não molhar na chuva
+    const telhadoSal = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.1, 2.2), matMadeira);
+    telhadoSal.position.y = 2.1;
+    cochoSal.add(telhadoSal);
+
+    for (let sx of [-2.2, 2.2]) {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.6), matMadeira);
+      p.position.set(sx, 1.3, 0);
+      cochoSal.add(p);
+    }
+    pasto.add(cochoSal);
+
+    scene.add(pasto);
+  }
+  construirPastoExtensivo();
+
+  // ---------- TRATOR AGRÍCOLA DETALHADO (TRABALHO DO CAMPO) ----------
+  function construirTrator() {
+    const trator = new THREE.Group();
+    trator.position.set(0, 0, -2);
+    trator.rotation.y = -0.3;
+
+    const matLataria = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.3, metalness: 0.2 }); // Verde clássico
+    const matAmarelo = new THREE.MeshStandardMaterial({ color: 0xfbc02d, roughness: 0.4 });
+    const matPneu = new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.85 });
+
+    // Chassi
+    const chassi = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.1, 4.0), matLataria);
+    chassi.position.y = 1.3;
+    chassi.castShadow = true;
+    trator.add(chassi);
+
+    // Cabine com teto
+    const teto = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.15, 1.8), matAmarelo);
+    teto.position.set(0, 3.1, -0.6);
+    trator.add(teto);
+
+    // Colunas da cabine
+    for (let cx of [-0.85, 0.85]) {
+      for (let cz of [-1.4, 0.2]) {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.6), matLataria);
+        col.position.set(cx, 2.3, cz);
+        trator.add(col);
+      }
+    }
+
+    // Escapamento vertical
+    const escape = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.6), matInox);
+    escape.position.set(0.7, 2.6, 1.2);
+    trator.add(escape);
+
+    // Rodas Traseiras Gigantes
+    const wheelBackGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.65, 16);
+    wheelBackGeo.rotateZ(Math.PI / 2);
+    for (let wx of [-1.35, 1.35]) {
+      const wb = new THREE.Mesh(wheelBackGeo, matPneu);
+      wb.position.set(wx, 1.2, -0.8);
+      wb.castShadow = true;
+      trator.add(wb);
+
+      // Calota amarela
+      const calota = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.68, 12), matAmarelo);
+      calota.rotation.z = Math.PI / 2;
+      calota.position.set(wx, 1.2, -0.8);
+      trator.add(calota);
+    }
+
+    // Rodas Dianteiras
+    const wheelFrontGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.45, 16);
+    wheelFrontGeo.rotateZ(Math.PI / 2);
+    for (let wx of [-1.2, 1.2]) {
+      const wf = new THREE.Mesh(wheelFrontGeo, matPneu);
+      wf.position.set(wx, 0.75, 1.3);
+      wf.castShadow = true;
+      trator.add(wf);
+    }
+
+    scene.add(trator);
+  }
+  construirTrator();
+
+  // ---------- ÁRVORES FRONDOSAS E NATUREZA (IPÊ / CARVALHO) ----------
+  function plantarArvore(x, z, cor = 0x2e7d32, escala = 1.0) {
+    const arv = new THREE.Group();
+    arv.position.set(x, 0, z);
+    arv.scale.set(escala, escala, escala);
+
+    const tronco = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 4.5, 8), matMadeira);
+    tronco.position.y = 2.25;
+    tronco.castShadow = true;
+    arv.add(tronco);
+
+    const copaMat = new THREE.MeshStandardMaterial({ color: cor, roughness: 0.85 });
+    for (let l = 0; l < 3; l++) {
+      const copa = new THREE.Mesh(new THREE.DodecahedronGeometry(2.4 - l * 0.4, 1), copaMat);
+      copa.position.y = 4.2 + l * 1.5;
+      copa.castShadow = true;
+      arv.add(copa);
+    }
+    scene.add(arv);
+  }
+  plantarArvore(-32, -18, 0x2e7d32, 1.3);
+  plantarArvore(-38, 5, 0xfbc02d, 1.4); // Ipê Amarelo no pasto
+  plantarArvore(-26, 28, 0x388e3c, 1.1);
+  plantarArvore(38, -22, 0x2e7d32, 1.2);
+  plantarArvore(36, 12, 0x43a047, 1.25);
+
+  // ---------- AVATAR DO JOGADOR (ADMINISTRADOR / GERENTE DA FAZENDA) ----------
+  const player = new THREE.Group();
+  player.position.set(0, 0, 10);
+
+  const matPele = new THREE.MeshStandardMaterial({ color: 0xf1c27d });
+  const matCamisa = new THREE.MeshStandardMaterial({ color: 0x1976d2, roughness: 0.6 }); // Camisa azul
+  const matCalca = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.8 }); // Calça escura
+  const matChapeu = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, roughness: 0.9 }); // Chapéu de palha do campo
+
+  // Corpo
+  const pCorpo = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.85, 0.45), matCamisa);
+  pCorpo.position.y = 1.35;
+  pCorpo.castShadow = true;
+  player.add(pCorpo);
+
+  // Cabeça
+  const pCabeca = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), matPele);
+  pCabeca.position.y = 2.05;
+  player.add(pCabeca);
+
+  // Chapéu
+  const pAba = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.06, 16), matChapeu);
+  pAba.position.y = 2.22;
+  player.add(pAba);
+  const pCopa = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.35, 12), matChapeu);
+  pCopa.position.y = 2.42;
+  player.add(pCopa);
+
+  // Pernas
+  const pPernaL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.95, 0.32), matCalca);
+  pPernaL.position.set(-0.2, 0.48, 0);
+  pPernaL.castShadow = true;
+  player.add(pPernaL);
+
+  const pPernaR = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.95, 0.32), matCalca);
+  pPernaR.position.set(0.2, 0.48, 0);
+  pPernaR.castShadow = true;
+  player.add(pPernaR);
+
+  // Braços Articulados do Administrador da Fazenda
+  const armPivotL = new THREE.Group();
+  armPivotL.position.set(-0.47, 1.65, 0); // Ombro esquerdo
+  player.add(armPivotL);
+
+  const pMangaL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.36, 0.22), matCamisa);
+  pMangaL.position.set(0, -0.16, 0);
+  pMangaL.castShadow = true;
+  armPivotL.add(pMangaL);
+
+  const pAntebracoL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.35, 0.18), matPele);
+  pAntebracoL.position.set(0, -0.46, 0);
+  pAntebracoL.castShadow = true;
+  armPivotL.add(pAntebracoL);
+
+  const pMaoL = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), matPele);
+  pMaoL.position.set(0, -0.66, 0);
+  pMaoL.castShadow = true;
+  armPivotL.add(pMaoL);
+
+  // Prancheta de Administrador da Fazenda na mão esquerda (detalhe temático da pecuária)
+  const matPrancheta = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.7 });
+  const matPapel = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+  const pPrancheta = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.32, 0.03), matPrancheta);
+  pPrancheta.position.set(0.04, -0.65, 0.12);
+  pPrancheta.rotation.set(-0.35, 0.2, 0);
+  armPivotL.add(pPrancheta);
+  const pFolha = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.26, 0.032), matPapel);
+  pFolha.position.set(0.04, -0.65, 0.122);
+  pFolha.rotation.set(-0.35, 0.2, 0);
+  armPivotL.add(pFolha);
+
+  // Braço direito
+  const armPivotR = new THREE.Group();
+  armPivotR.position.set(0.47, 1.65, 0); // Ombro direito
+  player.add(armPivotR);
+
+  const pMangaR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.36, 0.22), matCamisa);
+  pMangaR.position.set(0, -0.16, 0);
+  pMangaR.castShadow = true;
+  armPivotR.add(pMangaR);
+
+  const pAntebracoR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.35, 0.18), matPele);
+  pAntebracoR.position.set(0, -0.46, 0);
+  pAntebracoR.castShadow = true;
+  armPivotR.add(pAntebracoR);
+
+  const pMaoR = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), matPele);
+  pMaoR.position.set(0, -0.66, 0);
+  pMaoR.castShadow = true;
+  armPivotR.add(pMaoR);
+
+  // Sombra de contato do jogador
+  const sombraGeo = new THREE.CircleGeometry(0.6, 16);
+  const sombraMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
+  const pSombra = new THREE.Mesh(sombraGeo, sombraMat);
+  pSombra.rotation.x = -Math.PI / 2;
+  pSombra.position.y = 0.03;
+  player.add(pSombra);
+
+  scene.add(player);
+
+  // ---------- MARCADOR DE OBJETIVO 3D LUMINOSO NO CHÃO ----------
+  const markerGroup = new THREE.Group();
+  const ringGeo = new THREE.RingGeometry(1.8, 2.3, 32);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x2a55c4, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+  const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+  ringMesh.rotation.x = -Math.PI / 2;
+  ringMesh.position.y = 0.05;
+  markerGroup.add(ringMesh);
+
+  // Luz do marcador
+  const markerLight = new THREE.PointLight(0x2a55c4, 2, 8);
+  markerLight.position.y = 1.2;
+  markerGroup.add(markerLight);
+  scene.add(markerGroup);
+
+  function atualizarPosicaoMarcador() {
+    const m = MISSOES[missaoAtualIdx];
+    if (m) {
+      markerGroup.position.copy(m.alvoPos);
+      markerGroup.visible = true;
+    } else {
+      markerGroup.visible = false;
+    }
+  }
+  atualizarPosicaoMarcador();
+
+  // ---------- CONTROLES DE MOVIMENTO DO JOGADOR ----------
+  const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
+  let modoCamera = 'follow'; // 'follow', 'pasto', 'estabulo', 'aerea'
+  const moveVector = new THREE.Vector2(0, 0);
+
+  window.addEventListener('keydown', (e) => {
+    initAudio();
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+    if (keys.hasOwnProperty(e.code)) keys[e.code] = true;
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+    if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
+  });
+
+  // Joystick Virtual Touch para dispositivos móveis
+  const joystickZone = document.getElementById('virtual-joystick-zone');
+  const joystickKnob = document.getElementById('virtual-joystick-knob');
+  let touchId = null;
+  let joyOrigin = { x: 0, y: 0 };
+
+  if (joystickZone) {
+    joystickZone.addEventListener('pointerdown', (e) => {
+      initAudio();
+      touchId = e.pointerId;
+      joystickZone.setPointerCapture(touchId);
+      const rect = joystickZone.getBoundingClientRect();
+      joyOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    });
+
+    joystickZone.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== touchId) return;
+      const dx = e.clientX - joyOrigin.x;
+      const dy = e.clientY - joyOrigin.y;
+      const dist = Math.hypot(dx, dy);
+      const maxR = 40;
+      const angle = Math.atan2(dy, dx);
+      const clampedDist = Math.min(dist, maxR);
+
+      const kx = Math.cos(angle) * clampedDist;
+      const ky = Math.sin(angle) * clampedDist;
+
+      joystickKnob.style.transform = `translate(${kx}px, ${ky}px)`;
+      moveVector.set(kx / maxR, ky / maxR);
+    });
+
+    const endJoy = (e) => {
+      if (e.pointerId !== touchId) return;
+      touchId = null;
+      joystickKnob.style.transform = 'translate(0px, 0px)';
+      moveVector.set(0, 0);
+    };
+
+    joystickZone.addEventListener('pointerup', endJoy);
+    joystickZone.addEventListener('pointercancel', endJoy);
+  }
+
+  // Alternância de Câmeras
+  const btnCamFollow = document.getElementById('btnCamFollow');
+  const btnCamPasto = document.getElementById('btnCamPasto');
+  const btnCamEstabulo = document.getElementById('btnCamEstabulo');
+  const btnCamAerea = document.getElementById('btnCamAerea');
+
+  function setCameraMode(mode) {
+    modoCamera = mode;
+    [btnCamFollow, btnCamPasto, btnCamEstabulo, btnCamAerea].forEach(b => b.classList.remove('active'));
+
+    if (mode === 'follow') {
+      btnCamFollow.classList.add('active');
+      controls.enabled = false;
+    } else if (mode === 'pasto') {
+      btnCamPasto.classList.add('active');
+      controls.enabled = true;
+      camera.position.set(-22, 16, 22);
+      controls.target.set(-22, 2, -5);
+    } else if (mode === 'estabulo') {
+      btnCamEstabulo.classList.add('active');
+      controls.enabled = true;
+      camera.position.set(22, 14, 20);
+      controls.target.set(22, 2, -6);
+    } else if (mode === 'aerea') {
+      btnCamAerea.classList.add('active');
+      controls.enabled = true;
+      camera.position.set(0, 52, 45);
+      controls.target.set(0, 0, 0);
+    }
+  }
+
+  btnCamFollow.onclick = () => setCameraMode('follow');
+  btnCamPasto.onclick = () => setCameraMode('pasto');
+  btnCamEstabulo.onclick = () => setCameraMode('estabulo');
+  btnCamAerea.onclick = () => setCameraMode('aerea');
+
+  // Controle de som
+  const btnSons = document.getElementById('btnSonsToggle');
+  btnSons.onclick = () => {
+    sonsAtivos = !sonsAtivos;
+    btnSons.textContent = sonsAtivos ? '🔊 Sons: Ligados' : '🔇 Sons: Mudos';
+  };
+
+  // Botões de Áudio Acessíveis (TTS)
+  const btnAudioOuvir = document.getElementById('btnAudioOuvir');
+  const btnAudioLento = document.getElementById('btnAudioLento');
+
+  function falarMissaoAtual(taxa = 0.88) {
+    const m = MISSOES[missaoAtualIdx];
+    if (m) {
+      falar(m.titulo + '. ' + m.texto + ' ' + m.dica, taxa);
+    }
+  }
+  btnAudioOuvir.onclick = () => falarMissaoAtual(0.88);
+  btnAudioLento.onclick = () => falarMissaoAtual(0.55);
+
+  // ---------- INTERAÇÃO COM MISSÕES E QUIZ ----------
+  const missionCard = document.getElementById('missionCard');
+  const missionHeader = document.getElementById('missionHeader');
+  const btnToggleMission = document.getElementById('btnToggleMission');
+  const btnToggleCard = document.getElementById('btnToggleCard');
+  const missionTag = document.getElementById('missionTag');
+  const missionText = document.getElementById('missionText');
+  const missionHint = document.getElementById('missionHint');
+  const missionStars = document.getElementById('missionStars');
+  const toastMsg = document.getElementById('toastMsg');
+  const btnInteragir = document.getElementById('btnInteragir');
+  const txtInteragir = document.getElementById('txtInteragir');
+
+  // Estado de visibilidade e minimização do card (no celular inicia compacto para não cobrir o jogo)
+  let cardRecolhido = (window.innerWidth < 640 || window.innerHeight > window.innerWidth);
+  let cardOculto = false;
+
+  function atualizarEstadoCard() {
+    if (!missionCard) return;
+    if (cardOculto) {
+      missionCard.classList.add('hidden');
+      if (btnToggleCard) {
+        btnToggleCard.innerHTML = '👁️ Texto';
+        btnToggleCard.title = 'Mostrar texto da missão';
+      }
+      return;
+    }
+    missionCard.classList.remove('hidden');
+    if (btnToggleCard) {
+      btnToggleCard.innerHTML = cardRecolhido ? '👁️ Texto' : '👁️ Ocultar';
+      btnToggleCard.title = 'Ocultar ou mostrar card de texto';
+    }
+
+    if (cardRecolhido) {
+      missionCard.classList.add('collapsed');
+      if (btnToggleMission) btnToggleMission.textContent = '🔽 Ver';
+    } else {
+      missionCard.classList.remove('collapsed');
+      if (btnToggleMission) btnToggleMission.textContent = '🔼 Ocultar';
+    }
+  }
+
+  if (missionHeader) {
+    missionHeader.onclick = () => {
+      cardRecolhido = !cardRecolhido;
+      atualizarEstadoCard();
+    };
+  }
+  if (btnToggleMission) {
+    btnToggleMission.onclick = (e) => {
+      e.stopPropagation();
+      cardRecolhido = !cardRecolhido;
+      atualizarEstadoCard();
+    };
+  }
+  if (btnToggleCard) {
+    btnToggleCard.onclick = () => {
+      if (cardOculto) {
+        cardOculto = false;
+        cardRecolhido = false;
+      } else if (!cardRecolhido) {
+        cardRecolhido = true;
+      } else {
+        cardOculto = true;
+      }
+      atualizarEstadoCard();
+    };
+  }
+
+  const quizModal = document.getElementById('quizModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalQuestion = document.getElementById('modalQuestion');
+  const quizOptions = document.getElementById('quizOptions');
+  const modalFeedback = document.getElementById('modalFeedback');
+  const btnModalClose = document.getElementById('btnModalClose');
+
+  function atualizarHUDMissao() {
+    const m = MISSOES[missaoAtualIdx];
+    if (m) {
+      missionTag.textContent = `Missão ${missaoAtualIdx + 1} de ${MISSOES.length} · ${m.tag}`;
+      missionText.innerHTML = m.texto;
+      missionHint.textContent = '💡 ' + m.dica;
+      missionStars.textContent = '⭐'.repeat(estrelasGanhas) + '☆'.repeat(MISSOES.length - estrelasGanhas);
+      atualizarPosicaoMarcador();
+      atualizarEstadoCard();
+      falar(m.texto, 0.88);
+    } else {
+      missionTag.textContent = '🏆 Todas as Missões Concluídas!';
+      missionText.innerHTML = '🎉 <b>Parabéns, Mestre da Fazenda!</b> Você dominou todos os conhecimentos da Pecuária do 3º ano!';
+      missionHint.textContent = 'Você explorou a pecuária extensiva, intensiva, ordenha e os trabalhadores rurais.';
+      markerGroup.visible = false;
+      playChime(true);
+      atualizarEstadoCard();
+      falar('Parabéns! Você completou todas as missões da Fazenda 3D da Pecuária!', 0.88);
+    }
+  }
+
+  function mostrarToast(txt) {
+    toastMsg.textContent = txt;
+    toastMsg.classList.add('show');
+    setTimeout(() => toastMsg.classList.remove('show'), 2400);
+  }
+
+  function abrirQuiz(missao) {
+    modalTitle.innerHTML = `🐮 ${missao.titulo}`;
+    modalQuestion.innerHTML = `<b>Pergunta do Livro:</b><br>${missao.pergunta}`;
+    modalFeedback.className = 'modal-feedback';
+    modalFeedback.textContent = '';
+    quizOptions.innerHTML = '';
+
+    missao.opcoes.forEach((opt, idx) => {
+      const b = document.createElement('button');
+      b.className = 'quiz-opt';
+      b.textContent = opt;
+      b.onclick = () => {
+        const certa = idx === missao.correta;
+        const all = quizOptions.querySelectorAll('.quiz-opt');
+        all.forEach(bt => bt.disabled = true);
+
+        if (certa) {
+          b.classList.add('ok');
+          modalFeedback.className = 'modal-feedback ok show';
+          modalFeedback.innerHTML = `✓ ${missao.explica}`;
+          estrelasGanhas++;
+          playChime(true);
+          falar(missao.explica, 0.88);
+
+          setTimeout(() => {
+            quizModal.classList.remove('open');
+            mostrarToast('⭐ Ponto Conquistado!');
+            if (missaoAtualIdx < MISSOES.length) {
+              missaoAtualIdx++;
+              atualizarHUDMissao();
+            }
+          }, 2000);
+        } else {
+          b.classList.add('bad');
+          all[missao.correta].classList.add('ok');
+          modalFeedback.className = 'modal-feedback bad show';
+          modalFeedback.innerHTML = `✗ A resposta certa é: <b>${missao.opcoes[missao.correta]}</b>. ${missao.explica}`;
+          playChime(false);
+          falar(`A resposta certa é: ${missao.opcoes[missao.correta]}. ${missao.explica}`, 0.85);
+
+          setTimeout(() => {
+            quizModal.classList.remove('open');
+            if (missaoAtualIdx < MISSOES.length) {
+              missaoAtualIdx++;
+              atualizarHUDMissao();
+            }
+          }, 3200);
+        }
+      };
+      quizOptions.appendChild(b);
+    });
+
+    quizModal.classList.add('open');
+  }
+
+  btnModalClose.onclick = () => quizModal.classList.remove('open');
+  document.getElementById('btnQuizOpen').onclick = () => {
+    const m = MISSOES[missaoAtualIdx] || MISSOES[0];
+    abrirQuiz(m);
+  };
+
+  btnInteragir.onclick = () => {
+    const m = MISSOES[missaoAtualIdx];
+    if (m) {
+      playMoo();
+      abrirQuiz(m);
+    }
+  };
+
+  // ---------- LOOP DE ANIMAÇÃO PRINCIPAL ----------
+  const clock = new THREE.Clock();
+  let stepTimer = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    const elapsed = clock.getElapsedTime();
+
+    // 1. Atualizar animais e animações
+    animaveis.forEach(a => a.atualizar(elapsed));
+
+    // Animando anel luminoso de objetivo
+    ringMesh.rotation.z += delta * 1.5;
+    const pulseScale = 1 + Math.sin(elapsed * 4) * 0.08;
+    markerGroup.scale.set(pulseScale, 1, pulseScale);
+
+    // 2. Movimentação do Jogador
+    let inputX = moveVector.x;
+    let inputZ = moveVector.y;
+
+    if (keys.w || keys.ArrowUp) inputZ -= 1;
+    if (keys.s || keys.ArrowDown) inputZ += 1;
+    if (keys.a || keys.ArrowLeft) inputX -= 1;
+    if (keys.d || keys.ArrowRight) inputX += 1;
+
+    const moving = Math.hypot(inputX, inputZ) > 0.1;
+
+    if (moving) {
+      const speed = 9.5;
+      const angle = Math.atan2(inputX, inputZ);
+      player.rotation.y = angle;
+
+      player.position.x += Math.sin(angle) * speed * delta;
+      player.position.z += Math.cos(angle) * speed * delta;
+
+      // Limites da fazenda
+      player.position.x = THREE.MathUtils.clamp(player.position.x, -55, 55);
+      player.position.z = THREE.MathUtils.clamp(player.position.z, -55, 55);
+
+      // Balanço natural ao caminhar
+      pCorpo.position.y = 1.35 + Math.abs(Math.sin(elapsed * 12)) * 0.08;
+      pPernaL.rotation.x = Math.sin(elapsed * 12) * 0.6;
+      pPernaR.rotation.x = -Math.sin(elapsed * 12) * 0.6;
+
+      // Balanço natural dos braços (movimento oposto às pernas)
+      armPivotL.rotation.x = -Math.sin(elapsed * 12) * 0.55;
+      armPivotR.rotation.x = Math.sin(elapsed * 12) * 0.55;
+      armPivotL.rotation.z = 0.08;
+      armPivotR.rotation.z = -0.08;
+
+      stepTimer += delta;
+      if (stepTimer > 0.28) {
+        stepTimer = 0;
+        playStep();
+      }
+    } else {
+      pPernaL.rotation.x = 0;
+      pPernaR.rotation.x = 0;
+      pCorpo.position.y = 1.35;
+
+      // Braços em repouso com sutil movimento de respiração
+      armPivotL.rotation.x = Math.sin(elapsed * 2.5) * 0.04;
+      armPivotR.rotation.x = -Math.sin(elapsed * 2.5) * 0.04;
+      armPivotL.rotation.z = 0.08 + Math.sin(elapsed * 2.5) * 0.02;
+      armPivotR.rotation.z = -0.08 - Math.sin(elapsed * 2.5) * 0.02;
+    }
+
+    // 3. Câmera Suave de Terceira Pessoa (Modo Follow ajustado para celular e desktop)
+    if (modoCamera === 'follow') {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      const camY = isPortrait ? 8.8 : 7.5;
+      const camZ = isPortrait ? 17.0 : 14.5;
+      const lookY = isPortrait ? 1.4 : 1.8;
+      const targetCamPos = new THREE.Vector3(
+        player.position.x,
+        player.position.y + camY,
+        player.position.z + camZ
+      );
+      camera.position.lerp(targetCamPos, delta * 6);
+      camera.lookAt(player.position.x, player.position.y + lookY, player.position.z);
+    } else {
+      controls.update();
+    }
+
+    // 4. Detecção de Proximidade da Missão
+    const m = MISSOES[missaoAtualIdx];
+    if (m) {
+      const dist = player.position.distanceTo(m.alvoPos);
+      if (dist < m.raio) {
+        btnInteragir.style.display = 'inline-flex';
+        txtInteragir.textContent = `Interagir: ${m.tag}`;
+      } else {
+        btnInteragir.style.display = 'none';
+      }
+    } else {
+      btnInteragir.style.display = 'none';
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  // Redimensionamento de Tela Responsivo
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    atualizarEstadoCard();
+  });
+
+  // Inicialização
+  setCameraMode('follow');
+  atualizarHUDMissao();
+  animate();
+
+  // Iniciar mugido de boas-vindas após primeiro clique
+  window.addEventListener('pointerdown', () => {
+    initAudio();
+  }, { once: true });
+
+})();
+</script>
+
+</body>
+</html>

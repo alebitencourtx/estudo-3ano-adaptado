@@ -4,3 +4,7 @@ revisoes/
 anotacoes/
 *.tmp
 *.log
+node_modules/
+dist/
+.aistudio/
+

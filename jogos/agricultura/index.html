@@ -15,13 +15,15 @@
 <script>
 /* Pagina do topico "Agricultura" — gerada por _espec/gerar_menus.py. */
 const JOGOS = [
-  {arquivo:'jogo-agricultura-ordem.html', icone:'🌾', nome:'Do leite ao queijo', como:'Ponha na ordem certa', oque:'Juntar o gado, ordenhar as vacas, fazer os queijos.', id:'ordem-agr'},
-  {arquivo:'jogo-agricultura-subsistencia.html', icone:'🌱', nome:'Subsistência ou comercial?', como:'Leve o cartão à caixa certa', oque:'Família e instrumentos simples × máquinas e venda.', id:'agr-subsistencia'},
-  {arquivo:'jogo-agricultura-cana.html', icone:'🌾', nome:'A cana no tempo', como:'Passeie pelas paradas', oque:'1996, com facão; 2020, com máquinas; hoje, 9 em 10.', id:'tempo-cana'},
-  {arquivo:'jogo-agricultura-perguntas.html', icone:'🤖', nome:'Perguntas da agricultura', como:'Responda e veja a resposta', oque:'O meeiro, o robô na ordenha, o chip, açúcar e álcool.', id:'agr-perguntas'},
-  {arquivo:'jogo-agricultura-memoria.html', icone:'🌾', nome:'Memória do campo', como:'Encontre os dois iguais', oque:'Arado, colheitadeira e ordenha.', id:'mem-agr'},
-  {arquivo:'jogo-agricultura-leite.html', icone:'🥛', nome:'O leite no tempo', como:'Passeie pelas paradas', oque:'Há cem anos, hoje, 2013 com robôs.', id:'tempo-leite'},
-  {arquivo:'jogo-agricultura-alimentos.html', icone:'🍚', nome:'De onde vem a comida?', como:'Toque nos certos', oque:'Arroz, feijão, frutas e verduras.', id:'agr-alimentos'},
+  {arquivo:'../jogar.html?jogo=ordem-agr', icone:'🌾', nome:'Do leite ao queijo', como:'Ponha na ordem certa', oque:'Juntar o gado, ordenhar as vacas, fazer os queijos.', id:'ordem-agr'},
+  {arquivo:'../jogar.html?jogo=agr-subsistencia', icone:'🌱', nome:'Subsistência ou comercial?', como:'Leve o cartão à caixa certa', oque:'Família e instrumentos simples × máquinas e venda.', id:'agr-subsistencia'},
+  {arquivo:'../jogar.html?jogo=tempo-cana', icone:'🌾', nome:'A cana no tempo', como:'Passeie pelas paradas', oque:'1996, com facão; 2020, com máquinas; hoje, 9 em 10.', id:'tempo-cana'},
+  {arquivo:'../jogar.html?jogo=agr-perguntas', icone:'🤖', nome:'Perguntas da agricultura', como:'Responda e veja a resposta', oque:'O meeiro, o robô na ordenha, o chip, açúcar e álcool.', id:'agr-perguntas'},
+  {arquivo:'../jogar.html?jogo=mem-agr', icone:'🌾', nome:'Memória do campo', como:'Encontre os dois iguais', oque:'Arado, colheitadeira e ordenha.', id:'mem-agr'},
+  {arquivo:'../jogar.html?jogo=tempo-leite', icone:'🥛', nome:'O leite no tempo', como:'Passeie pelas paradas', oque:'Há cem anos, hoje, 2013 com robôs.', id:'tempo-leite'},
+  {arquivo:'../jogar.html?jogo=agr-alimentos', icone:'🍚', nome:'De onde vem a comida?', como:'Toque nos certos', oque:'Arroz, feijão, frutas e verduras.', id:'agr-alimentos'},
+  {arquivo:'../jogar.html?jogo=agr-simnao', icone:'🌾', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Subsistência, máquinas, cana e robô.', id:'agr-simnao'},
+  {arquivo:'../jogar-3d.html?topico=agricultura', icone:'✨', nome:'Plantação 3D da Agricultura', como:'Explore o sítio e o campo em 3D', oque:'Subsistência e agricultura comercial com máquinas e canteiros 3D.', id:'agr-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -37,7 +39,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🌾 Agricultura</h1>
-  <p class="sub">p. 84, 85, 92, 95 · 7 jogos · base do livro</p>
+  <p class="sub">p. 84, 85, 92, 95 · 9 jogos · base do livro</p>
   <p class="sub">Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.</p>
 </header>
 <section class="cards">
