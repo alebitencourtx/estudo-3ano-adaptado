@@ -27,6 +27,37 @@
       acoes:  { pos: [6.5, 9, 16],  look: [6.5, 1.5, 7.5] }
     },
 
+    fichas3d: [
+      {
+        id: 'imp-agro',
+        pos: [-16, 3.5, 4],
+        nome: 'Cuidado com Agrotóxicos',
+        foto: '../img/hga/imp/agrotoxico.jpg',
+        fato: 'O uso correto evita contaminar as plantas e o solo.'
+      },
+      {
+        id: 'imp-rio',
+        pos: [0, 2.5, 0],
+        nome: 'Rio com Água Limpa',
+        foto: '../img/hga/imp/esgoto.jpg',
+        fato: 'O esgoto precisa ser tratado para não poluir os rios.'
+      },
+      {
+        id: 'imp-cidade',
+        pos: [16, 3.5, 0],
+        nome: 'Trânsito e Poluição',
+        foto: '../img/hga/imp/engarrafamento.jpg',
+        fato: 'Muitos carros juntos soltam fumaça que polui o ar.'
+      },
+      {
+        id: 'imp-arvores',
+        pos: [-18, 3.5, -6],
+        nome: 'Proteger as Florestas',
+        foto: '../img/hga/imp/desmatamento.jpg',
+        fato: 'O desmatamento derruba as árvores e afasta os animais.'
+      }
+    ],
+
     construirCenario: function (scene, kit, animaveis) {
       // 1. CHÃO GERAL
       scene.add(kit.criarChao(72, 48, 0x81c784));

@@ -27,6 +27,37 @@
       minerais: { pos: [0, 6.5, 15],  look: [0, 1.2, 8] }
     },
 
+    fichas3d: [
+      {
+        id: 'min-ferro',
+        pos: [-19, 4.5, -4],
+        nome: 'Minério de Ferro',
+        foto: '../img/hga/min/ferro.jpg',
+        fato: 'O ferro é extraído da natureza e vira aço forte.'
+      },
+      {
+        id: 'min-cobre',
+        pos: [15, 5.2, -6],
+        nome: 'Fios de Cobre',
+        foto: '../img/hga/min/cobre.jpg',
+        fato: 'O cobre é um metal que conduz a eletricidade.'
+      },
+      {
+        id: 'min-cimento',
+        pos: [20, 6.0, 4],
+        nome: 'Cimento para Prédios',
+        foto: '../img/hga/min/cimento.jpg',
+        fato: 'O cimento é feito de calcário e constrói cidades.'
+      },
+      {
+        id: 'min-areia',
+        pos: [-11, 2.5, 6],
+        nome: 'Areia da Construção',
+        foto: '../img/hga/min/areia.jpg',
+        fato: 'A areia é um recurso mineral usado nas obras.'
+      }
+    ],
+
     construirCenario: function (scene, kit, animaveis) {
       // Chão principal e estrada conectando a mina à cidade
       scene.add(kit.criarChao(64, 44, 0x8a947d));

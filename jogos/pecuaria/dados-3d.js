@@ -26,6 +26,23 @@
       produtos: { pos: [0, 9, 20],    look: [0, 1.5, 9] }
     },
 
+    fichas3d: [
+      {
+        id: 'pec-pasto',
+        pos: [-6, 3.2, 2],
+        nome: 'Gado no Pasto',
+        foto: '../img/hga/pec/pasto.jpg',
+        fato: 'Na pecuária extensiva, os animais vivem soltos nas pastagens.'
+      },
+      {
+        id: 'pec-curral',
+        pos: [13, 3.5, 0],
+        nome: 'Gado no Estábulo',
+        foto: '../img/hga/pec/curral.jpg',
+        fato: 'Na pecuária intensiva, os animais são criados em estábulos.'
+      }
+    ],
+
     construirCenario: function (scene, kit, animaveis) {
       // Chão e estrada
       scene.add(kit.criarChao(60, 44, 0x86c232));

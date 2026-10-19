@@ -841,6 +841,110 @@
       }, 2400);
     }
 
+    // ===== FICHAS 3D E ÁLBUM DE DESCOBERTAS (PROPOSTA 1) =====
+    const fichasColetadas = new Set();
+    const fichaMarkers = [];
+    let fichaAtual = null;
+
+    function atualizarContadorFichas() {
+      const c = document.getElementById('fichasContador');
+      if (c && cfg.fichas3d) {
+        c.textContent = `${fichasColetadas.size}/${cfg.fichas3d.length}`;
+      }
+    }
+
+    function abrirFicha(ficha, markerGrp) {
+      fichaAtual = ficha;
+      fichasColetadas.add(ficha.id);
+      if (markerGrp) {
+        animarSalto(markerGrp);
+        markerGrp.visible = false;
+      }
+      Kit3D.Audio.acerto();
+      atualizarContadorFichas();
+
+      const fModal = document.getElementById('fichaModal');
+      if (fModal) {
+        document.getElementById('fichaImg').src = ficha.foto;
+        document.getElementById('fichaImg').alt = ficha.nome;
+        document.getElementById('fichaTit').textContent = ficha.nome;
+        document.getElementById('fichaFato').textContent = ficha.fato;
+        fModal.style.display = 'flex';
+      }
+      Kit3D.falar(ficha.fato, 0.85);
+
+      if (cfg.fichas3d && fichasColetadas.size === cfg.fichas3d.length) {
+        setTimeout(() => {
+          Kit3D.Audio.fanfarra();
+          criarConfetes();
+          Kit3D.falar('Parabéns! Você encontrou todas as fotos do álbum!', 0.85);
+        }, 500);
+      }
+    }
+
+    function abrirAlbum() {
+      const albModal = document.getElementById('albumModal');
+      const grid = document.getElementById('albumGrid');
+      if (!albModal || !grid) return;
+      grid.innerHTML = '';
+      (cfg.fichas3d || []).forEach((f) => {
+        const achou = fichasColetadas.has(f.id);
+        const item = document.createElement('div');
+        item.className = 'album-item ' + (achou ? 'desbloqueado' : 'bloqueado');
+        item.innerHTML = `
+          <img src="${achou ? f.foto : '../img/fita-autismo.png'}" alt="${achou ? f.nome : 'Bloqueado'}">
+          <span>${achou ? f.nome : '???'}</span>
+        `;
+        if (achou) {
+          item.style.cursor = 'pointer';
+          item.onclick = () => {
+            albModal.style.display = 'none';
+            abrirFicha(f, null);
+          };
+        }
+        grid.appendChild(item);
+      });
+      const sub = document.getElementById('albumSub');
+      if (sub && cfg.fichas3d) {
+        sub.textContent = `${fichasColetadas.size} de ${cfg.fichas3d.length} fichas descobertas!`;
+      }
+      albModal.style.display = 'flex';
+    }
+
+    if (cfg.fichas3d && cfg.fichas3d.length > 0) {
+      const fBtn = document.getElementById('hudFichasBtn');
+      if (fBtn) fBtn.style.display = 'block';
+      atualizarContadorFichas();
+
+      const marcGeo = Kit3D.geo('ficha_gem', () => new THREE.OctahedronGeometry(0.65, 0));
+      const marcMat = Kit3D.mat('phong', 0xffd54f, { emissive: 0xff8f00, emissiveIntensity: 0.55, shininess: 90 });
+      const anelGeo = Kit3D.geo('ficha_anel', () => new THREE.TorusGeometry(0.85, 0.07, 6, 16));
+      const anelMat = Kit3D.mat('basic', 0xffffff);
+
+      cfg.fichas3d.forEach((f) => {
+        const grp = new THREE.Group();
+        grp.position.set(f.pos[0], f.pos[1], f.pos[2]);
+
+        const gem = new THREE.Mesh(marcGeo, marcMat);
+        gem.castShadow = true;
+        grp.add(gem);
+
+        const anel = new THREE.Mesh(anelGeo, anelMat);
+        anel.rotation.x = Math.PI / 2;
+        grp.add(anel);
+
+        grp.userData = {
+          isFicha: true,
+          ficha: f,
+          baseY: f.pos[1],
+          tempo: Math.random() * 10
+        };
+
+        scene.add(grp);
+        fichaMarkers.push(grp);
+      });
+    }
+
     // Raycaster para Toque / Clique didático
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -856,6 +960,10 @@
         let cur = intersects[0].object;
         let alvo = null;
         while (cur && cur !== scene) {
+          if (cur.userData && cur.userData.isFicha) {
+            abrirFicha(cur.userData.ficha, cur);
+            return;
+          }
           if (cur.userData && cur.userData.interativo) {
             alvo = cur;
             break;
@@ -957,6 +1065,14 @@
       // Animações cadastradas pelos tópicos (cabeça/cauda de animais, rodas, etc.)
       animaveis.forEach((a) => {
         if (typeof a === 'function') a(now);
+      });
+
+      // Flutuação e rotação dos marcadores de fichas 3D
+      fichaMarkers.forEach((m) => {
+        if (m.visible) {
+          m.rotation.y += 0.035;
+          m.position.y = m.userData.baseY + Math.sin(now * 3 + m.userData.tempo) * 0.22;
+        }
       });
 
       // Animação de pulo elástico dos objetos tocados
@@ -1145,6 +1261,53 @@
       document.getElementById('actionPanel').style.display = 'flex';
       renderMissao(0);
     };
+
+    // Eventos dos Modais de Ficha e Álbum (Proposta 1)
+    const btnGuardar = document.getElementById('btnGuardarFicha');
+    if (btnGuardar) {
+      btnGuardar.onclick = () => {
+        const m = document.getElementById('fichaModal');
+        if (m) m.style.display = 'none';
+        Kit3D.Audio.toqueObjeto();
+      };
+    }
+    const btnFecharFicha = document.getElementById('btnFecharFicha');
+    if (btnFecharFicha) {
+      btnFecharFicha.onclick = () => {
+        const m = document.getElementById('fichaModal');
+        if (m) m.style.display = 'none';
+      };
+    }
+    const btnVerAlbum = document.getElementById('btnVerAlbum');
+    if (btnVerAlbum) {
+      btnVerAlbum.onclick = abrirAlbum;
+    }
+    const btnFecharAlbum = document.getElementById('btnFecharAlbum');
+    if (btnFecharAlbum) {
+      btnFecharAlbum.onclick = () => {
+        const m = document.getElementById('albumModal');
+        if (m) m.style.display = 'none';
+      };
+    }
+    const btnVoltarCenario = document.getElementById('btnVoltarCenario');
+    if (btnVoltarCenario) {
+      btnVoltarCenario.onclick = () => {
+        const m = document.getElementById('albumModal');
+        if (m) m.style.display = 'none';
+      };
+    }
+    const btnAudioFichaNorm = document.getElementById('btnAudioFichaNorm');
+    if (btnAudioFichaNorm) {
+      btnAudioFichaNorm.onclick = () => {
+        if (fichaAtual) Kit3D.falar(fichaAtual.fato, 0.85);
+      };
+    }
+    const btnAudioFichaLento = document.getElementById('btnAudioFichaLento');
+    if (btnAudioFichaLento) {
+      btnAudioFichaLento.onclick = () => {
+        if (fichaAtual) Kit3D.falar(fichaAtual.fato, 0.55);
+      };
+    }
 
     // Gera os pontinhos de progresso dinamicamente
     const dotsContainer = document.getElementById('dotsContainer');

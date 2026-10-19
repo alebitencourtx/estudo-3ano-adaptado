@@ -26,6 +26,37 @@
       alimentos:    { pos: [0, 9, 20],    look: [0, 1.5, 9] }
     },
 
+    fichas3d: [
+      {
+        id: 'agr-arado',
+        pos: [-16, 2.2, 7],
+        nome: 'Arado Tradicional',
+        foto: '../img/hga/agr/arado.jpg',
+        fato: 'O arado tradicional prepara a terra com tração animal.'
+      },
+      {
+        id: 'agr-colheitadeira',
+        pos: [15.5, 3.5, 0],
+        nome: 'Colheitadeira',
+        foto: '../img/hga/agr/colheitadeira.jpg',
+        fato: 'A colheitadeira colhe os grãos em grandes lavouras comerciais.'
+      },
+      {
+        id: 'agr-ordenha',
+        pos: [-20, 2.5, -4],
+        nome: 'Ordenha do Leite',
+        foto: '../img/hga/agr/ordenha.jpg',
+        fato: 'O leite tirado na fazenda serve para fazer queijos.'
+      },
+      {
+        id: 'agr-silo',
+        pos: [19.5, 4.5, -6],
+        nome: 'Silo de Grãos',
+        foto: '../img/hga/agr/chip.jpg',
+        fato: 'O silo armazena os grãos colhidos na agricultura moderna.'
+      }
+    ],
+
     construirCenario: function (scene, kit, animaveis) {
       // Chão principal e estrada central
       scene.add(kit.criarChao(60, 44, 0x86c232));

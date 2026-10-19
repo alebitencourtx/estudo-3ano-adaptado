@@ -456,3 +456,127 @@ main{
   justify-content:center;
   margin-top:8px;
 }
+
+/* Modais de Fichas e Álbum 3D */
+.ficha-overlay{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(24,38,74,0.65);
+  backdrop-filter:blur(5px);
+  z-index:90;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  animation:pop 0.25s ease-out;
+}
+.ficha-card, .album-card{
+  background:#fff;
+  border:3px solid var(--line);
+  border-radius:24px;
+  max-width:440px;
+  width:100%;
+  padding:20px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.25);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  position:relative;
+}
+.album-card{
+  max-width:620px;
+  max-height:85vh;
+  overflow-y:auto;
+}
+.ficha-topo{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.ficha-badge{
+  background:var(--hg-soft);
+  color:var(--hg);
+  font-family:var(--font-display);
+  font-size:0.85rem;
+  font-weight:800;
+  padding:4px 12px;
+  border-radius:99px;
+  border:1px solid var(--hg);
+}
+.btn-fechar-ficha{
+  background:none;
+  border:none;
+  font-size:1.4rem;
+  cursor:pointer;
+  color:var(--muted);
+  font-weight:800;
+  padding:4px 8px;
+  line-height:1;
+}
+.ficha-img{
+  width:100%;
+  max-height:190px;
+  object-fit:cover;
+  border-radius:16px;
+  border:2px solid var(--line);
+  margin-bottom:12px;
+}
+.ficha-tit{
+  font-family:var(--font-display);
+  font-size:1.35rem;
+  font-weight:800;
+  color:var(--ink);
+  margin:0 0 6px;
+}
+.ficha-fato{
+  font-size:1rem;
+  font-weight:700;
+  color:var(--muted);
+  line-height:1.35;
+  margin:0 0 14px;
+}
+.album-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+  gap:12px;
+  width:100%;
+  margin-top:10px;
+}
+.album-item{
+  background:var(--paper);
+  border:2px solid var(--line);
+  border-radius:14px;
+  padding:8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.album-item.desbloqueado{
+  border-color:var(--ok);
+  background:var(--ok-soft);
+}
+.album-item img{
+  width:100%;
+  height:85px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.album-item span{
+  font-size:0.85rem;
+  font-weight:800;
+  color:var(--ink);
+}
+.album-item.bloqueado{
+  opacity:0.6;
+  filter:grayscale(1);
+}
+.hud-fichas-btn{
+  position:absolute;
+  bottom:10px;
+  left:10px;
+  z-index:5;
+}

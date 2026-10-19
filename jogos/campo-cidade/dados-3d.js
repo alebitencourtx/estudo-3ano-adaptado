@@ -25,6 +25,37 @@
       cinema: { pos: [14, 11, 16],  look: [14, 2.0, 0] }
     },
 
+    fichas3d: [
+      {
+        id: 'cc-jardim',
+        pos: [-19, 3.2, -6],
+        nome: 'Jardim da Luz',
+        foto: '../img/hga/cc/jardim-luz.jpg',
+        fato: 'Em 1910, as famílias passeavam no Jardim da Luz.'
+      },
+      {
+        id: 'cc-mudo',
+        pos: [14, 3.2, 0],
+        nome: 'Cinema Mudo',
+        foto: '../img/hga/cc/cinema-1895.jpg',
+        fato: 'Em 1895, os primeiros filmes não tinham som.'
+      },
+      {
+        id: 'cc-sonoro',
+        pos: [18, 3.5, -6],
+        nome: 'Cinema Sonoro',
+        foto: '../img/hga/cc/cinema-1927.jpg',
+        fato: 'Em 1927, surgiram as primeiras falas no cinema.'
+      },
+      {
+        id: 'cc-branca',
+        pos: [18, 3.5, 6],
+        nome: 'Branca de Neve',
+        foto: '../img/hga/cc/branca-neve.jpg',
+        fato: 'Em 1937, foi lançado o desenho longo colorido.'
+      }
+    ],
+
     construirCenario: function (scene, kit, animaveis) {
       // Chão gramado geral e rua pavimentada central
       scene.add(kit.criarChao(64, 44, 0x81c784));

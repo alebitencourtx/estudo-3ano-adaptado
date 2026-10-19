@@ -49,6 +49,9 @@
   <section class="scene-container" id="container3d">
     <canvas id="canvas3d"></canvas>
     <div class="hud-tooltip" id="hudTooltip" style="display:none"></div>
+    <div class="hud-fichas-btn" id="hudFichasBtn" style="display:none">
+      <button type="button" class="btn-cam" id="btnVerAlbum" style="background:var(--ok);color:#fff;border-color:#0f5235">🎒 Álbum: <span id="fichasContador">0/0</span></button>
+    </div>
     <div class="scene-hud">
       <div class="hud-tag" id="hudTagEsq">Zona A</div>
       <div class="hud-tag" id="hudTagDir">Zona B</div>
@@ -88,6 +91,37 @@
     </div>
     <button type="button" class="btn-next" id="btnProxima">Próxima Missão →</button>
   </section>
+
+  <!-- Modal da Ficha Descoberta no Cenário 3D -->
+  <div class="ficha-overlay" id="fichaModal" style="display:none">
+    <div class="ficha-card">
+      <div class="ficha-topo">
+        <span class="ficha-badge">✨ Ficha Descoberta!</span>
+        <button type="button" class="btn-fechar-ficha" id="btnFecharFicha" aria-label="Fechar">✕</button>
+      </div>
+      <img class="ficha-img" id="fichaImg" src="../img/fita-autismo.png" alt="Foto da ficha">
+      <h3 class="ficha-tit" id="fichaTit">Nome da Ficha</h3>
+      <p class="ficha-fato" id="fichaFato">Fato didático do livro didático.</p>
+      <div class="audio-btns" style="justify-content:center;margin-bottom:12px">
+        <button type="button" class="btn-som" id="btnAudioFichaNorm">🔊 Ouvir</button>
+        <button type="button" class="btn-som" id="btnAudioFichaLento">🐢 Devagar</button>
+      </div>
+      <button type="button" class="btn-next" id="btnGuardarFicha" style="width:100%">✓ Guardar no Meu Álbum</button>
+    </div>
+  </div>
+
+  <!-- Modal do Álbum de Descobertas Completo -->
+  <div class="ficha-overlay" id="albumModal" style="display:none">
+    <div class="album-card">
+      <div class="ficha-topo">
+        <span class="ficha-badge">🎒 Álbum de Descobertas 3D</span>
+        <button type="button" class="btn-fechar-ficha" id="btnFecharAlbum" aria-label="Fechar">✕</button>
+      </div>
+      <p class="ficha-fato" id="albumSub">Gire o cenário 3D e toque nas estrelas amarelas para descobrir as fotos do livro!</p>
+      <div class="album-grid" id="albumGrid"></div>
+      <button type="button" class="btn-cam" id="btnVoltarCenario" style="margin-top:16px;width:100%;padding:12px;font-size:1rem;background:var(--focus);color:#fff">Voltar ao Cenário 3D</button>
+    </div>
+  </div>
 
   <!-- Tela de Sucesso Final -->
   <section class="win-modal" id="winModal">
