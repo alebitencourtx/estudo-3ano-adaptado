@@ -53,9 +53,10 @@
       grpSubsistencia.add(casaFamiliar);
 
       // Árvores frutíferas no quintal
-      grpSubsistencia.add(kit.criarArvore(-6, 8, 0x2e7d32));
-      grpSubsistencia.add(kit.criarArvore(-7, -4, 0x388e3c));
+      grpSubsistencia.add(kit.criarArvore(-6, 8, 0x2e7d32, null, 'frutifera'));
+      grpSubsistencia.add(kit.criarArvore(-7, -4, 0x388e3c, null, 'frutifera'));
       grpSubsistencia.add(kit.criarArvore(4, -10, 0x43a047));
+      kit.criarFlores(grpSubsistencia, -2, -5, 3, 10);
 
       // Pequeno lago / poço para irrigar a horta
       const poco = kit.criarRio(6, 6, 0x4fa3e3);

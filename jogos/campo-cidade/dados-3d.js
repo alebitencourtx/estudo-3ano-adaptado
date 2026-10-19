@@ -60,6 +60,10 @@
       caminhoPasseio.position.set(0, 0.06, 0);
       grpParque.add(caminhoPasseio);
 
+      // Canteiros de flores históricas do Jardim da Luz
+      kit.criarFlores(grpParque, 4, 4, 3, 14);
+      kit.criarFlores(grpParque, 4, -8, 3, 10);
+
       // Lago com chafariz
       const lago = kit.criarRio(8, 10, 0x29b6f6);
       lago.position.set(-5, 0.08, -6);

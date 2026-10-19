@@ -60,6 +60,11 @@
       v2.rotation.y = -Math.PI * 0.35;
       grpPasto.add(v2);
 
+      // Flores e arbustos no pasto
+      kit.criarFlores(grpPasto, -3, 4, 4, 12);
+      grpPasto.add(kit.criarArbusto(-8, 4, 0x43a047, 0xffeb3b));
+      grpPasto.add(kit.criarArbusto(-8, -5, 0x388e3c, 0xff5722));
+
       grpPasto.add(kit.criarPlaca(0, 6, 'PASTO', 0x2e7d32));
       scene.add(grpPasto);
 
@@ -71,12 +76,12 @@
       pisoCurral.position.y = 0.05;
       grpEstabulo.add(pisoCurral);
 
-      const galpao = kit.criarCasa(10, 4.5, 8, 0x8d6e63, 0xb71c1c);
+      const galpao = kit.criarCasa(10, 4.5, 8, 0x8d6e63, 0xb71c1c, { nome: 'Galpão do Estábulo' });
       galpao.position.set(0, 0, -4);
       grpEstabulo.add(galpao);
 
       // Cocho de ração
-      const cocho = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.9, 1.2), new THREE.MeshLambertMaterial({ color: 0x6d4c41 }));
+      const cocho = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.9, 1.2), kit.mat('lambert', 0x6d4c41));
       cocho.position.set(0, 0.5, 2.2);
       grpEstabulo.add(cocho);
 
@@ -86,6 +91,7 @@
 
       grpEstabulo.add(kit.criarCerca(9.5, 0, 30, true));
       grpEstabulo.add(kit.criarCerca(0, 15.5, 19, false));
+      grpEstabulo.add(kit.criarArbusto(8, 4, 0x43a047));
       grpEstabulo.add(kit.criarPlaca(0, 7, 'ESTÁBULO', 0xc62828));
       scene.add(grpEstabulo);
 
@@ -94,13 +100,17 @@
       caminhao.position.set(0, 0, 10);
       scene.add(caminhao);
 
-      // Animação das vaquinhas
+      // Animação das vaquinhas (cabeça e cauda)
       animaveis.push((now) => {
         [v1, v2, v3].forEach((v) => {
           if (v.userData && v.userData.cabeca) {
             const off = v.userData.tempo || 0;
             v.userData.cabeca.position.y = v.userData.baseHeadY + Math.sin(now * 3 + off) * 0.08;
             v.userData.cabeca.rotation.x = Math.sin(now * 2.5 + off) * 0.12;
+          }
+          if (v.userData && v.userData.cauda) {
+            const off = v.userData.tempo || 0;
+            v.userData.cauda.rotation.z = Math.sin(now * 4 + off) * 0.22;
           }
         });
       });

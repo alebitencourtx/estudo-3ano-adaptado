@@ -22,7 +22,7 @@ const JOGOS = [
   {arquivo:'../jogar.html?jogo=cc-filme', icone:'❓', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Como era o cinema em 1895 e como é hoje.', id:'cc-filme'},
   {arquivo:'../jogar.html?jogo=cc-filmes', icone:'🎥', nome:'Os primeiros filmes', como:'Responda e veja a resposta', oque:'França, Lumière, cantor de jazz, Branca de Neve.', id:'cc-filmes'},
   {arquivo:'../jogar.html?jogo=mem-cc', icone:'🎬', nome:'Memória do cinema', como:'Encontre os dois iguais', oque:'1895, 1927, 1937 e 1953.', id:'mem-cc'},
-  {arquivo:'../jogar-3d.html?topico=campo-cidade', icone:'✨', nome:'Lazer e Cinema 3D', como:'Explore o parque e o cinema em 3D', oque:'O Jardim da Luz de dona Alice e a história do cinema em 3D interativo.', id:'cc-3d'},
+  {arquivo:'../jogar-3d.html?topico=campo-cidade', icone:'✨', nome:'Passeio 3D no Jardim e Cinema', como:'Explore o Jardim da Luz e o Cinema em 3D', oque:'O parque de 1910 e a história do cinema em um cenário 3D.', id:'cc-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -38,7 +38,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🎬 Campo e cidade em diferentes tempos</h1>
-  <p class="sub">p. 102, 104, 105 · 8 jogos (inclui Lazer e Cinema 3D) · base do livro</p>
+  <p class="sub">p. 102, 104, 105 · 8 jogos · base do livro</p>
   <p class="sub">O passeio de dona Alice e a história do cinema em 1895, 1927, 1937 e 1953.</p>
 </header>
 <section class="cards">

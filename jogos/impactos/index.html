@@ -24,7 +24,7 @@ const JOGOS = [
   {arquivo:'../jogar.html?jogo=imp-paisagem', icone:'🏞️', nome:'O que se vê na paisagem', como:'Responda e veja a resposta', oque:'Pastagem e soja, campo e cidade.', id:'imp-paisagem'},
   {arquivo:'../jogar.html?jogo=imp-consequencias', icone:'🐟', nome:'O que isso pode causar?', como:'Responda sim ou não', oque:'Extinção, doenças, saúde, água.', id:'imp-consequencias'},
   {arquivo:'../jogar.html?jogo=imp-agua', icone:'💧', nome:'O esgoto no rio', como:'Ponha na ordem certa', oque:'Esgoto sem tratamento, água contaminada e doenças.', id:'imp-agua'},
-  {arquivo:'../jogar-3d.html?topico=impactos', icone:'✨', nome:'Cenário 3D: Campo e Cidade', como:'Explore o campo, a cidade e os rios em 3D', oque:'Impactos ambientais, poluição e boas ações em um lindo cenário 3D.', id:'imp-3d'},
+  {arquivo:'../jogar-3d.html?topico=impactos', icone:'✨', nome:'Cenário 3D dos Impactos no Ambiente', como:'Explore o campo, a cidade e o rio em 3D', oque:'Causas e soluções ambientais com rio limpo e reciclagem em 3D.', id:'imp-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -40,7 +40,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🚚 Impactos ambientais</h1>
-  <p class="sub">p. 108 a 113 · 10 jogos (inclui Cenário 3D) · base do livro</p>
+  <p class="sub">p. 108 a 113 · 10 jogos · base do livro</p>
   <p class="sub">O campo e a cidade trocam produtos, e os problemas do ambiente: desmatamento, água, lixo e trânsito.</p>
 </header>
 <section class="cards">
