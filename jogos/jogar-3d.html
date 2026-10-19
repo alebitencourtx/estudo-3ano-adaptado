@@ -104,29 +104,40 @@ if (!window.matchMedia('(max-width: 800px), (pointer: coarse)').matches) {
   </section>
 
   <!-- Modal da Ficha Descoberta no Cenário 3D -->
-  <div class="ficha-overlay" id="fichaModal" style="display:none">
+  <div class="ficha-overlay" id="fichaModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="fichaTit">
     <div class="ficha-card">
       <div class="ficha-topo">
-        <span class="ficha-badge">✨ Ficha Descoberta!</span>
-        <button type="button" class="btn-fechar-ficha" id="btnFecharFicha" aria-label="Fechar">✕</button>
+        <span class="ficha-badge" id="fichaBadge">✨ Ficha Descoberta!</span>
+        <button type="button" class="btn-fechar-ficha" id="btnFecharFicha" aria-label="Fechar ficha">✕</button>
       </div>
       <img class="ficha-img" id="fichaImg" src="../img/fita-autismo.png" alt="Foto da ficha">
       <h3 class="ficha-tit" id="fichaTit">Nome da Ficha</h3>
       <p class="ficha-fato" id="fichaFato">Fato didático do livro didático.</p>
+
+      <!-- Navegador entre fichas do álbum -->
+      <div class="ficha-nav" id="fichaNav" style="display:none">
+        <button type="button" class="btn-nav-ficha" id="btnFichaAnt" aria-label="Ficha anterior">← Anterior</button>
+        <span class="ficha-nav-ind" id="fichaNavInd">1 de 4</span>
+        <button type="button" class="btn-nav-ficha" id="btnFichaProx" aria-label="Próxima ficha">Próxima →</button>
+      </div>
+
       <div class="audio-btns" style="justify-content:center;margin-bottom:12px">
         <button type="button" class="btn-som" id="btnAudioFichaNorm">🔊 Ouvir</button>
         <button type="button" class="btn-som" id="btnAudioFichaLento">🐢 Devagar</button>
       </div>
-      <button type="button" class="btn-next" id="btnGuardarFicha" style="width:100%">✓ Guardar no Meu Álbum</button>
+      <div class="ficha-botoes" style="display:flex;gap:10px;width:100%">
+        <button type="button" class="btn-next" id="btnGuardarFicha" style="flex:1">✓ Guardar e Explorar</button>
+        <button type="button" class="btn-cam" id="btnIrAlbum" style="display:none;padding:12px 16px;background:var(--ok);color:#fff">🎒 Ver Álbum</button>
+      </div>
     </div>
   </div>
 
   <!-- Modal do Álbum de Descobertas Completo -->
-  <div class="ficha-overlay" id="albumModal" style="display:none">
+  <div class="ficha-overlay" id="albumModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="albumBadge">
     <div class="album-card">
       <div class="ficha-topo">
-        <span class="ficha-badge">🎒 Álbum de Descobertas 3D</span>
-        <button type="button" class="btn-fechar-ficha" id="btnFecharAlbum" aria-label="Fechar">✕</button>
+        <span class="ficha-badge" id="albumBadge">🎒 Álbum de Descobertas 3D</span>
+        <button type="button" class="btn-fechar-ficha" id="btnFecharAlbum" aria-label="Fechar álbum">✕</button>
       </div>
       <p class="ficha-fato" id="albumSub">Gire o cenário 3D e toque nas estrelas amarelas para descobrir as fotos do livro!</p>
       <div class="album-grid" id="albumGrid"></div>
@@ -189,6 +200,10 @@ window.DADOS_3D = window.DADOS_3D || {};
         col.innerHTML = `<h3>${card.titulo}</h3><ul>${card.itens.map(it => `<li>${it}</li>`).join('')}</ul>`;
         winCardsContainer.appendChild(col);
       });
+    }
+
+    if (params.get('cam')) {
+      cfg.camInicial = params.get('cam');
     }
 
     // Inicia o motor 3D
