@@ -358,10 +358,21 @@
   };
 
   /* ===== SÍNTESE DE VOZ (TTS) ===== */
+  Kit3D.limparTextoParaVoz = function (texto) {
+    if (!texto) return '';
+    return String(texto)
+      .replace(/\p{Extended_Pictographic}/ug, '')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F1E6}-\u{1F1FF}\u{200D}]/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   Kit3D.falar = function (texto, vel) {
     if (!('speechSynthesis' in window)) return;
+    const limpo = Kit3D.limparTextoParaVoz(texto);
+    if (!limpo) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(texto);
+    const u = new SpeechSynthesisUtterance(limpo);
     u.lang = 'pt-BR';
     u.rate = vel || 0.85;
     window.speechSynthesis.speak(u);
