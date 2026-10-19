@@ -354,6 +354,42 @@
         osc.start(t + n.delay);
         osc.stop(t + n.delay + 1.25);
       });
+    },
+    acordeCoreto() {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      [349.23, 440.0, 523.25, 659.25].forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t + idx * 0.08);
+        gain.gain.setValueAtTime(0.0001, t + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(0.07, t + idx * 0.08 + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + idx * 0.08 + 0.85);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + idx * 0.08);
+        osc.stop(t + idx * 0.08 + 0.9);
+      });
+    },
+    pelicula() {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      for (let i = 0; i < 9; i++) {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(340 + (i % 2) * 70, t + i * 0.055);
+        gain.gain.setValueAtTime(0.001, t + i * 0.055);
+        gain.gain.linearRampToValueAtTime(0.075, t + i * 0.055 + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.055 + 0.038);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + i * 0.055);
+        osc.stop(t + i * 0.055 + 0.042);
+      }
     }
   };
 

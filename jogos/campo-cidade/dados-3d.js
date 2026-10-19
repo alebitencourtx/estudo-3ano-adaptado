@@ -179,59 +179,6 @@
       fioAereo.position.set(0, 3.8, 0);
       scene.add(fioAereo);
 
-      // Helpers de síntese de áudio histórico acolhedor (TEA-friendly, harmônico e suave)
-      function tocarAcordeCoreto(Kit3D) {
-        if (Kit3D && Kit3D.Audio) {
-          Kit3D.Audio.init();
-          const ctx = Kit3D.Audio.ctx;
-          if (ctx) {
-            const t = ctx.currentTime;
-            // Notas aveludadas de clarineta e sino vitoriano (F4 349Hz, A4 440Hz, C5 523Hz, E5 659Hz)
-            [349.23, 440.0, 523.25, 659.25].forEach((freq, idx) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.type = 'triangle';
-              osc.frequency.setValueAtTime(freq, t + idx * 0.08);
-              gain.gain.setValueAtTime(0.0001, t + idx * 0.08);
-              gain.gain.linearRampToValueAtTime(0.07, t + idx * 0.08 + 0.025);
-              gain.gain.exponentialRampToValueAtTime(0.0001, t + idx * 0.08 + 0.85);
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start(t + idx * 0.08);
-              osc.stop(t + idx * 0.08 + 0.9);
-            });
-            return;
-          }
-          if (typeof Kit3D.Audio.sino === 'function') Kit3D.Audio.sino();
-        }
-      }
-
-      function tocarSomPelicula(Kit3D) {
-        if (Kit3D && Kit3D.Audio) {
-          Kit3D.Audio.init();
-          const ctx = Kit3D.Audio.ctx;
-          if (ctx) {
-            const t = ctx.currentTime;
-            // Ruído rítmico vintage da catraca do projetor de cinema 35mm
-            for (let i = 0; i < 9; i++) {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.type = 'triangle';
-              osc.frequency.setValueAtTime(340 + (i % 2) * 70, t + i * 0.055);
-              gain.gain.setValueAtTime(0.001, t + i * 0.055);
-              gain.gain.linearRampToValueAtTime(0.075, t + i * 0.055 + 0.006);
-              gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.055 + 0.038);
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start(t + i * 0.055);
-              osc.stop(t + i * 0.055 + 0.042);
-            }
-            return;
-          }
-          if (typeof Kit3D.Audio.pop === 'function') Kit3D.Audio.pop();
-        }
-      }
-
       // Postes de luz clássicos (Missão 4: Transição Histórica / Iluminação Pública)
       const postesAntigos = [];
       function criarPosteAntigo(px, pz, luzCor, luzInt, luzDist, comConeLuz) {
@@ -552,10 +499,9 @@
         interativo: true,
         pistaMissao: 1,
         nome: '🎪 Coreto vitoriano do Jardim da Luz: elegante palco com cúpula de cobre onde bandas e orquestras tocavam valsas e músicas suaves.',
-        som: 'sino',
-        aoClicar: function (alvo, Kit3D) {
+        som: 'acordeCoreto',
+        aoClicar: function (alvo) {
           coreto.userData.reacaoToqueAte = performance.now() * 0.001 + 2.2;
-          tocarAcordeCoreto(Kit3D);
         }
       };
 
@@ -725,10 +671,9 @@
         interativo: true,
         pistaMissao: 1,
         nome: '🎺 Trompete de latão polido: instrumento de sopro das bandas que tocavam valsas no coreto.',
-        som: 'sino',
-        aoClicar: function (alvo, Kit3D) {
+        som: 'acordeCoreto',
+        aoClicar: function () {
           coreto.userData.reacaoToqueAte = performance.now() * 0.001 + 2.2;
-          tocarAcordeCoreto(Kit3D);
         }
       };
 
@@ -754,10 +699,9 @@
         interativo: true,
         pistaMissao: 1,
         nome: '📯 Tuba de latão dourado: instrumento de som grave e aveludado das orquestras vitorianas.',
-        som: 'sino',
-        aoClicar: function (alvo, Kit3D) {
+        som: 'acordeCoreto',
+        aoClicar: function () {
           coreto.userData.reacaoToqueAte = performance.now() * 0.001 + 2.2;
-          tocarAcordeCoreto(Kit3D);
         }
       };
 
@@ -1133,10 +1077,9 @@
         interativo: true,
         pistaMissao: 2,
         nome: '🎬 Cinema Antigo Cine Glória (1895-1937): exibia os clássicos mudos dos irmãos Lumière, os primeiros sonoros e animações coloridas.',
-        som: 'pop',
-        aoClicar: function (alvo, Kit3D) {
+        som: 'pelicula',
+        aoClicar: function () {
           predioCinema.userData.luzAcesaAte = performance.now() * 0.001 + 2.6;
-          tocarSomPelicula(Kit3D);
         }
       };
       fachada.userData = predioCinema.userData;
@@ -1304,10 +1247,9 @@
         interativo: true,
         pistaMissao: 2,
         nome: '📽️ Projetor 35mm com carretéis duplos de filme e tela externa: exibia os fotogramas clássicos de cinema com feixe de luz mágica.',
-        som: 'pop',
-        aoClicar: function (alvo, Kit3D) {
+        som: 'pelicula',
+        aoClicar: function () {
           predioCinema.userData.luzAcesaAte = performance.now() * 0.001 + 2.6;
-          tocarSomPelicula(Kit3D);
         }
       };
       grpCidade.add(cineOutdoorGrp);
