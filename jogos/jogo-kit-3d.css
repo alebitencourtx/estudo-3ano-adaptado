@@ -226,8 +226,11 @@ main{
   backdrop-filter:blur(6px);
   color:#fff;
   border:2px solid #fff;
-  border-radius:99px;
-  padding:6px 16px;
+  border-radius:18px;
+  max-width:92%;
+  text-align:center;
+  line-height:1.35;
+  padding:8px 18px;
   font-family:var(--font-display);
   font-size:0.95rem;
   font-weight:800;
@@ -254,8 +257,15 @@ main{
   font-weight:800;
   cursor:pointer;
   box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  transition:background 0.2s, color 0.2s, border-color 0.2s;
 }
 .btn-cam:hover{background:#fff;border-color:var(--focus)}
+.btn-cam.active{
+  background:var(--focus);
+  color:#fff;
+  border-color:#0d47a1;
+  box-shadow:0 3px 8px rgba(25,118,210,0.35);
+}
 
 /* Alternativas e Controles */
 .action-panel{

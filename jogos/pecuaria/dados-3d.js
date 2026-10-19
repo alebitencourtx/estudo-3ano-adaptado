@@ -15,6 +15,13 @@
     skyBase: 0xffffff, /* Branco no horizonte */
     hudTags: ['🌿 Pasto (Extensiva)', '🏡 Estábulo (Intensiva)'],
 
+    visual: {
+      cor: true,
+      exposicao: 1.05,
+      ceu: { topo: 0x87ceeb, base: 0xffffff },
+      nevoa: { cor: 0xd7ecfd, perto: 40, longe: 110 }
+    },
+
     camBotoes: [
       { label: '🗺️ Visão Geral', cam: 'geral' },
       { label: '🌿 Olhar Pasto', cam: 'pasto' },
@@ -22,23 +29,23 @@
     ],
 
     cameras: {
-      geral:    { pos: [0, 20, 30],   look: [0, 2, 0] },
-      pasto:    { pos: [-14, 11, 16], look: [-14, 1.5, 0] },
-      estabulo: { pos: [13, 11, 16],  look: [13, 1.5, -2] },
-      produtos: { pos: [0, 9, 20],    look: [0, 1.5, 9] }
+      geral:    { pos: [0, 24, 34],   look: [0, 2, 0] },
+      pasto:    { pos: [-14, 14, 22], look: [-14, 2, -1] },
+      estabulo: { pos: [14, 13, 22],  look: [14, 2, -2] },
+      produtos: { pos: [0, 11, 22],    look: [0, 2, 8] }
     },
 
     fichas3d: [
       {
         id: 'pec-pasto',
-        pos: [-6, 3.2, 2],
+        pos: [-13.4, 2.2, -8.5],
         nome: 'Gado no Pasto',
         foto: '../img/hga/pec/pasto.jpg',
         fato: 'Na pecuária extensiva, os animais vivem soltos nas pastagens.'
       },
       {
         id: 'pec-curral',
-        pos: [13, 3.5, 0],
+        pos: [11.8, 2.4, 0.0],
         nome: 'Gado no Estábulo',
         foto: '../img/hga/pec/curral.jpg',
         fato: 'Na pecuária intensiva, os animais são criados em estábulos.'
@@ -76,6 +83,8 @@
 
       // Moinho de vento holandês com pás giratórias
       const moinho = kit.criarMoinhoVento(-5, -13, animaveis);
+      moinho.userData.interativo = true;
+      moinho.userData.nome = 'Moinho de vento da fazenda, que ajuda nas tarefas do campo.';
       grpPasto.add(moinho);
 
       // Árvores no pasto: frutíferas com maçãs e copas frondosas
@@ -84,8 +93,16 @@
       grpPasto.add(kit.criarArvore(6, 9, 'copa'));
 
       // Fardos de feno dourados no campo
-      grpPasto.add(kit.criarFardoFeno(4, 3, 0.3));
-      grpPasto.add(kit.criarFardoFeno(2, 4.2, -0.2));
+      const msgFeno = 'Fardos de feno: alimento nutritivo fornecido no cocho para o gado confinado.';
+      const feno1 = kit.criarFardoFeno(4, 3, 0.3);
+      feno1.userData.interativo = true;
+      feno1.userData.nome = msgFeno;
+      grpPasto.add(feno1);
+
+      const feno2 = kit.criarFardoFeno(2, 4.2, -0.2);
+      feno2.userData.interativo = true;
+      feno2.userData.nome = msgFeno;
+      grpPasto.add(feno2);
 
       // Cercas rústicas de madeira
       grpPasto.add(kit.criarCerca(-12, 0, 36, true));
@@ -93,14 +110,19 @@
       grpPasto.add(kit.criarCerca(0, 18, 22, false));
 
       // Vaquinhas felizes pastando soltas
+      const msgVaca = 'Vaquinha no pasto: na pecuária extensiva, os animais vivem soltos e comem capim.';
       const v1 = kit.criarVaca(0xffffff, 0x222222);
       v1.position.set(-2, 0, 2);
       v1.rotation.y = Math.PI * 0.25;
+      v1.userData.interativo = true;
+      v1.userData.nome = msgVaca;
       grpPasto.add(v1);
 
       const v2 = kit.criarVaca(0xffffff, 0x6d4c41);
       v2.position.set(2, 0, -3.5);
       v2.rotation.y = -Math.PI * 0.35;
+      v2.userData.interativo = true;
+      v2.userData.nome = msgVaca;
       grpPasto.add(v2);
 
       // Flores e arbustos floridos espalhados
@@ -126,28 +148,57 @@
       // Celeiro Vermelho Tradicional com sótão de feno, lanterna, chaminé e cocho longo
       const estabulo = kit.criarEstabuloPremium(12, 5.2, 9, animaveis);
       estabulo.position.set(0, 0, -6);
+      estabulo.userData.interativo = true;
+      estabulo.userData.nome = 'Estábulo: na pecuária intensiva, os animais ficam confinados e recebem alimentação balanceada.';
       grpEstabulo.add(estabulo);
 
       // Vaca confinada se alimentando no cocho
       const v3 = kit.criarVaca(0xffffff, 0x1a1a1a);
       v3.position.set(0, 0, 0.4);
       v3.rotation.y = 0;
+      v3.userData.interativo = true;
+      v3.userData.nome = msgVaca;
       grpEstabulo.add(v3);
 
       // Latões metálicos de leite fresco ordenhado
-      grpEstabulo.add(kit.criarLataoLeite(-5.5, 3.5));
-      grpEstabulo.add(kit.criarLataoLeite(-4.7, 3.2));
-      grpEstabulo.add(kit.criarLataoLeite(-5.0, 4.2));
+      const msgLatao = 'Latão de leite: a pecuária fornece matérias-primas e alimentos como leite e carne.';
+      const l1 = kit.criarLataoLeite(-5.5, 3.5);
+      l1.userData.interativo = true;
+      l1.userData.nome = msgLatao;
+      grpEstabulo.add(l1);
+
+      const l2 = kit.criarLataoLeite(-4.7, 3.2);
+      l2.userData.interativo = true;
+      l2.userData.nome = msgLatao;
+      grpEstabulo.add(l2);
+
+      const l3 = kit.criarLataoLeite(-5.0, 4.2);
+      l3.userData.interativo = true;
+      l3.userData.nome = msgLatao;
+      grpEstabulo.add(l3);
 
       // Fardos de feno organizados ao lado do estábulo
-      grpEstabulo.add(kit.criarFardoFeno(7.5, -3, 0.1));
-      grpEstabulo.add(kit.criarFardoFeno(7.5, -1.5, 0.25));
-      grpEstabulo.add(kit.criarFardoFeno(7.5, 0, -0.1));
+      const feno3 = kit.criarFardoFeno(7.5, -3, 0.1);
+      feno3.userData.interativo = true;
+      feno3.userData.nome = msgFeno;
+      grpEstabulo.add(feno3);
+
+      const feno4 = kit.criarFardoFeno(7.5, -1.5, 0.25);
+      feno4.userData.interativo = true;
+      feno4.userData.nome = msgFeno;
+      grpEstabulo.add(feno4);
+
+      const feno5 = kit.criarFardoFeno(7.5, 0, -0.1);
+      feno5.userData.interativo = true;
+      feno5.userData.nome = msgFeno;
+      grpEstabulo.add(feno5);
 
       // Trator agrícola verde estacionado junto ao curral
       const trator = kit.criarTrator(0x2e7d32);
       trator.position.set(6, 0, 8);
       trator.rotation.y = -Math.PI * 0.15;
+      trator.userData.interativo = true;
+      trator.userData.nome = 'Trator e máquinas usadas para apoiar a produção na fazenda.';
       grpEstabulo.add(trator);
 
       // Cercas do confinamento
@@ -162,6 +213,8 @@
       // Caminhão azul de transporte na estrada central
       const caminhao = kit.criarCaminhao(0x1976d2);
       caminhao.position.set(0, 0, 8);
+      caminhao.userData.interativo = true;
+      caminhao.userData.nome = 'Caminhão de transporte: leva produtos da agropecuária do campo para a cidade.';
       scene.add(caminhao);
 
       // Animação das vaquinhas (cabeça com ruminação, rabo balançando e sininho)

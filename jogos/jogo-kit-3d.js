@@ -19,6 +19,24 @@
   /* ===== CACHES FLYWEIGHT (Reuso de Materiais e Geometrias) ===== */
   const materialCache = new Map();
   const geometryCache = new Map();
+  const canvasCache = new Map();
+  const texturaCache = new Map();
+
+  /* ===== MODO "COR VIVA" (opt-in por cfg.visual) =====
+     Sem cfg.visual, o motor se comporta EXATAMENTE como antes. Com cfg.visual.cor = true, o
+     tópico passa a renderizar em fluxo de cor correto (hex sRGB -> linear -> ACES -> sRGB na
+     saída), com céu em vertex colors, névoa casada com o céu, nuvens em sprite, texturas
+     procedurais, sombra de contato e luz configurável. Só o tópico que declara cfg.visual muda. */
+  let usarSRGB = false;
+  let reduzirMovimento = false;
+
+  /* Converte um hex (autorado em sRGB) para o espaço linear quando o modo "cor viva" está
+     ligado. Sem isso, cores hex ficariam claras/lavadas ao ativar a saída sRGB. */
+  Kit3D.cor = function (hex) {
+    const c = new THREE.Color(hex);
+    if (usarSRGB) c.convertSRGBToLinear();
+    return c;
+  };
 
   Kit3D.criarRampaToon = function () {
     if (Kit3D._rampaToon) return Kit3D._rampaToon;
@@ -39,15 +57,22 @@
 
   Kit3D.mat = function (tipo, cor, opts) {
     opts = opts || {};
-    const key = `${tipo}_${cor}_${JSON.stringify(opts)}`;
-    if (materialCache.has(key)) return materialCache.get(key);
+    // opts.chave permite cachear materiais que carregam textura (map) sem serializar o mapa
+    const chaveCache = (typeof opts.chave === 'string')
+      ? tipo + '_' + cor + '_' + opts.chave
+      : `${tipo}_${cor}_${JSON.stringify(opts)}`;
+    if (materialCache.has(chaveCache)) return materialCache.get(chaveCache);
     let mat;
     const cfg = Object.assign({ color: cor }, opts);
+    delete cfg.chave;
+    if (usarSRGB) {
+      if (typeof cfg.color === 'number') cfg.color = Kit3D.cor(cfg.color);
+      if (typeof cfg.emissive === 'number') cfg.emissive = Kit3D.cor(cfg.emissive);
+    }
     if (tipo === 'toon') {
       mat = new THREE.MeshToonMaterial(Object.assign({
-        color: cor,
         gradientMap: Kit3D.criarRampaToon()
-      }, opts));
+      }, cfg));
     } else if (tipo === 'standard') {
       mat = new THREE.MeshStandardMaterial(cfg);
     } else if (tipo === 'phong') {
@@ -57,7 +82,7 @@
     } else {
       mat = new THREE.MeshLambertMaterial(cfg);
     }
-    materialCache.set(key, mat);
+    materialCache.set(chaveCache, mat);
     return mat;
   };
 
@@ -206,8 +231,211 @@
     ctx.fillText(texto.toUpperCase(), w / 2, h / 2 + 3);
 
     const tex = new THREE.CanvasTexture(canvas);
-    tex.anisotropy = 4;
+    tex.anisotropy = usarSRGB ? 8 : 4;
+    tex.minFilter = THREE.LinearMipMapLinearFilter;
+    if (usarSRGB) tex.encoding = THREE.sRGBEncoding;
     return tex;
+  };
+
+  /* ===== TEXTURAS PROCEDURAIS EM CANVAS (sem nenhum download) ===== */
+  const PINCEL = {
+    grama:   { base: '#63b23a', tons: ['#54a02e', '#7ac94e', '#4a8f27', '#8ed860'], forma: 'traco',  qtd: 2600 },
+    terra:   { base: '#bd9367', tons: ['#a87c50', '#d3ad82', '#96704a', '#e2c69d'], forma: 'ponto',  qtd: 1500 },
+    palha:   { base: '#e3cf9c', tons: ['#d2ba82', '#f2e4b6', '#c6ab72', '#efe0b0'], forma: 'tracoH', qtd: 2200 },
+    areia:   { base: '#ead9ac', tons: ['#f4e7c2', '#dcc796', '#fcf3d6'],            forma: 'ponto',  qtd: 1600 },
+    madeira: { base: '#a5713c', tons: ['#8a5a2b', '#c08c52', '#7a4f26'],            forma: 'tracoV', qtd: 700 },
+    agua:    { base: '#808080', tons: ['#adadad', '#5e5e5e', '#c4c4c4'],            forma: 'ponto',  qtd: 2000 }
+  };
+
+  function canvasProcedural(tipo, cor) {
+    const chave = tipo + '|' + (cor || '');
+    if (canvasCache.has(chave)) return canvasCache.get(chave);
+    const p = PINCEL[tipo] || PINCEL.grama;
+    const S = 256;
+    const c = document.createElement('canvas');
+    c.width = c.height = S;
+    const g = c.getContext('2d');
+    g.fillStyle = cor || p.base;
+    g.fillRect(0, 0, S, S);
+    for (let i = 0; i < p.qtd; i++) {
+      const x = Math.random() * S;
+      const y = Math.random() * S;
+      g.fillStyle = p.tons[(Math.random() * p.tons.length) | 0];
+      g.globalAlpha = 0.22 + Math.random() * 0.5;
+      if (p.forma === 'traco') {
+        g.fillRect(x, y, 1.5, 3 + Math.random() * 5);
+      } else if (p.forma === 'tracoH') {
+        g.fillRect(x, y, 4 + Math.random() * 7, 1.4);
+      } else if (p.forma === 'tracoV') {
+        g.fillRect(x, y, 1.6 + Math.random() * 2.4, 9 + Math.random() * 24);
+      } else {
+        g.beginPath();
+        g.arc(x, y, 0.8 + Math.random() * 1.8, 0, 6.2832);
+        g.fill();
+      }
+    }
+    g.globalAlpha = 1;
+    // manchas grandes e suaves: evitam o efeito "papel de parede"
+    for (let i = 0; i < 26; i++) {
+      const x = Math.random() * S;
+      const y = Math.random() * S;
+      const r = 18 + Math.random() * 46;
+      const rg = g.createRadialGradient(x, y, 0, x, y, r);
+      const claro = Math.random() > 0.5;
+      rg.addColorStop(0, claro ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)');
+      rg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(x, y, r, 0, 6.2832);
+      g.fill();
+    }
+    canvasCache.set(chave, c);
+    return c;
+  }
+
+  Kit3D.texturaProcedural = function (tipo, opts) {
+    opts = opts || {};
+    const tex = new THREE.CanvasTexture(canvasProcedural(tipo, opts.cor));
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(opts.repX || 1, opts.repY || 1);
+    tex.anisotropy = opts.aniso || 4;
+    // map/emissive em sRGB; mapas de relevo (bump/normal) continuam lineares
+    if (usarSRGB && !opts.linear) tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  };
+
+  Kit3D.texturaNuvem = function () {
+    if (texturaCache.has('nuvem')) return texturaCache.get('nuvem');
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 128;
+    const g = c.getContext('2d');
+    for (let i = 0; i < 30; i++) {
+      const x = 44 + Math.random() * 168;
+      const y = 50 + Math.random() * 46;
+      const r = 16 + Math.random() * 30;
+      const rg = g.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, 'rgba(255,255,255,0.85)');
+      rg.addColorStop(0.55, 'rgba(255,255,255,0.42)');
+      rg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(x, y, r, 0, 6.2832);
+      g.fill();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    if (usarSRGB) tex.encoding = THREE.sRGBEncoding;
+    texturaCache.set('nuvem', tex);
+    return tex;
+  };
+
+  Kit3D.texturaSombra = function () {
+    if (texturaCache.has('sombra')) return texturaCache.get('sombra');
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(64, 64, 3, 64, 64, 62);
+    rg.addColorStop(0, 'rgba(0,0,0,0.85)');
+    rg.addColorStop(0.6, 'rgba(0,0,0,0.32)');
+    rg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rg;
+    g.fillRect(0, 0, 128, 128);
+    const tex = new THREE.CanvasTexture(c);
+    texturaCache.set('sombra', tex);
+    return tex;
+  };
+
+  /* ===== CHÃO TEXTURIZADO ===== */
+  Kit3D.criarChaoTexturizado = function (w, d, opts) {
+    opts = opts || {};
+    const tipo = opts.textura || 'grama';
+    const tex = Kit3D.texturaProcedural(tipo, {
+      cor: opts.cor,
+      repX: opts.repX || Math.max(1, Math.round(w / 4)),
+      repY: opts.repY || Math.max(1, Math.round(d / 4))
+    });
+    const geo = Kit3D.geo('chao_tex_' + w + '_' + d, () => new THREE.PlaneGeometry(w, d));
+    const mat = Kit3D.mat('lambert', 0xffffff, {
+      chave: 'chao_' + tipo + '_' + (opts.cor || '') + '_' + tex.repeat.x + '_' + tex.repeat.y,
+      map: tex
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.receiveShadow = true;
+    return mesh;
+  };
+
+  /* ===== SOMBRA DE CONTATO (decal radial; "assenta" o objeto no chão) ===== */
+  Kit3D.sombraContato = function (raio, opacidade) {
+    const geo = Kit3D.geo('sombra_contato', () => new THREE.PlaneGeometry(1, 1));
+    const mat = Kit3D.mat('basic', 0x1e2a1c, {
+      chave: 'sombra_contato',
+      map: Kit3D.texturaSombra(),
+      transparent: true,
+      opacity: opacidade == null ? 0.5 : opacidade,
+      depthWrite: false
+    });
+    const m = new THREE.Mesh(geo, mat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.y = 0.02;
+    m.scale.setScalar((raio || 1) * 2);
+    return m;
+  };
+
+  /* ===== CÉU EM VERTEX COLORS (compatível com tone mapping, sem shader próprio) ===== */
+  Kit3D.ceuGradiente = function (topoHex, baseHex, raio, abaixoHex) {
+    const r = raio || 300;
+    const geo = new THREE.SphereGeometry(r, 40, 24);
+    const pos = geo.attributes.position;
+    const cores = [];
+    const topo = Kit3D.cor(topoHex);
+    const base = Kit3D.cor(baseHex);
+    const abaixo = Kit3D.cor(abaixoHex != null ? abaixoHex : 0x4a7040);
+    for (let i = 0; i < pos.count; i++) {
+      const h = pos.getY(i) / r;
+      const c = h >= 0
+        ? base.clone().lerp(topo, Math.pow(Math.min(h * 1.45, 1), 0.7))
+        : base.clone().lerp(abaixo, Math.min(-h * 2.4, 1));
+      cores.push(c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cores, 3));
+    const mat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.BackSide,
+      depthWrite: false,
+      fog: false
+    });
+    return new THREE.Mesh(geo, mat);
+  };
+
+  /* ===== NUVENS EM SPRITE (textura macia, sem esferas de plástico) ===== */
+  Kit3D.nuvensSprite = function (scene, opts) {
+    opts = opts || {};
+    const grp = new THREE.Group();
+    const tex = Kit3D.texturaNuvem();
+    const qtd = opts.qtd || 8;
+    const cores = opts.cores || [0xffffff, 0xfff3e0, 0xf3f8ff];
+    for (let i = 0; i < qtd; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: tex,
+        transparent: true,
+        depthWrite: false,
+        fog: false,
+        opacity: 0.75 + Math.random() * 0.25,
+        color: Kit3D.cor(cores[i % cores.length])
+      });
+      const s = new THREE.Sprite(mat);
+      const esc = (opts.escala || 16) * (0.7 + Math.random() * 0.8);
+      s.scale.set(esc, esc * 0.5, 1);
+      s.position.set(
+        (opts.centroX || 0) + (-(opts.largura || 140) / 2) + Math.random() * (opts.largura || 140),
+        (opts.altura != null ? opts.altura : 30) + Math.random() * (opts.variacao != null ? opts.variacao : 18),
+        (opts.centroZ || 0) + (-(opts.prof || 120) / 2) + Math.random() * (opts.prof || 120)
+      );
+      grp.add(s);
+    }
+    scene.add(grp);
+    return grp;
   };
 
   /* ===== HELPERS DE CONSTRUÇÃO LOW-POLY 3D ===== */
@@ -230,26 +458,32 @@
     return mesh;
   };
 
-  Kit3D.criarCerca = function (x, z, comp, horizontal, cor) {
+  Kit3D.criarCerca = function (x, z, comp, horizontal, cor, opts) {
+    opts = opts || {};
     const grp = new THREE.Group();
-    const posteGeo = Kit3D.geo('cerca_poste', () => new THREE.CylinderGeometry(0.12, 0.12, 1.2, 6));
+    const posteGeo = opts.quadrado
+      ? Kit3D.geo('cerca_poste_q', () => new THREE.BoxGeometry(0.2, 1.25, 0.2))
+      : Kit3D.geo('cerca_poste', () => new THREE.CylinderGeometry(0.12, 0.12, 1.2, 6));
     const madeiraMat = Kit3D.mat('lambert', cor || 0x8d6e63);
     const num = Math.floor(comp / 2.2);
 
-    // Trilho horizontal superior
-    const trilhoGeo = horizontal
-      ? new THREE.BoxGeometry(comp, 0.08, 0.1)
-      : new THREE.BoxGeometry(0.1, 0.08, comp);
-    const trilho = new THREE.Mesh(trilhoGeo, madeiraMat);
-    trilho.position.set(x, 0.85, z);
-    trilho.castShadow = true;
-    grp.add(trilho);
+    // Trilhos (um só, ou dois quando opts.duplo)
+    const alturas = opts.duplo ? [1.02, 0.6] : [0.85];
+    alturas.forEach((alt) => {
+      const trilhoGeo = horizontal
+        ? Kit3D.geo('cerca_trilho_h_' + alt, () => new THREE.BoxGeometry(comp, 0.1, 0.12))
+        : Kit3D.geo('cerca_trilho_v_' + alt, () => new THREE.BoxGeometry(0.12, 0.1, comp));
+      const trilho = new THREE.Mesh(trilhoGeo, madeiraMat);
+      trilho.position.set(x, alt, z);
+      trilho.castShadow = true;
+      grp.add(trilho);
+    });
 
     for (let i = -num / 2; i <= num / 2; i++) {
       const poste = new THREE.Mesh(posteGeo, madeiraMat);
       poste.castShadow = true;
-      if (horizontal) poste.position.set(x + i * 2.2, 0.6, z);
-      else poste.position.set(x, 0.6, z + i * 2.2);
+      if (horizontal) poste.position.set(x + i * 2.2, 0.62, z);
+      else poste.position.set(x, 0.62, z + i * 2.2);
       grp.add(poste);
     }
     return grp;
@@ -650,7 +884,7 @@
 
     vaca.userData = {
       interativo: true,
-      nome: 'Vaquinha na Fazenda',
+      nome: 'Vaquinha no pasto: na pecuária extensiva, os animais vivem soltos e comem capim.',
       cabeca: cabeca,
       olhos: olhos,
       focinho: focinho,
@@ -730,7 +964,7 @@
       grp.add(r);
     });
 
-    grp.userData = { interativo: true, nome: 'Trator Agrícola' };
+    grp.userData = { interativo: true, nome: 'Trator e máquinas usadas para apoiar a produção na fazenda.' };
     return grp;
   };
 
@@ -830,14 +1064,29 @@
   };
 
   /* ===== HELPERS DE DIORAMA ESTILIZADO 3D (LOW-POLY PREMIUM) ===== */
-  Kit3D.criarIlhaDiorama = function (w, d, h, corGrama, corTerra) {
+  Kit3D.criarIlhaDiorama = function (w, d, h, corGrama, corTerra, opts) {
+    opts = opts || {};
     const grp = new THREE.Group();
     const espessuraGrama = 0.6;
     const alturaTerra = (h || 4) - espessuraGrama;
 
-    // Placa superior de grama com relevo
+    // Placa superior de grama com relevo (opcionalmente texturizada, para fugir do "verde chapado")
     const topoGeo = Kit3D.geo(`ilha_topo_${w}_${d}`, () => new THREE.BoxGeometry(w, espessuraGrama, d));
-    const topoMat = Kit3D.mat('toon', corGrama || 0x7eb856);
+    let topoMat;
+    if (opts.texturaGrama) {
+      const tipoTex = opts.texturaGrama === true ? 'grama' : opts.texturaGrama;
+      const tex = Kit3D.texturaProcedural(tipoTex, {
+        cor: opts.corTextura,
+        repX: opts.repX || Math.max(2, Math.round(w / 4.5)),
+        repY: opts.repY || Math.max(2, Math.round(d / 4.5))
+      });
+      topoMat = Kit3D.mat('toon', 0xffffff, {
+        chave: 'ilha_topo_tex_' + tipoTex + '_' + (opts.corTextura || '') + '_' + tex.repeat.x + '_' + tex.repeat.y,
+        map: tex
+      });
+    } else {
+      topoMat = Kit3D.mat('toon', corGrama || 0x7eb856);
+    }
     const topo = new THREE.Mesh(topoGeo, topoMat);
     topo.position.y = -espessuraGrama / 2;
     topo.receiveShadow = true;
@@ -1008,7 +1257,7 @@
       });
     }
 
-    grp.userData = { interativo: true, nome: 'Moinho de Vento da Fazenda' };
+    grp.userData = { interativo: true, nome: 'Moinho de vento da fazenda, que ajuda nas tarefas do campo.' };
     return grp;
   };
 
@@ -1037,7 +1286,7 @@
       grp.add(corda);
     });
 
-    grp.userData = { interativo: true, nome: 'Fardo de Feno para os Animais' };
+    grp.userData = { interativo: true, nome: 'Fardos de feno: alimento nutritivo fornecido no cocho para o gado confinado.' };
     return grp;
   };
 
@@ -1064,7 +1313,7 @@
     alca.rotation.x = Math.PI / 2;
     grp.add(alca);
 
-    grp.userData = { interativo: true, nome: 'Latão de Leite da Ordenha' };
+    grp.userData = { interativo: true, nome: 'Latão de leite: a pecuária fornece matérias-primas e alimentos como leite e carne.' };
     return grp;
   };
 
@@ -1329,7 +1578,7 @@
     fenoCocho.position.set(0, 0.65, prof / 2 + 2.2);
     grp.add(fenoCocho);
 
-    grp.userData = { interativo: true, nome: 'Estábulo da Pecuária Intensiva' };
+    grp.userData = { interativo: true, nome: 'Estábulo: na pecuária intensiva, os animais ficam confinados e recebem alimentação balanceada.' };
     return grp;
   };
 
@@ -1413,18 +1662,37 @@
     const canvas = document.getElementById('canvas3d');
     const tooltipEl = document.getElementById('hudTooltip');
 
+    /* ===== MODO "COR VIVA" (opt-in, declarado em cfg.visual pelo tópico) =====
+       Sem cfg.visual, tudo o que vem abaixo se comporta como antes. Com cfg.visual.cor = true
+       o kit: converte cores sRGB -> linear, usa céu em vertex colors, névoa casada com o céu,
+       nuvens em sprite, luz configurável e sombra de contato; e desliga o EffectComposer
+       (a cena vai direto pro canvas, mantendo o sRGB correto e o MSAA do antialias ativo). */
+    const vis = cfg.visual || null;
+    usarSRGB = !!(vis && vis.cor);
+    reduzirMovimento = !!((vis && vis.semMovimento) ||
+      (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches));
+
     // Inicialização da Cena Three.js
     const scene = new THREE.Scene();
-    
-    // Céu dinâmico com shader de gradiente (ou fallback para cor sólida)
-    const skyTopo = cfg.skyTopo || 0x87ceeb;
-    const skyBase = cfg.skyBase || 0xffffff;
-    const skyMesh = Kit3D.criarCeuDinamico(skyTopo, skyBase);
-    scene.add(skyMesh);
-    
-    scene.fog = new THREE.Fog(skyBase, 40, 95);
+    const skyTopo = (vis && vis.ceu && vis.ceu.topo) || cfg.skyTopo || 0x87ceeb;
+    const skyBase = (vis && vis.ceu && vis.ceu.base) || cfg.skyBase || 0xffffff;
+    scene.background = new THREE.Color(skyTopo);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 160);
+    // Céu: shader de gradiente (padrão) ou esfera em vertex colors
+    const skyMesh = (usarSRGB && !(vis && vis.ceu && vis.ceu.modo === 'shader'))
+      ? Kit3D.ceuGradiente(skyTopo, skyBase, (vis && vis.raioCeu) || 300,
+          (vis && vis.ceu && vis.ceu.abaixo) != null ? vis.ceu.abaixo : undefined)
+      : Kit3D.criarCeuDinamico(skyTopo, skyBase);
+    scene.add(skyMesh);
+
+    const nev = (vis && vis.nevoa) || null;
+    scene.fog = new THREE.Fog(
+      Kit3D.cor((nev && nev.cor) || skyBase),
+      (nev && nev.perto) || 40,
+      (nev && nev.longe) || 120
+    );
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, (vis && vis.cameraFar) || 500);
     const targetCamPos = new THREE.Vector3(0, 18, 28);
     const targetLookAt = new THREE.Vector3(0, 2, 0);
     const currentLookAt = new THREE.Vector3(0, 2, 0);
@@ -1440,30 +1708,55 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMapping = (vis && vis.toneMapping === false) ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = (vis && vis.exposicao != null) ? vis.exposicao : 1.15;
+
+    const luz = (vis && vis.luz) || null;
 
     // Iluminação Natural: Luz Hemisférica (céu azul suave + reflexo de terra/grama)
-    const hemiLight = new THREE.HemisphereLight(0xe8f5fe, 0x4e7a2b, 0.65);
+    const hemiLight = new THREE.HemisphereLight(
+      Kit3D.cor((luz && luz.hemiCeu) || 0xe8f5fe),
+      Kit3D.cor((luz && luz.hemiChao) || 0x4e7a2b),
+      (luz && luz.hemiForca != null) ? luz.hemiForca : 0.65
+    );
     scene.add(hemiLight);
 
     // Luz Direcional do Sol com sombra suave e sem acne
-    const sunLight = new THREE.DirectionalLight(0xfffaec, 1.05);
-    sunLight.position.set(22, 34, 24);
+    const sunLight = new THREE.DirectionalLight(
+      Kit3D.cor((luz && luz.solCor) || 0xfffaec),
+      (luz && luz.solForca != null) ? luz.solForca : 1.05
+    );
+    const solPos = (luz && luz.solPos) || [22, 34, 24];
+    sunLight.position.set(solPos[0], solPos[1], solPos[2]);
     sunLight.castShadow = true;
     sunLight.shadow.normalBias = 0.02;
     sunLight.shadow.bias = -0.0003;
     sunLight.shadow.mapSize.width = shadowMapSize;
     sunLight.shadow.mapSize.height = shadowMapSize;
     sunLight.shadow.camera.near = 10;
-    sunLight.shadow.camera.far = 80;
-    sunLight.shadow.camera.left = -30;
-    sunLight.shadow.camera.right = 30;
-    sunLight.shadow.camera.top = 30;
-    sunLight.shadow.camera.bottom = -30;
+    sunLight.shadow.camera.far = (luz && luz.sombraFar) || 80;
+    const sombraRaio = (vis && vis.sombraRaio) || 30;
+    sunLight.shadow.camera.left = -sombraRaio;
+    sunLight.shadow.camera.right = sombraRaio;
+    sunLight.shadow.camera.top = sombraRaio;
+    sunLight.shadow.camera.bottom = -sombraRaio;
     scene.add(sunLight);
 
-    const nuvensGrp = Kit3D.criarNuvens(scene);
+    // Luz de preenchimento (suaviza o lado na sombra sem "queimar" o resto)
+    if (luz && luz.preenchimento) {
+      const fp = luz.preenchimento;
+      const fillLight = new THREE.DirectionalLight(
+        Kit3D.cor(fp.cor || 0xffffff),
+        fp.forca == null ? 0.2 : fp.forca
+      );
+      const fpos = fp.pos || [-20, 14, -18];
+      fillLight.position.set(fpos[0], fpos[1], fpos[2]);
+      scene.add(fillLight);
+    }
+
+    const nuvensGrp = (vis && vis.nuvens === 'sprite')
+      ? Kit3D.nuvensSprite(scene, vis.nuvensOpts || null)
+      : Kit3D.criarNuvens(scene);
 
     // Constrói o cenário específico do tópico
     const animaveis = [];
@@ -1475,6 +1768,7 @@
     const saltando = [];
     function animarSalto(obj) {
       if (!obj) return;
+      if (saltando.some(s => s.obj === obj)) return; // Evita empilhamento caso clicado rapidamente
       saltando.push({
         obj: obj,
         start: performance.now(),
@@ -1493,7 +1787,7 @@
       tooltipTimer = setTimeout(() => {
         tooltipEl.style.opacity = '0';
         setTimeout(() => { tooltipEl.style.display = 'none'; }, 260);
-      }, 2400);
+      }, 4000);
     }
 
     // ===== FICHAS 3D E ÁLBUM DE DESCOBERTAS (PROPOSTA 1) =====
@@ -1550,11 +1844,17 @@
           <img src="${achou ? f.foto : '../img/fita-autismo.png'}" alt="${achou ? f.nome : 'Bloqueado'}">
           <span>${achou ? f.nome : '???'}</span>
         `;
+        item.style.cursor = 'pointer';
         if (achou) {
-          item.style.cursor = 'pointer';
           item.onclick = () => {
             albModal.style.display = 'none';
             abrirFicha(f, null);
+          };
+        } else {
+          item.title = 'Ficha ainda não descoberta no cenário 3D';
+          item.onclick = () => {
+            Kit3D.Audio.toqueObjeto();
+            Kit3D.falar('Gire o cenário 3D e toque na estrela dourada para descobrir esta foto!', 0.85);
           };
         }
         grid.appendChild(item);
@@ -1564,6 +1864,7 @@
         sub.textContent = `${fichasColetadas.size} de ${cfg.fichas3d.length} fichas descobertas!`;
       }
       albModal.style.display = 'flex';
+      Kit3D.Audio.toqueObjeto();
     }
 
     if (cfg.fichas3d && cfg.fichas3d.length > 0) {
@@ -1571,10 +1872,10 @@
       if (fBtn) fBtn.style.display = 'block';
       atualizarContadorFichas();
 
-      const marcGeo = Kit3D.geo('ficha_gem', () => new THREE.OctahedronGeometry(0.65, 0));
-      const marcMat = Kit3D.mat('phong', 0xffd54f, { emissive: 0xff8f00, emissiveIntensity: 0.55, shininess: 90 });
-      const anelGeo = Kit3D.geo('ficha_anel', () => new THREE.TorusGeometry(0.85, 0.07, 6, 16));
-      const anelMat = Kit3D.mat('basic', 0xffffff);
+      const marcGeo = Kit3D.geo('ficha_gem', () => new THREE.OctahedronGeometry(0.5, 0));
+      const marcMat = Kit3D.mat('toon', 0xffb300);
+      const anelGeo = Kit3D.geo('ficha_anel', () => new THREE.TorusGeometry(0.7, 0.05, 6, 16));
+      const anelMat = Kit3D.mat('toon', 0xfff9c4);
 
       cfg.fichas3d.forEach((f) => {
         const grp = new THREE.Group();
@@ -1732,7 +2033,8 @@
     });
 
     window.addEventListener('pointerup', (e) => {
-      if (isDragging && dragDistance < 8) {
+      const maxDrag = isMobile ? 18 : 10;
+      if (isDragging && dragDistance < maxDrag) {
         tratarClique(e.clientX, e.clientY);
       }
       isDragging = false;
@@ -1745,17 +2047,30 @@
       const c = cfg.cameras[nome];
       targetCamPos.set(c.pos[0], c.pos[1], c.pos[2]);
       targetLookAt.set(c.look[0], c.look[1], c.look[2]);
+      const camBtnsContainer = document.getElementById('camBtns');
+      if (camBtnsContainer) {
+        camBtnsContainer.querySelectorAll('.btn-cam').forEach((b) => {
+          b.classList.toggle('active', b.dataset.cam === nome);
+        });
+      }
     }
 
     // Loop de renderização
     let composer = null;
-    
-    // Configura post-processing apenas em desktop e se as bibliotecas foram carregadas
-    if (!isMobile && typeof THREE.EffectComposer !== 'undefined') {
+
+    // Post-processing apenas em desktop. No modo "cor viva" o bloom fica DESLIGADO por padrão:
+    // o EffectComposer renderiza a cena num render target LINEAR e devolveria a imagem escura
+    // ao canvas (e o antialias do contexto não vale para render target). Sem ele, a saída vai
+    // direto pro canvas com sRGB correto + MSAA. Se o tópico pedir bloom (visual.bloom = true),
+    // o composer volta e um passe final converte linear -> sRGB.
+    const usarComposer = !isMobile && typeof THREE.EffectComposer !== 'undefined' &&
+      !!(vis && vis.bloom);
+
+    if (usarComposer) {
       composer = new THREE.EffectComposer(renderer);
       const renderPass = new THREE.RenderPass(scene, camera);
       composer.addPass(renderPass);
-      
+
       // Bloom suave apenas nos pontos brilhantes (lanternas, sinos, reflexos metálicos)
       const bloomPass = new THREE.UnrealBloomPass(
         new THREE.Vector2(container.clientWidth, container.clientHeight),
@@ -1764,6 +2079,24 @@
         0.82  // threshold alto: mantém o diorama toon nítido e ilumina apenas pontos de luz
       );
       composer.addPass(bloomPass);
+
+      if (usarSRGB && typeof THREE.ShaderPass !== 'undefined') {
+        composer.addPass(new THREE.ShaderPass({
+          uniforms: { tDiffuse: { value: null } },
+          vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader: [
+            'uniform sampler2D tDiffuse;',
+            'varying vec2 vUv;',
+            'vec3 linearParaSRGB(vec3 c) {',
+            '  return mix(c * 12.92, 1.055 * pow(max(c, vec3(0.0)), vec3(0.41666)) - 0.055, step(vec3(0.0031308), c));',
+            '}',
+            'void main() {',
+            '  vec4 cor = texture2D(tDiffuse, vUv);',
+            '  gl_FragColor = vec4(linearParaSRGB(cor.rgb), cor.a);',
+            '}'
+          ].join('\n')
+        }));
+      }
     }
 
     function renderLoop() {
@@ -1773,8 +2106,8 @@
       currentLookAt.lerp(targetLookAt, 0.045);
       camera.lookAt(currentLookAt);
 
-      // Deslocamento sutil das nuvens
-      if (nuvensGrp) {
+      // Deslocamento sutil das nuvens (desligado com prefers-reduced-motion)
+      if (nuvensGrp && !reduzirMovimento) {
         nuvensGrp.position.x = Math.sin(now * 0.04) * 4;
       }
 
@@ -1800,7 +2133,8 @@
           item.obj.position.y = item.origY;
           saltando.splice(i, 1);
         } else {
-          const jump = Math.sin((elapsed / 0.45) * Math.PI) * 0.6;
+          const jumpHeight = reduzirMovimento ? 0.2 : 0.6;
+          const jump = Math.sin((elapsed / 0.45) * Math.PI) * jumpHeight;
           item.obj.position.y = item.origY + jump;
         }
       }
@@ -1964,8 +2298,12 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'btn-cam';
+        btn.dataset.cam = b.cam;
         btn.textContent = b.label;
-        btn.onclick = () => setCameraPreset(b.cam);
+        btn.onclick = () => {
+          Kit3D.Audio.toqueObjeto();
+          setCameraPreset(b.cam);
+        };
         camBtnsContainer.appendChild(btn);
       });
     }
@@ -2028,6 +2366,16 @@
         if (fichaAtual) Kit3D.falar(fichaAtual.fato, 0.55);
       };
     }
+
+    // Acessibilidade: fechar modais com tecla Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const fModal = document.getElementById('fichaModal');
+        const aModal = document.getElementById('albumModal');
+        if (fModal && fModal.style.display !== 'none') fModal.style.display = 'none';
+        if (aModal && aModal.style.display !== 'none') aModal.style.display = 'none';
+      }
+    });
 
     // Gera os pontinhos de progresso dinamicamente
     const dotsContainer = document.getElementById('dotsContainer');
