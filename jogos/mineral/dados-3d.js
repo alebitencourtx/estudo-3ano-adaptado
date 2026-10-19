@@ -11,6 +11,8 @@
     icone: '⛏️',
     referenciaLivro: 'p. 90 e 91 · base do livro',
     skyColor: 0xdcedf8,
+    skyTopo: 0x90a4ae, /* Cinza para céu nublado */
+    skyBase: 0xcfd8dc, /* Cinza claro no horizonte */
     hudTags: ['⛏️ Mina (Solo e Subsolo)', '🏙️ Cidade (Construções e Fios)'],
 
     camBotoes: [

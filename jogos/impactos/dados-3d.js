@@ -11,6 +11,8 @@
     icone: '🌍',
     referenciaLivro: 'p. 108 a 113 · base do livro',
     skyColor: 0xd7ecfd,
+    skyTopo: 0x90a4ae, /* Cinza para céu urbano */
+    skyBase: 0x81c784, /* Verde no horizonte */
     hudTags: ['🚜 Campo (Lavoura e Mata)', '🏙️ Cidade (Urbano e Rios)'],
 
     camBotoes: [

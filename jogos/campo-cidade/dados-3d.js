@@ -11,6 +11,8 @@
     icone: '🎬',
     referenciaLivro: 'p. 102, 104 e 105 · base do livro',
     skyColor: 0xd2e7f9,
+    skyTopo: 0xff9800, /* Laranja para pôr do sol */
+    skyBase: 0x90caf9, /* Azul claro no horizonte */
     hudTags: ['🌳 Jardim da Luz (1910)', '🎬 Cinema Antigo'],
 
     camBotoes: [

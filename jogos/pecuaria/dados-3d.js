@@ -11,6 +11,8 @@
     icone: '🐄',
     referenciaLivro: 'p. 86 e 87 · base do livro',
     skyColor: 0xd7ecfd,
+    skyTopo: 0x87ceeb, /* Azul claro para céu limpo */
+    skyBase: 0xffffff, /* Branco no horizonte */
     hudTags: ['🌿 Pasto (Extensiva)', '🏡 Estábulo (Intensiva)'],
 
     camBotoes: [
@@ -44,90 +46,140 @@
     ],
 
     construirCenario: function (scene, kit, animaveis) {
-      // Chão e estrada
-      scene.add(kit.criarChao(60, 44, 0x86c232));
-      scene.add(kit.criarEstrada(5, 44, 0xd9b382));
+      // Pedestal da Ilha Diorama Flutuante (estratificado com solo e rochas)
+      scene.add(kit.criarIlhaDiorama(56, 40, 4.0, 0x7eb856, 0x5d4037));
+
+      // Estrada central rústica que divide o pasto e o estábulo
+      scene.add(kit.criarEstrada(4.5, 40, 0xd7ccc8));
+
+      // Partículas suaves de luz do sol no ar (pólen e raios de sol)
+      kit.criarParticulasSol(scene, animaveis, 45);
+
+      // Gramado com centenas de tufos instanciados balançando ao vento (1 draw call)
+      kit.criarGramaInstanciada(scene, animaveis, {
+        minX: -26,
+        maxX: -4,
+        minZ: -18,
+        maxZ: 18,
+        count: 280,
+        cor: 0x8bc34a,
+        excluir: (gx, gz) => Math.hypot(gx - (-17), gz - (-7)) < 5.2 || Math.hypot(gx - (-19), gz - 13) < 4.2
+      });
 
       // LADO ESQUERDO: Pasto (Extensiva)
       const grpPasto = new THREE.Group();
       grpPasto.position.set(-14, 0, 0);
 
-      const grama = kit.criarChao(20, 32, 0x76b82a);
-      grama.position.y = 0.05;
-      grpPasto.add(grama);
-
-      grpPasto.add(kit.criarCerca(-9.5, 0, 30, true));
-      grpPasto.add(kit.criarCerca(0, -15.5, 19, false));
-
-      grpPasto.add(kit.criarArvore(-6, 8));
-      grpPasto.add(kit.criarArvore(-5, -11));
-      grpPasto.add(kit.criarArvore(5, -10));
-
-      const lago = kit.criarRio(7, 7, 0x4fa3e3);
-      lago.position.set(-4, 0.08, -6);
+      // Lago artesanal com margem de seixos, vitórias-régias e píer de madeira
+      const lago = kit.criarLagoDiorama(-3, -7, 4.8, 3.8, animaveis);
       grpPasto.add(lago);
 
+      // Moinho de vento holandês com pás giratórias
+      const moinho = kit.criarMoinhoVento(-5, -13, animaveis);
+      grpPasto.add(moinho);
+
+      // Árvores no pasto: frutíferas com maçãs e copas frondosas
+      grpPasto.add(kit.criarArvore(5, -11, 'frutifera'));
+      grpPasto.add(kit.criarArvore(-7, 7, 'frutifera'));
+      grpPasto.add(kit.criarArvore(6, 9, 'copa'));
+
+      // Fardos de feno dourados no campo
+      grpPasto.add(kit.criarFardoFeno(4, 3, 0.3));
+      grpPasto.add(kit.criarFardoFeno(2, 4.2, -0.2));
+
+      // Cercas rústicas de madeira
+      grpPasto.add(kit.criarCerca(-12, 0, 36, true));
+      grpPasto.add(kit.criarCerca(0, -18, 22, false));
+      grpPasto.add(kit.criarCerca(0, 18, 22, false));
+
+      // Vaquinhas felizes pastando soltas
       const v1 = kit.criarVaca(0xffffff, 0x222222);
       v1.position.set(-2, 0, 2);
-      v1.rotation.y = Math.PI * 0.2;
+      v1.rotation.y = Math.PI * 0.25;
       grpPasto.add(v1);
 
-      const v2 = kit.criarVaca(0xffffff, 0x704214);
-      v2.position.set(3, 0, -4);
+      const v2 = kit.criarVaca(0xffffff, 0x6d4c41);
+      v2.position.set(2, 0, -3.5);
       v2.rotation.y = -Math.PI * 0.35;
       grpPasto.add(v2);
 
-      // Flores e arbustos no pasto
-      kit.criarFlores(grpPasto, -3, 4, 4, 12);
-      grpPasto.add(kit.criarArbusto(-8, 4, 0x43a047, 0xffeb3b));
-      grpPasto.add(kit.criarArbusto(-8, -5, 0x388e3c, 0xff5722));
+      // Flores e arbustos floridos espalhados
+      kit.criarFlores(grpPasto, -1, 5, 4.5, 16);
+      kit.criarFlores(grpPasto, -5, -2, 3.5, 12);
+      grpPasto.add(kit.criarArbusto(-9, 4, 0x43a047, 0xffeb3b));
+      grpPasto.add(kit.criarArbusto(-8, -6, 0x388e3c, 0xff5722));
+      grpPasto.add(kit.criarArbusto(6, -4, 0x4caf50));
 
-      grpPasto.add(kit.criarPlaca(0, 6, 'PASTO', 0x2e7d32));
+      // Placa indicativa com CanvasTexture de alta resolução
+      grpPasto.add(kit.criarPlaca(0, 15, '🌿 PASTO (EXTENSIVA)', 0x2e7d32));
       scene.add(grpPasto);
 
       // LADO DIREITO: Estábulo (Intensiva)
       const grpEstabulo = new THREE.Group();
-      grpEstabulo.position.set(13, 0, 0);
+      grpEstabulo.position.set(14, 0, 0);
 
-      const pisoCurral = kit.criarChao(20, 32, 0xc4ab80);
-      pisoCurral.position.y = 0.05;
+      // Piso de terra batida / curral
+      const pisoCurral = kit.criarChao(22, 36, 0xbcaaa4);
+      pisoCurral.position.y = 0.03;
       grpEstabulo.add(pisoCurral);
 
-      const galpao = kit.criarCasa(10, 4.5, 8, 0x8d6e63, 0xb71c1c, { nome: 'Galpão do Estábulo' });
-      galpao.position.set(0, 0, -4);
-      grpEstabulo.add(galpao);
+      // Celeiro Vermelho Tradicional com sótão de feno, lanterna, chaminé e cocho longo
+      const estabulo = kit.criarEstabuloPremium(12, 5.2, 9, animaveis);
+      estabulo.position.set(0, 0, -6);
+      grpEstabulo.add(estabulo);
 
-      // Cocho de ração
-      const cocho = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.9, 1.2), kit.mat('lambert', 0x6d4c41));
-      cocho.position.set(0, 0.5, 2.2);
-      grpEstabulo.add(cocho);
-
-      const v3 = kit.criarVaca(0xffffff, 0x111111);
-      v3.position.set(0, 0, -1);
+      // Vaca confinada se alimentando no cocho
+      const v3 = kit.criarVaca(0xffffff, 0x1a1a1a);
+      v3.position.set(0, 0, 0.4);
+      v3.rotation.y = 0;
       grpEstabulo.add(v3);
 
-      grpEstabulo.add(kit.criarCerca(9.5, 0, 30, true));
-      grpEstabulo.add(kit.criarCerca(0, 15.5, 19, false));
-      grpEstabulo.add(kit.criarArbusto(8, 4, 0x43a047));
-      grpEstabulo.add(kit.criarPlaca(0, 7, 'ESTÁBULO', 0xc62828));
+      // Latões metálicos de leite fresco ordenhado
+      grpEstabulo.add(kit.criarLataoLeite(-5.5, 3.5));
+      grpEstabulo.add(kit.criarLataoLeite(-4.7, 3.2));
+      grpEstabulo.add(kit.criarLataoLeite(-5.0, 4.2));
+
+      // Fardos de feno organizados ao lado do estábulo
+      grpEstabulo.add(kit.criarFardoFeno(7.5, -3, 0.1));
+      grpEstabulo.add(kit.criarFardoFeno(7.5, -1.5, 0.25));
+      grpEstabulo.add(kit.criarFardoFeno(7.5, 0, -0.1));
+
+      // Trator agrícola verde estacionado junto ao curral
+      const trator = kit.criarTrator(0x2e7d32);
+      trator.position.set(6, 0, 8);
+      trator.rotation.y = -Math.PI * 0.15;
+      grpEstabulo.add(trator);
+
+      // Cercas do confinamento
+      grpEstabulo.add(kit.criarCerca(10, 0, 36, true));
+      grpEstabulo.add(kit.criarCerca(0, -18, 20, false));
+      grpEstabulo.add(kit.criarCerca(0, 18, 20, false));
+
+      grpEstabulo.add(kit.criarArbusto(8, 12, 0x43a047));
+      grpEstabulo.add(kit.criarPlaca(0, 15, '🏡 ESTÁBULO (INTENSIVA)', 0xc62828));
       scene.add(grpEstabulo);
 
-      // Caminhão no centro
+      // Caminhão azul de transporte na estrada central
       const caminhao = kit.criarCaminhao(0x1976d2);
-      caminhao.position.set(0, 0, 10);
+      caminhao.position.set(0, 0, 8);
       scene.add(caminhao);
 
-      // Animação das vaquinhas (cabeça e cauda)
+      // Animação das vaquinhas (cabeça com ruminação, rabo balançando e sininho)
       animaveis.push((now) => {
         [v1, v2, v3].forEach((v) => {
+          const off = (v.userData && v.userData.tempo) || 0;
           if (v.userData && v.userData.cabeca) {
-            const off = v.userData.tempo || 0;
-            v.userData.cabeca.position.y = v.userData.baseHeadY + Math.sin(now * 3 + off) * 0.08;
-            v.userData.cabeca.rotation.x = Math.sin(now * 2.5 + off) * 0.12;
+            v.userData.cabeca.position.y = v.userData.baseHeadY + Math.sin(now * 2 + off) * 0.06;
+            v.userData.cabeca.rotation.x = Math.sin(now * 1.8 + off) * 0.08;
+          }
+          if (v.userData && v.userData.focinho) {
+            v.userData.focinho.rotation.y = Math.sin(now * 6 + off) * 0.07;
           }
           if (v.userData && v.userData.cauda) {
-            const off = v.userData.tempo || 0;
-            v.userData.cauda.rotation.z = Math.sin(now * 4 + off) * 0.22;
+            v.userData.cauda.rotation.z = Math.sin(now * 4 + off) * 0.3;
+          }
+          if (v.userData && v.userData.sino) {
+            v.userData.sino.rotation.z = Math.sin(now * 2.5 + off) * 0.18;
           }
         });
       });

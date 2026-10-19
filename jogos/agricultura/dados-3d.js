@@ -11,6 +11,8 @@
     icone: '🌾',
     referenciaLivro: 'p. 84, 85, 92, 95 · base do livro',
     skyColor: 0xd7ecfd,
+    skyTopo: 0x87ceeb, /* Azul claro para céu limpo */
+    skyBase: 0xe8f5e9, /* Verde claro no horizonte */
     hudTags: ['🏡 Subsistência (Familiar)', '🚜 Comercial (Máquinas)'],
 
     camBotoes: [
