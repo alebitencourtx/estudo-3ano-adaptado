@@ -23,6 +23,7 @@ const JOGOS = [
   {arquivo:'../jogar.html?jogo=tempo-leite', icone:'🥛', nome:'O leite no tempo', como:'Passeie pelas paradas', oque:'Há cem anos, hoje, 2013 com robôs.', id:'tempo-leite'},
   {arquivo:'../jogar.html?jogo=agr-alimentos', icone:'🍚', nome:'De onde vem a comida?', como:'Toque nos certos', oque:'Arroz, feijão, frutas e verduras.', id:'agr-alimentos'},
   {arquivo:'../jogar.html?jogo=agr-simnao', icone:'🌾', nome:'Sim ou não?', como:'Responda sim ou não', oque:'Subsistência, máquinas, cana e robô.', id:'agr-simnao'},
+  {arquivo:'../jogar-3d.html?topico=agricultura', icone:'✨', nome:'Plantação 3D da Agricultura', como:'Explore a subsistência e a comercial em 3D', oque:'Agricultura de subsistência e comercial em um lindo cenário 3D interativo.', id:'agr-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -38,7 +39,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🌾 Agricultura</h1>
-  <p class="sub">p. 84, 85, 92, 95 · 8 jogos · base do livro</p>
+  <p class="sub">p. 84, 85, 92, 95 · 9 jogos (inclui Plantação 3D) · base do livro</p>
   <p class="sub">Subsistência e comercial, instrumentos simples e máquinas, a cana no tempo e o leite do Sr. Alfredo.</p>
 </header>
 <section class="cards">

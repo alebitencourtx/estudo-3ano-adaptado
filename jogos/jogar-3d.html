@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jogo 3D Educativo — 3º Ano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Three.js (r128) via CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="jogo-kit-3d.css">
+<script src="jogo-kit-3d.js"></script>
+</head>
+<body>
+
+<header class="top-bar">
+  <a class="voltar" id="linkVoltar" href="index.html">← Tópicos</a>
+  <h1 class="top-title" id="pageTitle">
+    <img class="fita" src="../img/fita-autismo.png" alt="Fita autismo">
+    <span id="txtTitulo">Jogo 3D</span>
+  </h1>
+  <span class="badge-3d">3D Interativo</span>
+</header>
+
+<main>
+  <!-- Barra de Progresso -->
+  <section class="progress-card" aria-label="Progresso da missão">
+    <div class="progress-header">
+      <span id="txtMissaoNum">Missão 1</span>
+      <span id="txtReferenciaLivro">Base do livro didático</span>
+    </div>
+    <div class="dots" id="dotsContainer"></div>
+  </section>
+
+  <!-- Enunciado com Áudio Acessível -->
+  <section class="question-card" id="qCard">
+    <div class="q-topo">
+      <span class="q-kicker" id="qKicker">Missão 1</span>
+      <div class="audio-btns">
+        <button type="button" class="btn-som" id="btnAudioNormal" title="Ouvir em velocidade normal">🔊 Ouvir</button>
+        <button type="button" class="btn-som" id="btnAudioLento" title="Ouvir devagar">🐢 Devagar</button>
+      </div>
+    </div>
+    <p class="q-text" id="qEnunciado">Carregando pergunta...</p>
+  </section>
+
+  <!-- Janela 3D Interativa -->
+  <section class="scene-container" id="container3d">
+    <canvas id="canvas3d"></canvas>
+    <div class="scene-hud">
+      <div class="hud-tag" id="hudTagEsq">Zona A</div>
+      <div class="hud-tag" id="hudTagDir">Zona B</div>
+    </div>
+    <div class="hud-cam-btns" id="camBtns"></div>
+  </section>
+
+  <!-- Painel de Ações: Escolhas ou Grade de Itens -->
+  <section class="action-panel" id="actionPanel">
+    <div class="btn-options" id="btnOptions">
+      <button type="button" class="btn-choice" id="btnEscolhaA">
+        <span class="ico-box">🌿</span>
+        <div>
+          <span class="tit">Opção A</span>
+          <small class="desc">Descrição A</small>
+        </div>
+      </button>
+      <button type="button" class="btn-choice" id="btnEscolhaB">
+        <span class="ico-box">🏡</span>
+        <div>
+          <span class="tit">Opção B</span>
+          <small class="desc">Descrição B</small>
+        </div>
+      </button>
+    </div>
+
+    <!-- Grade de Seleção para Missões de Coleta/Identificação -->
+    <div class="items-grid" id="itemsGrid" style="display:none"></div>
+  </section>
+
+  <!-- Feedback Didático e Imediato -->
+  <section class="feedback-box" id="feedbackBox">
+    <div class="fb-topo" id="fbTopo">✓ Muito bem!</div>
+    <div class="fb-corpo">
+      <img class="fb-img" id="fbImg" src="../img/fita-autismo.png" alt="Foto explicativa">
+      <div class="fb-texto" id="fbTexto">Explicação.</div>
+    </div>
+    <button type="button" class="btn-next" id="btnProxima">Próxima Missão →</button>
+  </section>
+
+  <!-- Tela de Sucesso Final -->
+  <section class="win-modal" id="winModal">
+    <div class="win-stars">⭐⭐⭐</div>
+    <h2 class="win-title" id="winTitle">Parabéns! Você completou o jogo 3D!</h2>
+    <p id="winSub">Você explorou e aprendeu todos os conceitos deste tópico.</p>
+    
+    <div class="win-cards" id="winCards"></div>
+
+    <div class="win-actions">
+      <button type="button" class="btn-cam" id="btnModoLivre" style="padding:12px 18px;font-size:1rem;background:var(--focus);color:#fff">🎮 Passear pelo Cenário 3D</button>
+      <button type="button" class="btn-cam" id="btnReiniciar" style="padding:12px 18px;font-size:1rem">🔄 Jogar Novamente</button>
+      <a class="voltar" id="winBtnVoltar" href="index.html" style="padding:12px 18px;font-size:1rem">← Voltar aos Jogos</a>
+    </div>
+  </section>
+</main>
+
+<script>
+window.DADOS_3D = window.DADOS_3D || {};
+
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const topico = params.get('topico') || 'pecuaria';
+
+  // Carrega dinamicamente o arquivo de dados 3D do tópico
+  const scriptDados = document.createElement('script');
+  scriptDados.src = topico + '/dados-3d.js';
+  scriptDados.onload = function () {
+    const cfg = window.DADOS_3D[topico];
+    if (!cfg) {
+      document.getElementById('qEnunciado').textContent = 'Erro ao carregar os dados 3D do tópico: ' + topico;
+      return;
+    }
+    // Atualiza cabeçalho e referências
+    document.title = (cfg.titulo || 'Jogo 3D') + ' — 3º Ano';
+    document.getElementById('txtTitulo').textContent = (cfg.icone || '🎮') + ' ' + (cfg.titulo || 'Jogo 3D');
+    document.getElementById('linkVoltar').href = topico + '/index.html';
+    document.getElementById('winBtnVoltar').href = topico + '/index.html';
+    if (cfg.referenciaLivro) {
+      document.getElementById('txtReferenciaLivro').textContent = cfg.referenciaLivro;
+    }
+    if (cfg.hudTags) {
+      document.getElementById('hudTagEsq').textContent = cfg.hudTags[0] || '';
+      document.getElementById('hudTagDir').textContent = cfg.hudTags[1] || '';
+    }
+
+    // Configura os cards de resumo da vitória
+    const winCardsContainer = document.getElementById('winCards');
+    winCardsContainer.innerHTML = '';
+    if (cfg.resumoFinal && cfg.resumoFinal.length) {
+      cfg.resumoFinal.forEach(function (card) {
+        const col = document.createElement('div');
+        col.className = 'win-col';
+        col.innerHTML = `<h3>${card.titulo}</h3><ul>${card.itens.map(it => `<li>${it}</li>`).join('')}</ul>`;
+        winCardsContainer.appendChild(col);
+      });
+    }
+
+    // Inicia o motor 3D
+    Kit3D.iniciar(cfg);
+  };
+  scriptDados.onerror = function () {
+    document.getElementById('qEnunciado').textContent = 'Arquivo de dados não encontrado: ' + topico + '/dados-3d.js';
+  };
+  document.head.appendChild(scriptDados);
+})();
+</script>
+</body>
+</html>
