@@ -367,14 +367,87 @@
       .trim();
   };
 
+  // Cache e seleção priorizada de voz feminina natural / neural
+  let _vozFemininaSelecionada = null;
+  Kit3D.obterMelhorVoz = function () {
+    if (!('speechSynthesis' in window)) return null;
+    const vozes = window.speechSynthesis.getVoices();
+    if (!vozes || !vozes.length) return null;
+
+    // Filtra vozes em português brasileiro
+    const vozesPt = vozes.filter(v => v.lang && (v.lang === 'pt-BR' || v.lang.startsWith('pt')));
+    if (!vozesPt.length) return vozes[0];
+
+    // Critérios de pontuação para encontrar a voz mais humana, feminina e fluida
+    function pontuarVoz(v) {
+      const nome = (v.name || '').toLowerCase();
+      let pts = 0;
+      
+      // 1. Preferência por vozes femininas reconhecidas
+      if (nome.includes('luciana') || nome.includes('leticia') || nome.includes('francisca') ||
+          nome.includes('maria') || nome.includes('camila') || nome.includes('female') ||
+          nome.includes('feminina') || nome.includes('mulher') || nome.includes('thalita') ||
+          nome.includes('vitoria') || nome.includes('heloisa')) {
+        pts += 50;
+      }
+      
+      // 2. Vozes neurais / naturais / online (muito mais fluidas que as sintetizadas locais offline)
+      if (nome.includes('natural') || nome.includes('neural') || nome.includes('online')) {
+        pts += 40;
+      }
+      
+      // 3. Vozes do Google (ex: 'Google português do Brasil') são suaves e femininas no Android e Chrome
+      if (nome.includes('google')) {
+        pts += 35;
+      }
+      
+      // 4. Vozes da Microsoft ou Apple de alta qualidade
+      if (nome.includes('microsoft') || nome.includes('apple') || nome.includes('siri')) {
+        pts += 20;
+      }
+      
+      // Desfavorece vozes declaradamente masculinas
+      if (nome.includes('felipe') || nome.includes('ricardo') || nome.includes('antonio') ||
+          nome.includes('daniel') || nome.includes('male') || nome.includes('masculin')) {
+        pts -= 40;
+      }
+      
+      if (v.lang === 'pt-BR') pts += 10;
+      return pts;
+    }
+
+    vozesPt.sort((a, b) => pontuarVoz(b) - pontuarVoz(a));
+    _vozFemininaSelecionada = vozesPt[0];
+    return _vozFemininaSelecionada;
+  };
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      Kit3D.obterMelhorVoz();
+    };
+  }
+
   Kit3D.falar = function (texto, vel) {
     if (!('speechSynthesis' in window)) return;
     const limpo = Kit3D.limparTextoParaVoz(texto);
     if (!limpo) return;
     window.speechSynthesis.cancel();
+    
     const u = new SpeechSynthesisUtterance(limpo);
     u.lang = 'pt-BR';
-    u.rate = vel || 0.85;
+    
+    const voz = _vozFemininaSelecionada || Kit3D.obterMelhorVoz();
+    if (voz) u.voice = voz;
+    
+    // Cadência fluida: taxa normal ~0.95 (menos arrastada) e tom levemente elevado (1.05) para maior naturalidade
+    if (vel === 0.55) {
+      u.rate = 0.65; // Modo devagar mais natural e menos robótico
+      u.pitch = 1.02;
+    } else {
+      u.rate = vel || 0.95;
+      u.pitch = 1.05;
+    }
+    
     window.speechSynthesis.speak(u);
   };
 
