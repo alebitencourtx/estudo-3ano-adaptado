@@ -22,6 +22,7 @@ const JOGOS = [
   {arquivo:'../jogar.html?jogo=pec-criacao', icone:'🐄', nome:'Solto ou confinado?', como:'Leve o cartão à caixa certa', oque:'Pecuária extensiva e intensiva, com as palavras do livro.', id:'pec-criacao'},
   {arquivo:'../jogar.html?jogo=pec-volante', icone:'🚛', nome:'O trabalhador volante', como:'Responda e veja a resposta', oque:'Boia-fria, plantio e colheita por um tempo.', id:'pec-volante'},
   {arquivo:'../jogar.html?jogo=pec-animais', icone:'🧵', nome:'Produtos da pecuária', como:'Separe produtos das outras informações', oque:'Leite, carnes, ovos e couro, como no livro.', id:'pec-animais'},
+  {arquivo:'../pecuaria-3d.html', icone:'✨', nome:'Fazenda 3D da Pecuária (Experimental)', como:'Explore o pasto e o estábulo em 3D', oque:'Pecuária extensiva e intensiva em um lindo cenário 3D interativo.', id:'pec-3d'},
 ];
 const app = document.getElementById('app');
 const prog = JogoKit.progresso.ler();
@@ -37,7 +38,7 @@ function jogou(j) {
 app.innerHTML = `
 <header class="top">
   <h1><img class="fita" src="../../img/fita-autismo.png" alt=""> 🐄 Pecuária</h1>
-  <p class="sub">p. 86, 87 · 7 jogos · base do livro</p>
+  <p class="sub">p. 86, 87 · 8 jogos (inclui Fazenda 3D) · base do livro</p>
   <p class="sub">A criação de animais: leite, carnes, ovos e couro; gado solto ou confinado; os trabalhadores do campo.</p>
 </header>
 <section class="cards">
