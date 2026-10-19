@@ -1051,7 +1051,8 @@ const top=()=>window.scrollTo(0,0);
 /* modo regular / autismo / tudo: autismo = só tópicos id *-autismo */
 const isAut=t=>/autismo/.test(t.id);
 function visibleTopics(sub){if(store.mode==='autismo')return sub.topics.filter(isAut);if(store.mode==='regular')return sub.topics.filter(t=>!isAut(t));return sub.topics.slice()}
-function visibleSubjects(){if(store.mode==='autismo')return SUBJECTS.filter(s=>s.topics.some(isAut));return SUBJECTS.slice()}
+/* Apenas a matéria de História e Geo (base livro) visível nos testes; as demais continuam no código */
+function visibleSubjects(){return SUBJECTS.filter(s=>s.id==='hga')}
 function modeTabs(){return `<div class="tabs" role="group" aria-label="Modo de questões"><button type="button" class="mini" data-mode="regular" aria-pressed="${store.mode==='regular'}">Regular</button><button type="button" class="mini" data-mode="autismo" aria-pressed="${store.mode==='autismo'}">Adaptado autismo <img class="fita" src="img/fita-autismo.png" alt="Símbolo do autismo"></button><button type="button" class="mini" data-mode="tudo" aria-pressed="${store.mode==='tudo'}">Tudo</button></div>`}
 function wireMode(rerender){app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{store.mode=b.dataset.mode;save();rerender()})};
 /* modo admin: anota excluir/corrigir por questão, salva em TXT por sessão */
